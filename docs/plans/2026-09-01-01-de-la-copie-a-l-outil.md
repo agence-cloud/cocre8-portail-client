@@ -288,24 +288,56 @@ l'exécution, sur une requête qui compile.
 
 ## Bloc E : la démonstration et la sortie
 
-### Tâche 9 : charger et vider le jeu de démonstration
+### Tâche 9 : charger et vider le jeu de démonstration, faite le 2026-09-01
 
-**Fichiers :** `modules/portail/actions-demonstration.ts`, `Reglages.tsx`.
+**Fichiers :** `modules/portail/actions-demonstration.ts`,
+`modules/portail/Demonstration.tsx`, `lib/auth/creation.ts`,
+`app/pilotage/reglages/page.tsx`.
 
-- [ ] Deux boutons : charger, tout vider. Un client fictif, son profil rempli,
-      ses tâches à moitié faites, deux séances passées avec compte rendu.
-- [ ] « Tout vider » demande une confirmation et **ne touche jamais une fiche
-      qui n'est pas marquée `demonstration`.**
+- [x] Deux boutons dans les réglages. Une cliente inventée, son profil rempli
+      en entier, six tâches sur dix faites parmi les parties ouvertes, et deux
+      séances passées avec leur compte rendu.
+- [x] « Tout vider » demande confirmation, et **ne touche jamais une fiche qui
+      n'est pas marquée `demonstration`** : le filtre à la lecture, et la
+      suppression de compte qui refuse de toute façon. Deux gardes sur la même
+      règle, par deux chemins.
+- [x] Le chargement est rejouable : un second clic ne crée pas une seconde
+      cliente inventée.
+
+**Le profil est rempli en entier, et c'est structurel.** Tant qu'une réponse
+manque, l'espace entier renvoie vers la porte d'accueil : la démonstration
+ouvrirait sur un questionnaire au lieu du tableau de bord qu'elle est censée
+montrer.
+
+**Vider a demandé d'ouvrir une porte dans `creation.ts`**, dont la règle 2
+interdisait toute suppression. La règle est amendée plutôt que contournée, et
+la base rendait la chose nécessaire : **vérifié sur le vrai projet**, une
+fiche cliente refuse d'être supprimée tant que son compte existe, la
+contrainte `membre_a_une_personne` interdisant un membre sans fiche. Le compte
+part donc en premier, `compte` suit en cascade, la fiche devient supprimable.
+
+**La cliente inventée ne se connecte pas toute seule**, et c'est voulu. Son
+mot de passe est aléatoire et jeté, comme pour tout le monde. Pour voir son
+espace, le coach prend « Obtenir un lien à copier » sur son écran de suivi et
+l'ouvre dans une fenêtre privée : le détour lui fait traverser le vrai chemin
+d'accès, celui que ses clients emprunteront.
 
 ### Tâche 10 : le dépôt devient public
 
-- [ ] Le bouton de déploiement et les variables préremplies.
+- [x] Le bouton de déploiement et les trois variables préremplies, dans le
+      README, avec l'ordre corrigé : la base d'abord, l'app ensuite. Déployer
+      avant d'avoir un projet Supabase n'aurait donné aucune valeur à saisir.
+- [x] **La purge vérifiée par script**, `npm run verifier`. Il ne lit que les
+      fichiers suivis par git, et il cherche des personnes et des valeurs, pas
+      la marque : « Cocre8 » a le droit d'apparaître, c'est la signature de
+      l'éditeur.
 - [ ] Le README relu par quelqu'un qui n'a jamais vu le projet.
-- [ ] **Une dernière relecture de ce qui part** : aucune adresse, aucun
-      numéro, aucun prix, aucun nom de client réel.
-- [ ] Passer le dépôt en public.
+- [ ] Passer le dépôt en public. Le geste appartient à son propriétaire.
 
----
+**Le script a trouvé quatre restes le jour où il a été écrit**, dont un
+ajouté la veille dans une spec. C'est la démonstration de son intérêt : la
+relecture qui a suivi la copie n'a protégé qu'un jour, celui où elle a été
+faite.
 
 ## Ce que ce plan ne fait pas
 

@@ -88,6 +88,11 @@ surtout rien qu'un numéro qui appartient à quelqu'un d'autre.
 première mise en service et l'écran de réglages : ce sont les prochaines
 tâches de `docs/plans/`.
 
+**Avant de publier quoi que ce soit : `npm run verifier`.** Il refuse de
+laisser partir une donnée qui appartient à l'éditeur, et il a trouvé quatre
+restes le jour où il a été écrit. La relecture qui a suivi la copie n'a
+protégé qu'un jour, celui où elle a été faite.
+
 **Le schéma a été appliqué à un vrai projet Supabase et son modèle de
 permissions a été éprouvé** (2026-09-01). Ce qui a été vérifié, en SQL, en
 prenant l'identité d'un client puis celle d'un anonyme :

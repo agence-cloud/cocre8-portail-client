@@ -203,13 +203,14 @@ export function NavigationLaterale({
           repliee ? "justify-center" : "justify-between px-3 max-md:justify-center max-md:px-0"
         }`}
       >
-        {/* Le logotype du programme et non celui de l'agence : le membre
-            vient chez Nouvelle École, Cocre8 est la maison qui l'édite.
+        {/* Le logotype du programme et non celui de l'éditeur : le client
+            vient chez son coach, et l'éditeur signe ailleurs, sur l'écran de
+            connexion.
 
             Repliée, la barre n'affiche rien plutôt que des initiales : il
             reste 48 pixels une fois les marges retirées, et la bascule en
-            occupe 32. « NE » y tiendrait mal, et mal placé un logo dessert
-            la marque plus qu'il ne la sert. */}
+            occupe 32. Deux lettres y tiendraient mal, et mal placé un logo
+            dessert la marque plus qu'il ne la sert. */}
         {!repliee && (
           <div className="max-md:hidden">
             <LogoProgramme taille="petit" />

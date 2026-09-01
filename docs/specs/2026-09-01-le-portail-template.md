@@ -19,7 +19,7 @@ nulle part où ils en sont**.
 
 ## Ce que l'outil doit savoir faire
 
-*Posé par le fondateur le 2026-09-01, après le bloc C.* Quatre objectifs, et rien
+*Posé le 2026-09-01, après le bloc C.* Quatre objectifs, et rien
 au-delà : c'est ce qui garde l'outil simple et donnable.
 
 1. **Créer un client et lui donner ses accès**, par email ou à la main.

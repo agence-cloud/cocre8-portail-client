@@ -23,8 +23,14 @@ import { nomComplet } from "@/lib/personne/types";
  *    requête forgée créerait un compte sur n'importe quelle adresse, et le
  *    lien d'accès partirait chez n'importe qui.
  * 2. **Il ne sait créer qu'un membre.** Jamais d'admin, jamais de
- *    suppression, jamais de modification d'un compte existant. Une clé qui
- *    peut tout ne doit servir qu'à une chose.
+ *    modification d'un compte existant. Une clé qui peut tout ne doit servir
+ *    qu'à peu de choses.
+ *
+ *    **Une seule suppression existe**, et sa garde tient en une ligne : elle
+ *    refuse toute fiche qui ne porte pas le drapeau `demonstration`. Elle
+ *    sert au bouton « tout vider » du jeu d'essai, et la base la rend
+ *    nécessaire : une fiche cliente ne se supprime pas tant que son compte
+ *    existe, la contrainte `membre_a_une_personne` s'y oppose.
  * 3. **Il refuse une fiche sans accompagnement**, et ne fait rien si un
  *    compte existe déjà. C'est l'accompagnement qui fait d'une fiche un
  *    client : sans lui, un contact ajouté pour mémoire recevrait un accès à
@@ -230,4 +236,53 @@ export async function genererLeLienDAcces(
   if (erreurLien) return { pourquoi: erreurLien.message };
 
   return { lien: data.properties.action_link, email: personne.email };
+}
+
+/**
+ * Supprime le compte d'une fiche de démonstration, et elle seule.
+ *
+ * **La garde est la première ligne, et elle est absolue** : la fiche doit
+ * porter le drapeau `demonstration`. Sans elle, un défaut d'appel effacerait
+ * l'accès d'un vrai client, ce qui ne se rattrape pas.
+ *
+ * **Pourquoi elle est nécessaire.** La base refuse de supprimer une fiche
+ * dont un compte membre dépend : `compte.personne_id` passe à nul, et la
+ * contrainte `membre_a_une_personne` interdit un membre sans fiche. Le bouton
+ * « tout vider » ne pourrait donc rien vider. L'utilisateur
+ * d'authentification part en premier, `compte` suit en cascade, et la fiche
+ * devient supprimable.
+ *
+ * Ne lève pas si la fiche n'a pas de compte : vider un jeu d'essai
+ * partiellement créé doit marcher aussi.
+ */
+export async function supprimerLeCompteDeDemonstration(
+  personneId: string,
+): Promise<{ pourquoi?: string }> {
+  const service = clienteDeService();
+
+  const { data: personne, error } = await service
+    .from("personne")
+    .select("id, demonstration")
+    .eq("id", personneId)
+    .maybeSingle();
+
+  if (error) return { pourquoi: error.message };
+  if (!personne) return {};
+
+  if (!personne.demonstration) {
+    return { pourquoi: "Cette fiche n'est pas une fiche de démonstration." };
+  }
+
+  const { data: compte } = await service
+    .from("compte")
+    .select("id")
+    .eq("personne_id", personneId)
+    .maybeSingle();
+
+  if (!compte) return {};
+
+  const { error: erreurSuppression } = await service.auth.admin.deleteUser(compte.id);
+  if (erreurSuppression) return { pourquoi: erreurSuppression.message };
+
+  return {};
 }

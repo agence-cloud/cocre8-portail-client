@@ -195,9 +195,9 @@ describe("la porte du profil entrepreneur", () => {
   it("accueille avant de questionner", () => {
     render(porte());
 
-    // « Que ça affiche bienvenue sur ton app Nouvelle École, on va te poser
-    // quelques questions avant de démarrer ». Un questionnaire qui démarre
-    // sans prévenir se subit ; annoncé, il se traverse.
+    // On accueille, puis on annonce ce qui va se passer, et seulement après
+    // on questionne. Un questionnaire qui démarre sans prévenir se subit ;
+    // annoncé, il se traverse.
     expect(screen.getByText("Bienvenue, Léa.")).toBeInTheDocument();
     expect(screen.queryByText("Combien factures-tu par mois ?")).not.toBeInTheDocument();
 

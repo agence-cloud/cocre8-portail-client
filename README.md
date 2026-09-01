@@ -20,19 +20,24 @@ et l'envoi de ses accès, et les réglages.
 
 Quatre étapes, une vingtaine de minutes, aucune ligne de commande.
 
-1. **Déploie l'app.** Le bouton de déploiement crée le projet et pose les
-   variables tout seul.
-2. **Crée ta base.** Colle `install.sql` dans l'éditeur SQL de ton projet
-   Supabase et exécute-le.
-3. **Crée ton compte.** Ouvre l'app : le premier compte créé devient le tien,
-   et la porte se referme derrière toi.
-4. **Regarde-le vivre.** Charge le jeu de démonstration depuis les réglages,
-   promène-toi dedans, puis vide-le et ajoute ton premier vrai client.
+1. **Crée un projet Supabase**, gratuit, sur
+   [supabase.com](https://supabase.com). C'est ta base : elle t'appartient,
+   et personne d'autre n'y a accès.
+2. **Crée ta base.** Ouvre l'éditeur SQL de ton projet, colle le contenu de
+   [`install.sql`](./install.sql), exécute.
+3. **Déploie l'app.**
 
-> **En chantier.** Les étapes 1 à 3 sont prêtes. L'étape 4 ne l'est pas : le
-> jeu de démonstration et l'écran de réglages sont les prochaines tâches de
-> `docs/plans/`. En attendant, tu peux déjà créer ton compte, ajouter un
-> client à la main dans Supabase et regarder son espace.
+   [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fagence-cloud%2Fcocre8-portail-client&env=NEXT_PUBLIC_SUPABASE_URL,NEXT_PUBLIC_SUPABASE_ANON_KEY,SUPABASE_SERVICE_ROLE_KEY&envDescription=Les%20trois%20valeurs%20de%20ton%20projet%20Supabase&project-name=portail-client&repository-name=portail-client)
+
+   Vercel te demandera trois valeurs, toutes dans ton projet Supabase, sous
+   Project Settings puis API : l'URL du projet, la clé `anon`, et la clé
+   `service_role`. **Cette dernière est un secret** : elle sert à créer les
+   comptes de tes clients, et elle ne doit jamais sortir d'ici.
+
+4. **Crée ton compte et regarde-le vivre.** Ouvre l'adresse que Vercel te
+   donne : le premier compte créé devient le tien, et la porte se referme
+   derrière toi. Charge ensuite le jeu de démonstration depuis tes réglages,
+   promène-toi dedans, puis vide-le et ajoute ton premier vrai client.
 
 ## Le régler
 
@@ -41,6 +46,19 @@ le mot que tu emploies pour les grandes parties de ton accompagnement
 (module, pilier, phase, axe), ces parties elles-mêmes, les questions du
 profil, les tâches que chaque client reçoit, ton nom et ton numéro, et tes
 liens externes.
+
+## Donner ses accès à un client
+
+Deux façons, au choix, depuis son écran de suivi.
+
+**Par email :** l'app lui envoie le lien qui lui fera poser son mot de passe.
+Attention, le service d'email de Supabase plafonne à quelques envois par heure
+sur un projet neuf, et ses textes sont en anglais tant que tu ne les as pas
+réécrits (Authentication, Emails).
+
+**Par un lien à copier :** l'app fabrique le lien sans rien envoyer, tu le
+colles où tu parles déjà à tes clients. Il vaut une heure et ouvre son espace,
+donc ne le colle qu'en privé.
 
 ## Ce qu'il ne fait pas
 

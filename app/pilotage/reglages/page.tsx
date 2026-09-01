@@ -3,7 +3,9 @@ import { lireReglages } from "@/lib/reglages/requetes";
 import { lirePiliers } from "@/lib/pilier/requetes";
 import { lireToutesLesQuestions } from "@/lib/profil/requetes";
 import { lireTachesModeles } from "@/lib/parcours/requetes";
+import { lireClients } from "@/lib/personne/requetes";
 import { Reglages } from "@/modules/portail/Reglages";
+import { Demonstration } from "@/modules/portail/Demonstration";
 import {
   ReglagesParties,
   ReglagesQuestions,
@@ -14,11 +16,12 @@ export default async function PageReglages() {
   // Chaque page se garde elle-même, le layout ne suffit pas.
   await exigerAdmin();
 
-  const [reglages, piliers, questions, taches] = await Promise.all([
+  const [reglages, piliers, questions, taches, clients] = await Promise.all([
     lireReglages(),
     lirePiliers(),
     lireToutesLesQuestions(),
     lireTachesModeles(),
+    lireClients(),
   ]);
 
   return (
@@ -39,6 +42,7 @@ export default async function PageReglages() {
         />
         <ReglagesQuestions questions={questions} />
         <ReglagesTaches taches={taches} piliers={piliers} mot={reglages.mot_partie.singulier} />
+        <Demonstration chargee={clients.some((client) => client.demonstration)} />
       </div>
     </>
   );

@@ -9,7 +9,8 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:parcours": "playwright test"
+    "test:parcours": "playwright test",
+    "verifier": "node scripts/verifier-la-purge.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.5",

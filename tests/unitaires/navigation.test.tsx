@@ -85,7 +85,7 @@ describe("NavigationLaterale", () => {
     // instantanée.
     cleanup();
     render(<NavigationLaterale liens={liens} nom="Alice Dupont" zone="Pilotage" repliee={true} />);
-    expect(screen.queryByLabelText("Nouvelle École")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(REGLAGES_PAR_DEFAUT.nom_programme)).not.toBeInTheDocument();
   });
 
   it("se replie d'elle-même en largeur téléphone, quel que soit le réglage", () => {
