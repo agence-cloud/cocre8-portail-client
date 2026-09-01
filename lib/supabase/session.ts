@@ -23,6 +23,12 @@ export const ROUTES_PUBLIQUES = [
   "/connexion",
   "/connexion/mot-de-passe",
   "/auth/confirmer",
+  // La première mise en service. Elle n'a pas de session et ne peut pas en
+  // avoir : celui qui installe n'a pas encore de compte. Ce n'est pas un
+  // trou, la page se garde elle-même et rend un 404 dès que l'outil est
+  // installé, ce qui est le cas de toutes les installations sauf pendant
+  // leurs premières minutes.
+  "/installation",
 ];
 
 export async function rafraichirSession(requete: NextRequest) {

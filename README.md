@@ -29,10 +29,10 @@ Quatre étapes, une vingtaine de minutes, aucune ligne de commande.
 4. **Regarde-le vivre.** Charge le jeu de démonstration depuis les réglages,
    promène-toi dedans, puis vide-le et ajoute ton premier vrai client.
 
-> **En chantier.** L'étape 2 est prête, `install.sql` est là. Les étapes 3 et
-> 4 ne le sont pas : l'écran de première mise en service et les réglages sont
-> les prochaines tâches de `docs/plans/`. En attendant, le premier compte se
-> crée à la main depuis le tableau de bord Supabase.
+> **En chantier.** Les étapes 1 à 3 sont prêtes. L'étape 4 ne l'est pas : le
+> jeu de démonstration et l'écran de réglages sont les prochaines tâches de
+> `docs/plans/`. En attendant, tu peux déjà créer ton compte, ajouter un
+> client à la main dans Supabase et regarder son espace.
 
 ## Le régler
 

@@ -87,12 +87,11 @@ n'est pas un oubli : le proxy réseau des sessions d'agent bloque
 d'ici. **Ils se lancent depuis un poste**, avec un `.env.local` renseigné, et
 c'est la première chose à faire avant d'écrire du neuf.
 
-**Le conseiller de sécurité Supabase signale une erreur, et elle est
-acceptée** : `coaching_membre` est une vue `SECURITY DEFINER`. C'est exactement
-ce qui la fait fonctionner. Elle lit `appel` avec les droits de son
-propriétaire, alors que le client n'a aucun droit sur cette table, et elle
-filtre elle-même sur `ma_personne()`. La passer en `SECURITY INVOKER` ne
-rendrait plus rien au client. **Ne pas la corriger.**
+**Ce que le conseiller de sécurité Supabase signale est relevé et expliqué
+dans `docs/conseiller-de-securite.md`.** Quatre de ses signalements ne doivent
+surtout pas être « corrigés », à commencer par la vue `coaching_membre` en
+`SECURITY DEFINER`, qui est ce qui la fait fonctionner. Le lire avant d'y
+toucher, et le relancer après toute migration.
 
 Ce qui est là : l'espace client entier (tableau de bord, profil et sa porte,
 parties et tâches, séances et comptes rendus, documents), l'écran de suivi
@@ -107,10 +106,20 @@ client s'ajoute donc à la main**, et c'est le geste que le plan doit encore
 ## Deux choses à savoir sur le code
 
 **La clé de service n'est lue qu'à un seul endroit**, `lib/supabase/service.ts`,
-et un seul fichier l'utilise, `lib/auth/creation.ts`. La liste se vérifie par
+et deux fichiers l'utilisent. La liste se vérifie par
 `grep -rn "supabase/service" lib modules app`, jamais par une liste écrite
-qu'il faudrait croire. **L'adresse email n'est jamais un paramètre de la
-création d'un compte**, elle se lit en base à partir d'un identifiant de fiche.
+qu'il faudrait croire.
+
+- `lib/auth/creation.ts` crée le compte d'un client. **L'adresse email n'y est
+  jamais un paramètre**, elle se lit en base à partir d'un identifiant de
+  fiche : sans cette règle, une requête forgée créerait un compte sur
+  n'importe quelle adresse.
+- `lib/auth/installation.ts` crée le compte du coach, une seule fois, sur une
+  base vierge. **C'est le seul endroit de l'app où une adresse et un mot de
+  passe viennent d'un formulaire**, et c'est acceptable là et nulle part
+  ailleurs : sur une base vierge, il n'y a aucun compte à usurper. La porte se
+  ferme par la base et non par une lecture, la table `installation` n'acceptant
+  qu'une seule ligne.
 
 **La vue `coaching_membre` est une frontière de confidentialité.** Le compte
 rendu d'une séance a quatre morceaux, et la note interne du coach n'est pas

@@ -96,31 +96,45 @@ preuve.
 
 ## Bloc B : la première mise en service
 
-### Tâche 3 : la base vierge ouvre une porte, une seule fois
+### Tâche 3 : la base vierge ouvre une porte, faite le 2026-09-01
 
-**Fichiers :** `install.sql` (table `installation`), `lib/auth/installation.ts`,
-`app/installation/page.tsx`, `app/installation/actions.ts`,
-`lib/supabase/session.ts`.
+**Fichiers :** `install.sql`, `lib/auth/installation.ts`,
+`app/installation/page.tsx`, `app/installation/FormulaireInstallation.tsx`,
+`app/installation/actions.ts`, `lib/supabase/session.ts`, `app/page.tsx`,
+`tests/integration/installation.test.ts`.
 
-C'est la tâche sensible du plan : une route publique qui crée un compte
-administrateur avec la clé de service.
+- [x] **La garde est en base, pas en mémoire.** La table `installation` a une
+      clé primaire qui vaut `true` et une contrainte qui interdit `false` :
+      elle n'accepte qu'une ligne. Deux requêtes simultanées ne créent pas
+      deux coachs, la seconde se heurte à un doublon.
+- [x] **Un module séparé de `creation.ts`**, dont la règle « il ne sait créer
+      qu'un membre, jamais d'admin » n'a pas été desserrée.
+- [x] L'adresse et le mot de passe viennent du formulaire, seule fois de
+      toute l'app. Acceptable ici : sur une base vierge, il n'y a personne à
+      usurper.
+- [x] `/installation` est publique et rend un `notFound()` dès que
+      l'installation est faite. `/` y renvoie un visiteur sans session quand
+      la base est vierge, plutôt que vers un formulaire de connexion qui ne
+      peut fonctionner pour personne.
+- [x] `CLAUDE.md` à jour : les lecteurs de la clé de service passent de un à
+      deux, chacun avec sa garde.
+- [x] Conseiller de sécurité relancé, et son relevé écrit dans
+      `docs/conseiller-de-securite.md`.
 
-- [ ] **La garde est en base, pas en mémoire.** « Aucun coach n'existe » lu
-      puis écrit laisserait passer deux requêtes simultanées. Une table
-      `installation` à ligne unique (clé primaire à `true`, contrainte qui
-      interdit `false`) fait échouer le second appel sur un doublon.
-- [ ] **Un module séparé de `creation.ts`.** Celui-ci porte en tête « il ne
-      sait créer qu'un membre, jamais d'admin ». Ne pas desserrer cette règle :
-      la création du premier compte vit ailleurs, avec ses propres gardes.
-- [ ] L'adresse et le mot de passe viennent du formulaire, et **c'est la seule
-      fois de toute l'app où c'est le cas.** Acceptable ici et nulle part
-      ailleurs : sur une base vierge, il n'y a personne à usurper.
-- [ ] `/installation` entre dans `ROUTES_PUBLIQUES` et répond `notFound()` dès
-      que la ligne existe. Un test le vérifie.
-- [ ] Mettre à jour `CLAUDE.md` : les lecteurs de la clé de service passent de
-      un à deux.
+**Deux choses valent d'être connues :**
 
----
+**La réservation vient avant la création, et se libère si la suite échoue.**
+Dans l'autre ordre, deux requêtes simultanées créeraient deux comptes avant
+que l'une s'aperçoive d'être en trop. Le prix de ce choix : si le processus
+meurt entre la réservation et le retrait, l'outil reste fermé sans compte, et
+il faut vider la table `installation` à la main. C'est plus petit que le
+défaut évité, et c'est écrit dans le code.
+
+**Le test d'intégration éprouve la porte fermée**, qui est l'état de toutes
+les bases sauf pendant leurs premières minutes : personne ne lit la table,
+un client ne peut pas effacer la ligne pour rouvrir la porte, et le témoin
+positif vérifie que la fonction répond encore. **Il n'a pas tourné**, comme
+les autres : le proxy réseau des sessions d'agent bloque `*.supabase.co`.
 
 ## Bloc C : les réglages
 

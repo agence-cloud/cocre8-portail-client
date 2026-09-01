@@ -238,6 +238,25 @@ create table tache (
 
 create index tache_personne_idx on tache (personne_id, pilier_id);
 
+-- La marque de la première mise en service, et le verrou qui l'accompagne.
+--
+-- Une seule ligne possible, à jamais : la clé primaire vaut `true` et la
+-- contrainte interdit `false`. Le second appel se heurte donc à un doublon
+-- plutôt qu'à une lecture qui a vieilli, ce qui compte : « aucun compte
+-- n'existe » lu puis écrit laisserait passer deux requêtes simultanées, et
+-- l'app aurait deux coachs au lieu d'un.
+--
+-- Personne ne la lit ni ne l'écrit depuis une session : aucune politique, et
+-- tout droit révoqué. Seules la clé de service et la fonction ci-dessous y
+-- touchent.
+create table installation (
+  id boolean primary key default true check (id),
+  faite_le timestamptz not null default now()
+);
+
+alter table installation enable row level security;
+revoke all on installation from anon, authenticated;
+
 
 -- ---------------------------------------------------------------------
 --  4. Les fonctions qui décident des permissions
@@ -271,6 +290,17 @@ create or replace function a_un_compte() returns boolean
 language sql stable security definer set search_path = public
 as $$
   select exists (select 1 from compte where id = auth.uid() and actif);
+$$;
+
+-- La seule chose que l'app dise avant d'être installée : l'est-elle ?
+--
+-- Elle doit répondre à un visiteur non connecté, puisque c'est lui qui
+-- installe. Elle ne rend qu'un booléen sur l'instance, jamais rien sur
+-- quelqu'un : c'est le minimum nécessaire, et c'est le maximum acceptable.
+create or replace function installation_faite() returns boolean
+language sql stable security definer set search_path = public
+as $$
+  select exists (select 1 from installation);
 $$;
 
 create or replace function pilier_ouvert(p_personne uuid, p_pilier uuid)
@@ -653,6 +683,11 @@ grant execute on function public.a_un_compte() to authenticated;
 grant execute on function public.pilier_ouvert(uuid, uuid) to authenticated;
 
 -- Les deux gestes de mise en service sont appelés avec la session du coach.
+-- Celle-ci répond à un anonyme, et c'est voulu : il n'y a personne d'autre
+-- pour installer l'outil.
+revoke execute on function public.installation_faite() from public;
+grant execute on function public.installation_faite() to anon, authenticated;
+
 revoke execute on function public.appliquer_parcours_modele(uuid) from public, anon;
 revoke execute on function public.planifier_piliers(uuid, date) from public, anon;
 grant execute on function public.appliquer_parcours_modele(uuid) to authenticated;
