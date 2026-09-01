@@ -1,37 +1,26 @@
 /**
- * Le coach du client, et comment le joindre.
+ * Comment joindre le coach : les deux formes d'un numéro, dérivées d'une
+ * seule écriture.
  *
- * **Vide par défaut, et c'est voulu.** Un numéro d'exemple laissé là finit
- * affiché à de vrais clients, et un lien `tel:` qui compose le numéro de
- * quelqu'un d'autre est pire qu'un lien absent. La carte ne se dessine pas
- * tant que le numéro n'est pas renseigné.
+ * **Son numéro est un réglage, et il part vide.** Un numéro d'exemple laissé
+ * dans le code finit affiché à de vrais clients, et un lien `tel:` qui
+ * compose le numéro de quelqu'un d'autre est pire qu'un lien absent. La carte
+ * du tableau de bord ne se dessine pas tant qu'il n'est pas renseigné.
  *
- * En constante et non en variable d'environnement : un `NEXT_PUBLIC_` est
- * recopié dans le paquet à la construction, il n'offre donc aucune souplesse
- * qu'une constante n'ait déjà, et une variable oubliée fait disparaître le
- * contenu sans rien dire. Elle deviendra un réglage, modifiable depuis
- * l'écran des réglages, quand celui-ci existera.
- */
-export const COACH = {
-  nom: "",
-  telephone: "",
-};
-
-/**
- * Les deux formes d'un numéro, dérivées d'une seule écriture.
+ * **Une fonction plutôt que deux valeurs réglées séparément.** Le lien et
+ * l'affichage doivent dire le même numéro, et deux chaînes saisies à la main
+ * divergent. Ici il n'y a qu'une source, les chiffres, et deux vues dessus.
  *
- * **Pourquoi une fonction plutôt que deux chaînes dans `COACH`.** Le lien et
- * l'affichage doivent dire le même numéro, et deux valeurs saisies à la main
- * divergent : c'est exactement la faute que ce dépôt documente sur
- * `telephone_court`, où deux calculs du même identifiant devaient être tenus
- * identiques. Ici il n'y a qu'une source, les chiffres, et deux vues dessus.
+ * Elle reçoit le numéro en paramètre plutôt que d'aller le lire : le module
+ * met en forme, il ne décide pas d'où vient la valeur, et c'est ce qui la
+ * rend éprouvable sans base.
  *
  * L'international dans le lien, parce qu'un `tel:` en `0…` ne compose rien
- * depuis l'étranger, et un membre en déplacement doit pouvoir appeler.
- * Le format français à l'écran, parce que c'est celui qu'on lit.
+ * depuis l'étranger, et un client en déplacement doit pouvoir appeler. Le
+ * format français à l'écran, parce que c'est celui qu'on lit.
  *
- * Tout ce qui n'est pas un chiffre est retiré avant : la constante peut être
- * écrite avec des espaces ou des points sans que le lien casse.
+ * Tout ce qui n'est pas un chiffre est retiré avant : le réglage peut être
+ * saisi avec des espaces ou des points sans que le lien casse.
  */
 export function joindreLeCoach(telephone: string): {
   href: string;

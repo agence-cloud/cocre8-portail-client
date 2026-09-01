@@ -238,6 +238,24 @@ create table tache (
 
 create index tache_personne_idx on tache (personne_id, pilier_id);
 
+-- Les réglages de l'outil : ce que chaque coach change pour se
+-- l'approprier, sans toucher au code.
+--
+-- Une table clé-valeur plutôt qu'une table à une ligne et vingt colonnes :
+-- chaque réglage nouveau serait sinon une migration, sur un outil qui n'en
+-- reçoit plus une fois donné.
+--
+-- **Aucun secret n'entre ici.** La table est lue par le client autant que par
+-- le coach : tout ce qu'on y pose est public pour lui. Une clé d'API n'y a
+-- rien à faire.
+create table reglage (
+  cle text primary key,
+  valeur jsonb not null,
+  modifie_le timestamptz not null default now()
+);
+
+alter table reglage enable row level security;
+
 -- La marque de la première mise en service, et le verrou qui l'accompagne.
 --
 -- Une seule ligne possible, à jamais : la clé primaire vaut `true` et la
@@ -290,6 +308,24 @@ create or replace function a_un_compte() returns boolean
 language sql stable security definer set search_path = public
 as $$
   select exists (select 1 from compte where id = auth.uid() and actif);
+$$;
+
+-- Le nom du programme, et lui seul, avant toute session.
+--
+-- L'écran de connexion l'affiche, et celui qui s'y présente n'a pas encore de
+-- session : il lui faut donc un chemin à lui. Ouvrir toute la table `reglage`
+-- à `anon` aurait été plus simple et bien pire, elle porte aussi le nom et le
+-- numéro du coach, qui ne regardent que ses clients connectés.
+--
+-- Rend la valeur par défaut quand rien n'est réglé, plutôt que null : une
+-- base neuve affiche un nom, pas un trou.
+create or replace function nom_du_programme() returns text
+language sql stable security definer set search_path = public
+as $$
+  select coalesce(
+    (select valeur #>> '{}' from reglage where cle = 'nom_programme'),
+    'Espace Client'
+  );
 $$;
 
 -- La seule chose que l'app dise avant d'être installée : l'est-elle ?
@@ -563,6 +599,20 @@ create policy membre_coche_ses_taches on tache
 create policy membre_lit_son_calendrier on acces_pilier
   for select to authenticated using (personne_id = ma_personne());
 
+-- Les réglages : tout compte connecté les lit, le coach seul les écrit.
+--
+-- Le `grant` d'écriture est nécessaire pour que la politique puisse même
+-- s'évaluer : sans droit sur la table, PostgreSQL refuse avant d'en arriver
+-- là. C'est la politique qui filtre, pas le `grant`.
+revoke all on reglage from anon, authenticated;
+grant select, insert, update, delete on reglage to authenticated;
+
+create policy tous_lisent_les_reglages on reglage
+  for select to authenticated using (a_un_compte());
+
+create policy admin_ecrit_les_reglages on reglage
+  for all to authenticated using (est_admin()) with check (est_admin());
+
 create policy membre_lit_ses_documents on document
   for select to authenticated using (personne_id = ma_personne() and visible_membre);
 
@@ -687,6 +737,11 @@ grant execute on function public.pilier_ouvert(uuid, uuid) to authenticated;
 -- pour installer l'outil.
 revoke execute on function public.installation_faite() from public;
 grant execute on function public.installation_faite() to anon, authenticated;
+
+-- Celle-ci aussi répond à un anonyme : l'écran de connexion affiche le nom du
+-- programme, et personne n'a de session à ce moment-là.
+revoke execute on function public.nom_du_programme() from public;
+grant execute on function public.nom_du_programme() to anon, authenticated;
 
 revoke execute on function public.appliquer_parcours_modele(uuid) from public, anon;
 revoke execute on function public.planifier_piliers(uuid, date) from public, anon;

@@ -7,8 +7,8 @@ import { lireQuestions, lireReponses } from "@/lib/profil/requetes";
 import { completude } from "@/lib/profil/completude";
 import { lireProchainsCoachings } from "@/lib/coaching/requetes";
 import { lireTaches } from "@/modules/portail/requetes";
-import { CIRCLE } from "@/modules/portail/circle";
-import { COACH, joindreLeCoach } from "@/modules/portail/coach";
+import { joindreLeCoach } from "@/modules/portail/coach";
+import { lireReglages } from "@/lib/reglages/requetes";
 import {
   progression,
   progressionPilier,
@@ -61,7 +61,8 @@ export default async function AccueilEspace() {
     ? taches.filter((t) => t.pilier_id === courant.id && !t.faite)
     : [];
   const bilan = completude(questions, reponses);
-  const contact = joindreLeCoach(COACH.telephone);
+  const reglages = await lireReglages();
+  const contact = joindreLeCoach(reglages.coach_telephone);
 
   return (
     <>
@@ -220,9 +221,9 @@ export default async function AccueilEspace() {
                 est qu'on peut cliquer, et trois glyphes identiques le disent
                 mieux que deux familles à distinguer. */}
             <div className="mt-4 flex flex-col text-sm">
-              {CIRCLE.communaute && (
+              {reglages.liens_externes.communaute && (
                 <a
-                  href={CIRCLE.communaute}
+                  href={reglages.liens_externes.communaute}
                   target="_blank"
                   rel="noopener noreferrer"
                   className={LIGNE_ACCES}
@@ -254,11 +255,13 @@ export default async function AccueilEspace() {
               elle ne se cache jamais, y compris avant que l'accompagnement
               démarre : c'est justement là qu'un client a le plus besoin de
               savoir qui appeler. */}
-          {COACH.telephone && (
+          {reglages.coach_telephone && (
             <Carte ton="calme" className="shadow-douce">
               <MicroLibelle>Besoin d'aide ?</MicroLibelle>
               <p className="mt-3 text-sm text-texte-doux">
-                {COACH.nom ? `${COACH.nom} est là pour t'aider` : "Ton coach est là pour t'aider"}
+                {reglages.coach_nom
+                  ? `${reglages.coach_nom} est là pour t'aider`
+                  : "Ton coach est là pour t'aider"}
               </p>
               {/* Le numéro est le contenu de cette carte, pas l'ornement d'un
                   verbe : « Appeler ton coach » obligerait à cliquer pour

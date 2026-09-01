@@ -1,16 +1,15 @@
 import { describe, it, expect } from "vitest";
-import { CIRCLE, construireLiensCircle, liensCircle } from "@/modules/portail/circle";
+import { construireLiensCircle } from "@/modules/portail/circle";
+import { REGLAGES_PAR_DEFAUT } from "@/lib/reglages/types";
 
 describe("construireLiensCircle", () => {
   it("ne rend que les adresses remplies", () => {
-    // Une adresse vide n'est pas une panne : tant qu'un espace Circle
-    // n'existe pas, mieux vaut ne rien montrer qu'un lien mort.
+    // Une adresse vide n'est pas une panne : tant qu'un espace n'existe pas,
+    // mieux vaut ne rien montrer qu'un lien mort.
     //
-    // La comparaison ne porte pas sur `CIRCLE` : au 2026-08-28, ses trois
-    // adresses sont remplies, et un test qui les comparerait à
-    // `liensCircle().length` bougerait avec elles, retirer le filtre
-    // laisserait alors ce test vert. Une adresse vide posée ici-même est ce
-    // qui éprouve vraiment la règle.
+    // Les adresses sont posées ici et non lues au même endroit que la
+    // fonction : un test qui comparerait à la source verrait ses deux côtés
+    // bouger ensemble, et retirer le filtre le laisserait vert.
     const liens = construireLiensCircle({
       communaute: "https://exemple.circle.so/communaute",
       formation: "",
@@ -20,31 +19,24 @@ describe("construireLiensCircle", () => {
     expect(liens).toHaveLength(2);
     expect(liens.map((lien) => lien.libelle)).toEqual(["Communauté", "Événements"]);
   });
-});
 
-describe("liensCircle", () => {
-  it("applique la même règle aux adresses réelles", () => {
-    // `liensCircle` n'est qu'un appel de `construireLiensCircle` sur
-    // `CIRCLE` : ce test garde le lien entre les deux, pendant que le test
-    // du dessus garde la règle elle-même.
-    const liens = liensCircle();
-    const remplies = Object.values(CIRCLE).filter((adresse) => adresse !== "");
-
-    expect(liens).toHaveLength(remplies.length);
-    expect(liens.every((lien) => lien.href !== "")).toBe(true);
+  it("ne rend rien du tout sur un outil qui vient d'être installé", () => {
+    // Les trois adresses partent vides : ce sont les espaces de celui qui
+    // installe, personne d'autre ne peut les deviner. Le groupe entier
+    // disparaît alors de la barre, titre et filet compris.
+    expect(construireLiensCircle(REGLAGES_PAR_DEFAUT.liens_externes)).toEqual([]);
   });
 
   it("marque tous ses liens comme externes", () => {
-    // C'est ce drapeau qui déclenche le nouvel onglet et le rel dans la
-    // barre. Un lien Circle qui s'ouvre dans l'app reprendrait au membre
+    // C'est ce drapeau qui déclenche le nouvel onglet et le `rel` dans la
+    // barre. Un lien qui s'ouvrirait dans l'app reprendrait au client
     // l'écran sur lequel il travaille.
-    expect(liensCircle().every((lien) => lien.externe)).toBe(true);
-  });
+    const liens = construireLiensCircle({
+      communaute: "https://exemple.circle.so/communaute",
+      formation: "https://exemple.circle.so/formation",
+      evenements: "https://exemple.circle.so/evenements",
+    });
 
-  it("n'expose que des adresses absolues", () => {
-    // Une adresse relative sortirait sur l'app elle-même, pas sur Circle.
-    for (const adresse of Object.values(CIRCLE)) {
-      if (adresse !== "") expect(adresse).toMatch(/^https:\/\//);
-    }
+    expect(liens.every((lien) => lien.externe)).toBe(true);
   });
 });

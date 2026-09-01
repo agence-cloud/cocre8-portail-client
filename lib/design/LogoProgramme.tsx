@@ -1,27 +1,45 @@
+"use client";
+
+import { createContext, useContext } from "react";
+import { REGLAGES_PAR_DEFAUT } from "@/lib/reglages/types";
+
 /**
  * Le logotype du programme, affiché sur l'écran de connexion, dans la barre
  * latérale et sur la porte du profil.
  *
  * **Deux mots, et c'est structurel.** L'italique porte les deux, le gras ne
- * porte que le second : c'est ce contraste qui fait la signature. Un nom
- * d'un seul mot s'affiche donc en gras entier, sans que la composition
- * casse.
+ * porte que le dernier : c'est ce contraste qui fait la signature. Un nom
+ * d'un seul mot s'affiche donc en gras entier, sans que la composition casse.
  *
  * Composé en texte et non en tracé : c'est un mot-symbole typographique, il
  * suit la police de l'app et reste net à toutes les tailles.
  *
- * **Le nom deviendra un réglage.** Il est ici en constante le temps que
- * l'écran de réglages existe, et il n'a jamais eu à être une variable
- * d'environnement : un `NEXT_PUBLIC_` est recopié dans le paquet à la
- * construction, il n'offre donc aucune souplesse qu'une constante n'ait
- * déjà, et une variable oubliée fait disparaître le contenu sans rien dire.
+ * **Le nom vient d'un contexte et non d'une propriété**, parce que les trois
+ * écrans qui l'affichent sont des composants clients, et que deux d'entre eux
+ * sont trop loin de leur page pour qu'une propriété descende sans traverser
+ * quatre composants qui n'en ont que faire. Le contexte est posé une fois
+ * dans la mise en page racine.
  *
  * La taille est un choix parmi deux, pas une classe qu'on passe de
- * l'extérieur. Un `text-[22px]` ajouté au `className` ne l'emporterait pas
- * de façon fiable sur le `text-[40px]` d'ici : à spécificité égale, c'est
+ * l'extérieur. Un `text-[22px]` ajouté au `className` ne l'emporterait pas de
+ * façon fiable sur le `text-[40px]` d'ici : à spécificité égale, c'est
  * l'ordre dans la feuille de style qui tranche, pas l'ordre dans l'attribut.
  */
-export const NOM_PROGRAMME = "Espace Client";
+const ContexteProgramme = createContext<string>(REGLAGES_PAR_DEFAUT.nom_programme);
+
+export function ProgrammeProvider({
+  nom,
+  children,
+}: {
+  nom: string;
+  children: React.ReactNode;
+}) {
+  return <ContexteProgramme.Provider value={nom}>{children}</ContexteProgramme.Provider>;
+}
+
+export function useNomDuProgramme(): string {
+  return useContext(ContexteProgramme);
+}
 
 const TAILLES = {
   /** La page de connexion, où le logotype accueille. */
@@ -33,12 +51,12 @@ const TAILLES = {
 export function LogoProgramme({
   taille = "grand",
   className = "",
-  nom = NOM_PROGRAMME,
 }: {
   taille?: keyof typeof TAILLES;
   className?: string;
-  nom?: string;
 }) {
+  const nom = useNomDuProgramme();
+
   // Le dernier mot porte le gras, tout ce qui précède reste en normal. Un nom
   // d'un seul mot n'a donc pas de partie normale, et le `join` rend une
   // chaîne vide plutôt qu'un espace parasite.

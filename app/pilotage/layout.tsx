@@ -5,11 +5,13 @@ import { NavigationLaterale } from "@/lib/design/NavigationLaterale";
 /**
  * Les liens du côté coach.
  *
- * Un seul pour l'instant, et c'est volontaire : cet outil ne fait qu'une
- * chose, suivre les clients qu'on accompagne. Les réglages viendront s'ajouter
- * ici.
+ * Deux, et c'est volontaire : cet outil fait une chose, suivre les clients
+ * qu'on accompagne, et se règle depuis un seul endroit.
  */
-const LIENS = [{ libelle: "Mes clients", href: "/pilotage", icone: "clients" as const }];
+const LIENS = [
+  { libelle: "Mes clients", href: "/pilotage", icone: "clients" as const },
+  { libelle: "Réglages", href: "/pilotage/reglages", icone: "crm" as const },
+];
 
 export default async function LayoutPilotage({
   children,

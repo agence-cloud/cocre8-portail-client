@@ -39,10 +39,17 @@ au moment de la mise en service, et la fonction `installation_faite()` y
 touchent. Une politique, quelle qu'elle soit, ouvrirait une porte que rien ne
 demande.
 
-**AVERTISSEMENT : `installation_faite()` est exécutable par `anon`.**
-Nécessaire : celui qui installe l'outil n'a pas encore de compte, et c'est
-lui qui doit pouvoir demander si l'installation reste à faire. Elle ne rend
-qu'un booléen sur l'instance, jamais rien sur quelqu'un.
+**AVERTISSEMENT : `installation_faite()` et `nom_du_programme()` sont
+exécutables par `anon`.** Nécessaire dans les deux cas, et c'est le même
+raisonnement : ces deux réponses sont attendues par quelqu'un qui n'a pas
+encore de session. Celui qui installe l'outil doit pouvoir demander si
+l'installation reste à faire ; l'écran de connexion doit pouvoir afficher le
+nom du programme.
+
+Chacune ne rend qu'une valeur sur l'instance, jamais rien sur quelqu'un.
+**C'est précisément pour ça que le nom du programme a sa propre fonction** :
+ouvrir toute la table `reglage` aux anonymes aurait aussi donné le nom et le
+numéro du coach, qui ne regardent que ses clients connectés.
 
 **AVERTISSEMENT : les quatre fonctions de permission sont exécutables par
 `authenticated`.** Nécessaire aussi, et c'est le piège à ne pas corriger : les

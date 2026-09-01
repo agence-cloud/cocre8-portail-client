@@ -48,9 +48,21 @@ manipuler.
 ## Ce qui se règle, et ce qui ne se règle pas
 
 **Se règle, depuis l'app, sans toucher au code :** le nom du programme, le mot
-employé pour les grandes parties de l'accompagnement, ces parties elles-mêmes,
-les questions du profil, les tâches modèles, le nom et le numéro du coach, les
-liens externes.
+employé pour les grandes parties de l'accompagnement, le nom et le numéro du
+coach, les liens externes. Viendront s'y ajouter les parties elles-mêmes, les
+questions du profil et les tâches modèles.
+
+Les réglages vivent dans la table `reglage`, en clé-valeur, et
+`lib/reglages/types.ts` porte leur forme et leurs valeurs par défaut. **Une
+valeur absente ou déformée retombe sur son défaut plutôt que de lever** : une
+base neuve n'a aucune ligne, et une base qu'on a modifiée à la main ne doit
+pas faire tomber un écran.
+
+**Aucun secret n'entre dans les réglages.** Ils sont lus par le client autant
+que par le coach. **Le nom du programme a sa propre fonction de base**,
+`nom_du_programme()`, ouverte aux anonymes : l'écran de connexion l'affiche
+avant toute session, et ouvrir la table entière aurait donné le numéro du
+coach avec.
 
 **Ne se règle pas :** la structure (un programme, des parties, des tâches, un
 profil rempli à l'entrée), le profil comme porte d'entrée, le tutoiement, la

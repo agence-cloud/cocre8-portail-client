@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, cleanup, fireEvent } from "@testing-library/react";
-import { NOM_PROGRAMME } from "@/lib/design/LogoProgramme";
+import { REGLAGES_PAR_DEFAUT } from "@/lib/reglages/types";
 import { NavigationLaterale } from "@/lib/design/NavigationLaterale";
 import { BasculeNavigation } from "@/lib/design/BasculeNavigation";
 
@@ -76,7 +76,7 @@ describe("NavigationLaterale", () => {
     const liens = [{ libelle: "Clients", href: "/pilotage", icone: "clients" as const }];
     render(<NavigationLaterale liens={liens} nom="Alice Dupont" zone="Pilotage" repliee={false} />);
 
-    expect(screen.getByLabelText(NOM_PROGRAMME)).toBeInTheDocument();
+    expect(screen.getByLabelText(REGLAGES_PAR_DEFAUT.nom_programme)).toBeInTheDocument();
     expect(screen.queryByText("Cocre8")).not.toBeInTheDocument();
 
     // Un remontage, pas un rerender : `repliee` n'est que la valeur initiale

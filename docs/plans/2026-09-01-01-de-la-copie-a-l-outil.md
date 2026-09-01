@@ -138,52 +138,69 @@ les autres : le proxy réseau des sessions d'agent bloque `*.supabase.co`.
 
 ## Bloc C : les réglages
 
-### Tâche 4 : la table `reglage` et sa lecture
+### Tâche 4 : la table `reglage` et sa lecture, faite le 2026-09-01
 
 **Fichiers :** `install.sql`, `lib/reglages/types.ts`, `lib/reglages/requetes.ts`,
-`tests/integration/reglage-etanche.test.ts`.
+`tests/unitaires/reglages.test.ts`, `tests/integration/reglage-etanche.test.ts`.
 
-- [ ] Une table clé-valeur (`cle text primary key`, `valeur jsonb`) plutôt
-      qu'une table à vingt colonnes : chaque réglage nouveau serait sinon une
-      migration.
-- [ ] Lisible par tout compte connecté, écrivable par les seuls coachs. **Le
-      `grant` d'écriture est nécessaire pour que la politique s'applique** :
-      sans droit de table, la politique ne s'évalue jamais. C'est la politique
-      qui filtre, pas le `grant`.
-- [ ] **Aucun secret dans cette table.** Elle est lue par le client : tout ce
-      qu'on y pose est public pour lui.
-- [ ] `lireReglages()` rend un objet complet, chaque clé garantie présente,
-      les manquantes remplies par le défaut du code.
-- [ ] Le test d'étanchéité, avec témoin positif.
+- [x] Une table clé-valeur, lisible par tout compte connecté, écrivable par
+      le coach seul. Le `grant` d'écriture est nécessaire pour que la
+      politique puisse même s'évaluer : c'est elle qui filtre, pas le `grant`.
+- [x] Aucun secret n'y entre : elle est lue par le client.
+- [x] `lireReglages()` rend un objet complet, chaque clé garantie présente,
+      les manquantes remplies par le défaut du code. Une valeur déformée
+      retombe sur son défaut plutôt que de lever.
+- [x] Le test d'étanchéité, avec témoin positif.
 
-### Tâche 5 : le coach, les liens et le nom du programme lisent le réglage
+**Un écart avec ce qui était prévu, et il compte.** Le nom du programme
+s'affiche sur l'écran de connexion, donc **avant toute session**. Ouvrir la
+table aux anonymes aurait donné le nom et le numéro du coach avec. Il a donc
+sa propre fonction de base, `nom_du_programme()`, qui ne rend que lui. C'est
+la seule valeur dupliquée entre le code et le SQL, et les deux défauts
+doivent rester d'accord.
+
+### Tâche 5 : le coach et les liens lisent le réglage, faite le 2026-09-01
 
 **Fichiers :** `modules/portail/coach.ts`, `modules/portail/circle.ts`,
-`lib/design/LogoProgramme.tsx`.
+`lib/design/LogoProgramme.tsx`, `app/layout.tsx`, `app/espace/layout.tsx`,
+`app/espace/page.tsx`.
 
-- [ ] `joindreLeCoach(telephone)` et `construireLiensCircle(adresses)` **ne
-      changent pas de signature** : les deux prennent déjà leur valeur en
-      paramètre, précisément pour être éprouvées sans dépendre de la
-      constante. Seule la source change.
-- [ ] Les tests existants restent verts sans être modifiés. S'il faut les
-      toucher, la source a fuité dans la fonction.
+- [x] Les constantes `COACH` et `CIRCLE` disparaissent. `joindreLeCoach` et
+      `construireLiensCircle` **n'ont pas changé de signature** : elles
+      prenaient déjà leur valeur en paramètre, et leurs tests n'ont eu à
+      changer que de source.
+- [x] Le titre de l'onglet devient le nom du programme. Il disait encore
+      « Nouvelle École », resté de la copie.
 
-### Tâche 6 : l'écran de réglages
+**Le nom descend par un contexte posé dans la mise en page racine**, et non
+par des propriétés : les trois écrans qui l'affichent sont des composants
+clients, dont deux trop loin de leur page pour qu'une propriété descende sans
+traverser des composants qui n'en ont que faire.
+
+**Ce que ça coûte, et c'est assumé :** lire un réglage dans la mise en page
+racine rend toute l'app dynamique, y compris l'écran de connexion qui était
+figé à la construction. Une requête légère de plus sur une page publique,
+contre un logotype qui dit le bon nom partout.
+
+### Tâche 6 : l'écran de réglages, à moitié faite le 2026-09-01
 
 **Fichiers :** `app/pilotage/reglages/page.tsx`, `modules/portail/Reglages.tsx`,
 `modules/portail/actions-reglages.ts`, `app/pilotage/layout.tsx`.
 
-- [ ] Le geste du dépôt : **on lit d'abord, le stylo ouvre l'édition, un seul
-      « Enregistrer » envoie tout** (`lib/design/BoutonStylo.tsx`).
-- [ ] Les valeurs simples : nom du programme, mot pour « partie », nom et
+- [x] Le geste du dépôt : on lit d'abord, le stylo ouvre l'édition, un seul
+      « Enregistrer » envoie tout, et « Annuler » ne renvoie rien.
+- [x] Les valeurs simples : nom du programme, mot des parties, nom et
       téléphone du coach, trois liens externes.
+- [x] Le lien « Réglages » dans la barre du coach.
 - [ ] Les parties : nom, description, ordre, ajouter, retirer. **Retirer une
       partie qui porte des tâches déjà cochées doit être refusé**, pas caché :
       la progression d'un client en dépend.
 - [ ] Les questions du profil. Désactiver plutôt que supprimer quand une
       réponse existe.
 - [ ] Les tâches modèles, par partie.
-- [ ] Le lien « Réglages » s'ajoute dans la barre du coach.
+
+Les trois listes restantes sont des écrans à part entière : les mettre dans le
+même formulaire ferait un mur, et chacune a sa règle de suppression.
 
 ### Tâche 7 : le mot « partie » s'affiche partout depuis le réglage
 

@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { COACH, joindreLeCoach } from "@/modules/portail/coach";
+import { joindreLeCoach } from "@/modules/portail/coach";
+import { REGLAGES_PAR_DEFAUT } from "@/lib/reglages/types";
 
 describe("joindreLeCoach", () => {
   it("rend le lien en international et l'affichage en français", () => {
@@ -30,12 +31,12 @@ describe("joindreLeCoach", () => {
     });
   });
 
-  it("ne fabrique aucun lien tant que la constante est vide", () => {
-    // La constante part vide, et c'est ce qui doit rester vrai dans le
-    // template : un numéro d'exemple laissé là finirait affiché à de vrais
-    // clients. La carte du tableau de bord se garde sur cette valeur, donc
-    // elle ne se dessine pas tant qu'on n'a pas renseigné son numéro.
-    const { href, affichage } = joindreLeCoach(COACH.telephone);
+  it("ne fabrique aucun lien tant que le réglage est vide", () => {
+    // Le réglage part vide, et c'est ce qui doit rester vrai : un numéro
+    // d'exemple livré avec l'outil finirait affiché à de vrais clients. La
+    // carte du tableau de bord se garde sur cette valeur, donc elle ne se
+    // dessine pas tant que le coach n'a pas renseigné son numéro.
+    const { href, affichage } = joindreLeCoach(REGLAGES_PAR_DEFAUT.coach_telephone);
     expect(href).toBe("tel:");
     expect(affichage).toBe("");
   });

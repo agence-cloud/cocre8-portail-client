@@ -1,6 +1,6 @@
 import { test, expect, type Page, type Locator } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
-import { COACH, joindreLeCoach } from "@/modules/portail/coach";
+import { joindreLeCoach } from "@/modules/portail/coach";
 
 async function connecter(page: Page, email: string, motDePasse: string) {
   await page.goto("/connexion");
@@ -449,16 +449,33 @@ test("le membre trouve le numéro de son coach sur son tableau de bord", async (
   try {
     await page.goto("/espace");
 
-    const contact = joindreLeCoach(COACH.telephone);
+    // Le numéro est un réglage, et il part vide : la carte n'existe donc pas
+    // sur une base neuve. Ce test éprouve les deux moitiés de la règle, celle
+    // qui compte étant la première : un numéro d'exemple affiché à de vrais
+    // clients serait pire qu'une carte absente.
+    const admin = await connecterAdmin();
+    const { data } = await admin
+      .from("reglage")
+      .select("valeur")
+      .eq("cle", "coach_telephone")
+      .maybeSingle();
+    const telephone = typeof data?.valeur === "string" ? data.valeur : "";
 
-    // Un lien et non un simple texte : sur un téléphone, un membre doit
+    if (telephone === "") {
+      await expect(page.getByText(/est là pour t'aider/)).toHaveCount(0);
+      return;
+    }
+
+    const contact = joindreLeCoach(telephone);
+
+    // Un lien et non un simple texte : sur un téléphone, un client doit
     // pouvoir appeler d'un doigt. C'est tout l'intérêt du `tel:`, et c'est la
     // seule partie que l'oeil ne vérifie pas sur une capture d'écran.
     const appel = page.getByRole("link", { name: contact.affichage });
     await expect(appel).toBeVisible();
     await expect(appel).toHaveAttribute("href", contact.href);
 
-    await expect(page.getByText("Notre équipe est là pour vous accompagner")).toBeVisible();
+    await expect(page.getByText(/est là pour t'aider/)).toBeVisible();
   } finally {
     if (profilRempli) await viderProfilComplete(page);
   }
