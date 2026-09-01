@@ -6,10 +6,7 @@ export type Offre = {
   prix_defaut: number;
   type: TypeOffre;
   duree_mois: number | null;
-  provisionne_espace: boolean;
   active: boolean;
-  /** L'offre que vise tout nouveau lead, sans qu'on ait rien à choisir. */
-  par_defaut: boolean;
 };
 
 export type StatutAccompagnement = "actif" | "termine" | "suspendu";
@@ -19,11 +16,11 @@ export type Accompagnement = {
   personne_id: string;
   offre_id: string;
   /**
-   * Le prix figé au jour de la signature. Son nom vient d'un temps où l'on
-   * croyait négocier : il n'y a jamais eu de négociation, seulement le prix
-   * de l'offre du moment. Le champ reste, et il est
-   * précieux : c'est lui qui dira qu'un client a signé à 1 500 le jour où
-   * l'offre en vaudra 2 000. Il se remplit tout seul, à la signature.
+   * Le prix figé au jour où le client signe.
+   *
+   * Sur l'offre vit le prix du moment ; ici vit celui qu'a payé cette
+   * personne-là. C'est ce qui permet d'augmenter ses tarifs sans réécrire
+   * l'histoire de ceux qui ont signé avant.
    */
   prix_negocie: number;
   date_debut: string;

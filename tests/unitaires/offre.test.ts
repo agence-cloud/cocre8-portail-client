@@ -8,9 +8,7 @@ function offre(surcharge: Partial<Offre> = {}): Offre {
     prix_defaut: 1500,
     type: "ponctuel",
     duree_mois: 3,
-    provisionne_espace: true,
     active: true,
-    par_defaut: false,
     ...surcharge,
   };
 }

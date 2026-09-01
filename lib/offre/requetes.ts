@@ -1,10 +1,9 @@
 import { creerClientServeur } from "@/lib/supabase/serveur";
 import type { Accompagnement, Offre } from "@/lib/offre/types";
 
-const CHAMPS_OFFRE =
-  "id, nom, prix_defaut, type, duree_mois, provisionne_espace, active, par_defaut";
+const CHAMPS_OFFRE = "id, nom, prix_defaut, type, duree_mois, active";
 
-/** Les offres proposables, la moins chère d'abord : c'est l'ordre du catalogue. */
+/** Les offres proposables, la moins chère d'abord. */
 export async function lireOffres(): Promise<Offre[]> {
   const supabase = await creerClientServeur();
   const { data, error } = await supabase
@@ -16,20 +15,6 @@ export async function lireOffres(): Promise<Offre[]> {
   if (error) throw new Error(`Lecture des offres impossible : ${error.message}`);
 
   return (data ?? []) as Offre[];
-}
-
-/** L'offre que vise tout nouveau lead. Nulle si le catalogue n'en désigne aucune. */
-export async function lireOffreParDefaut(): Promise<Offre | null> {
-  const supabase = await creerClientServeur();
-  const { data, error } = await supabase
-    .from("offre")
-    .select(CHAMPS_OFFRE)
-    .eq("par_defaut", true)
-    .maybeSingle();
-
-  if (error) throw new Error(`Lecture de l'offre par défaut impossible : ${error.message}`);
-
-  return (data ?? null) as Offre | null;
 }
 
 /** Les offres signées par une personne, la plus ancienne d'abord. */
