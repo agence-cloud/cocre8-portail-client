@@ -1,0 +1,224 @@
+@import "tailwindcss";
+
+@theme {
+  /* Couleurs, confirmées depuis le Figma Cocre8 */
+  --color-fond: #ffffff;
+  --color-fond-alt: #f7f7f7;
+  --color-texte: #272727;
+  --color-texte-doux: rgba(39, 39, 39, 0.7);
+  --color-bordure: rgba(39, 39, 39, 0.12);
+  --color-orange: #ff6320;
+  --color-orange-fonce: #e0571c;
+  --color-orange-tint: #fff0ea;
+  --color-surface: #e4ebf1;
+  /* Exception documentée dans docs/decisions/0008 : réservé au seul bouton de
+     conversion. Toute autre action reste orange. */
+  --color-vert: #16a34a;
+  --color-vert-fonce: #15803d;
+
+  /* Le bleu nuit, divergence assumée de la charte vitrine
+     (docs/decisions/0020). Il porte les titres de page et les actions
+     principales là où la charte imposerait l'orange. La raison : une vitrine
+     se parcourt en trente secondes et doit imprimer une marque, une app se
+     regarde une heure par jour et doit rendre lisible une hiérarchie.
+     L'orange reste l'accent, il ne devient pas le décor. */
+  --color-nuit: #151c2c;
+  --color-nuit-fonce: #0e1420;
+
+  /* Rayons */
+  --radius-carte: 16px;
+  --radius-icone: 12px;
+  --radius-pilule: 9999px;
+
+  /* Typo : BDO Grotesk est une police premium. Tant qu'elle n'est pas
+     achetée et hébergée, Plus Jakarta Sans est le repli le plus proche.
+     Jamais de serif. */
+  --font-sans: "BDO Grotesk", var(--font-jakarta), system-ui, sans-serif;
+
+  /* Ombres douces, multi-couches, jamais marquées. Trois niveaux comme la
+     charte les définit, alors que l'app n'en utilisait qu'un : c'est
+     l'élévation qui donne la profondeur, et une seule valeur met tout sur le
+     même plan. */
+  --shadow-douce: 0 1px 2px rgba(39, 39, 39, 0.04),
+    0 0 0 1px rgba(39, 39, 39, 0.04);
+  --shadow-carte: 0 6px 6px -3px rgba(39, 39, 39, 0.04),
+    0 12px 12px -6px rgba(39, 39, 39, 0.05);
+  --shadow-haute: 0 6px 6px -3px rgba(39, 39, 39, 0.04),
+    0 12px 12px -6px rgba(39, 39, 39, 0.05),
+    0 24px 24px -12px rgba(39, 39, 39, 0.06);
+}
+
+body {
+  background: var(--color-fond);
+  color: var(--color-texte);
+  font-family: var(--font-sans);
+  letter-spacing: -0.01em;
+}
+
+h1, h2, h3 {
+  font-weight: 500; /* Medium, pas Bold. Le Bold est réservé aux chiffres. */
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+@keyframes entree {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* 6 pixels et 200 ms : assez pour que l'œil sente l'arrivée, trop peu pour
+   qu'il l'attende. Une entrée qui se remarque devient une lenteur. */
+main > * {
+  animation: entree 200ms ease-out;
+}
+
+/* Les entrées de la porte d'entrée du profil. Trois seulement, et toutes
+   courtes : une question qui met une seconde à s'afficher devient une
+   attente, et il y en a dix à passer.
+
+   Le glissement porte un sens, il n'est pas décoratif : la question suivante
+   arrive par la droite, la précédente revient par la gauche. C'est ce qui
+   fait sentir qu'on avance dans une file plutôt qu'on saute d'un écran à un
+   autre. */
+@keyframes glisse-avant {
+  from {
+    opacity: 0;
+    transform: translateX(28px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes glisse-arriere {
+  from {
+    opacity: 0;
+    transform: translateX(-28px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes monte {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.entree-avant {
+  animation: glisse-avant 280ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.entree-arriere {
+  animation: glisse-arriere 280ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* `both` retient l'état de départ : sans lui, un élément retardé s'affiche à
+   sa place définitive avant de disparaître pour rejouer son entrée. */
+.entree-monte {
+  animation: monte 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* La même entrée, mais en cascade : chaque enfant part 70 ms après son
+   aîné. C'est ce qui donne le plus de « soigné » pour le moins de code, et
+   c'est la seule animation d'arrivée de la connexion.
+
+   La cascade s'arrête au cinquième : au-delà, l'attente se sent, et le
+   dernier arrivant donnerait l'impression que la page rame. Les suivants
+   entrent donc tous avec lui. */
+.cascade > * {
+  animation: monte 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.cascade > *:nth-child(2) {
+  animation-delay: 70ms;
+}
+.cascade > *:nth-child(3) {
+  animation-delay: 140ms;
+}
+.cascade > *:nth-child(4) {
+  animation-delay: 210ms;
+}
+.cascade > *:nth-child(n + 5) {
+  animation-delay: 280ms;
+}
+
+/* Le champ de la porte d'entrée n'a pas de cadre, juste un trait sous le
+   texte. Les deux flèches que le navigateur accroche à un champ de type
+   nombre viennent alors se poser dans le vide, à droite de rien, et cassent
+   la seule ligne de l'écran. On les retire là et nulle part ailleurs : dans
+   un formulaire encadré, elles rendent service. */
+.champ-nu::-webkit-outer-spin-button,
+.champ-nu::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.champ-nu[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* L'indicateur du lien cliqué (lib/design/IndicateurNavigation.tsx).
+
+   Le retard de 120 ms est toute l'astuce : une navigation préchargée arrive
+   avant lui, donc l'indicateur se démonte sans jamais avoir été visible.
+   Seules les navigations réellement lentes le montrent. Sans ce retard, on
+   aurait un clignotement à chaque clic, et une app qui clignote paraît
+   agitée, pas rapide. */
+@keyframes apparait-retarde {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.55;
+  }
+}
+
+.apparait-retarde {
+  opacity: 0;
+  animation: apparait-retarde 140ms ease-out 120ms forwards;
+}
+
+/* Respecte le réglage système : certains désactivent les animations parce
+   qu'elles leur donnent le vertige, pas par goût. Les entrées de la porte
+   sont en `both`, donc les neutraliser demande aussi de rendre l'opacité :
+   sans cette règle, un élément retardé resterait invisible pour toujours. */
+@media (prefers-reduced-motion: reduce) {
+  main > *,
+  .animate-pulse {
+    animation: none;
+  }
+
+  .entree-avant,
+  .entree-arriere,
+  .entree-monte,
+  .cascade > * {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  /* L'indicateur reste visible mais ne tourne plus : le retirer priverait
+     d'un retour ceux qui en ont le plus besoin, la lenteur ne disparaissant
+     pas parce qu'on a coupé les animations. `motion-safe:` retire déjà la
+     rotation, cette règle rend l'opacité que le retard aurait gardée à
+     zéro. */
+  .apparait-retarde {
+    animation: none;
+    opacity: 0.55;
+  }
+}

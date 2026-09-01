@@ -1,0 +1,45 @@
+# Dépendances
+node_modules/
+.pnp
+.pnp.js
+
+# Build
+.next/
+out/
+build/
+dist/
+
+# Secrets : jamais commités
+.env
+.env.*
+!.env.example
+
+# Base locale (si SQLite)
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+npm-debug.log*
+
+# macOS
+.DS_Store
+
+# Éditeurs
+.vscode/
+.idea/
+
+# Claude Code
+.claude/settings.local.json
+
+# Journal d'exécution (scratch)
+.superpowers/
+
+# Cache de compilation TypeScript
+*.tsbuildinfo
+
+# Artefacts de test
+test-results/
+playwright-report/
