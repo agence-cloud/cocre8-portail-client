@@ -17,6 +17,28 @@ Il fait aujourd'hui tout ça dans un Notion partagé, un Drive et WhatsApp. Sa
 douleur n'est pas de manquer d'outils, c'est que **ses clients ne voient
 nulle part où ils en sont**.
 
+## Ce que l'outil doit savoir faire
+
+*Posé par le fondateur le 2026-09-01, après le bloc C.* Quatre objectifs, et rien
+au-delà : c'est ce qui garde l'outil simple et donnable.
+
+1. **Créer un client et lui donner ses accès**, par email ou à la main.
+2. **Un accueil avec des questions personnalisables**, que le coach écrit pour
+   les siens.
+3. **Un espace client** : son tableau de bord, son profil, les liens externes
+   que le coach ajoute, et le suivi de son accompagnement.
+4. **Deux vues sur la même chose** : le coach pose les tâches et les
+   objectifs, le client les voit, avec ses coachings.
+
+L'espace est **le même pour tout le monde, et modifiable pour chacun** : le
+parcours type donne la structure commune, et le coach ajuste ensuite chez qui
+il veut.
+
+**Un manque connu : les objectifs.** L'outil sait poser des tâches, pas des
+objectifs. Reste à trancher si un objectif est une partie du parcours (auquel
+cas il existe déjà, sous un autre nom) ou une chose à part, posée par client
+et suivie à côté des tâches.
+
 ## Les deux côtés
 
 Deux rôles, une base. `role_compte` vaut `admin` ou `membre`, et le rôle
