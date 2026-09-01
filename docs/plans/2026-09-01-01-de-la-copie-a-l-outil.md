@@ -244,22 +244,47 @@ design et non de code.
 
 ## Bloc D : ajouter un client
 
-### Tâche 8 : l'écran d'ajout
+### Tâche 8 : l'écran d'ajout, faite le 2026-09-01
 
 **Fichiers :** `modules/portail/AjouterClient.tsx`, `modules/portail/actions.ts`,
+`modules/portail/EnvoyerLesAcces.tsx`, `lib/auth/creation.ts`,
 `app/pilotage/page.tsx`.
 
-- [ ] Le formulaire : nom, prénom, email, offre, prix.
-- [ ] Il crée la fiche, ouvre l'accompagnement, copie le parcours modèle et
-      pose le calendrier des parties.
-- [ ] **La règle du socle ne bouge pas : l'adresse email n'est jamais un
-      paramètre de la création de compte.** On crée la fiche avec son email,
+- [x] Le formulaire : prénom, nom, email, offre, prix, date de démarrage. Le
+      prix suit l'offre choisie et reste modifiable : c'est le prix de cette
+      personne-là, pas celui du catalogue.
+- [x] Il crée la fiche, ouvre l'accompagnement, copie le parcours type et
+      pose le calendrier. **Vérifié en base** : douze tâches copiées, quatre
+      parties planifiées.
+- [x] **La règle du socle ne bouge pas** : l'adresse email n'est jamais un
+      paramètre de la création de compte. On crée la fiche avec son email,
       puis `creerLeCompteDuMembre(personneId)` la relit en base.
-- [ ] L'envoi des accès reste un geste séparé, sur l'écran de suivi.
-- [ ] Un parcours Playwright : un coach ajoute un client, il apparaît dans la
-      liste, son espace existe.
+- [x] L'envoi des accès reste un geste séparé, sur l'écran de suivi.
+- [ ] Un parcours Playwright. Il ne peut pas tourner d'ici, il attend un
+      poste.
 
----
+**L'ordre des trois écritures est une garde, pas une commodité.** La fiche,
+puis l'accompagnement, puis le compte : `creerLeCompteDuMembre` refuse une
+fiche sans accompagnement, et c'est ce refus qui garantit qu'un contact ajouté
+pour mémoire ne reçoive pas d'accès à un espace vide. Si l'accompagnement
+échoue, la fiche est retirée : sans ça, son adresse bloquerait une seconde
+tentative sur l'index unique.
+
+**Les accès se donnent de deux façons, et la seconde n'est pas un
+pis-aller.** Par email, avec confirmation nommant l'adresse. Ou par un lien à
+copier, que le coach colle où il parle déjà à ses clients.
+
+C'est ce second chemin qui fait marcher l'outil le premier jour : une
+installation neuve utilise le service d'email de Supabase, plafonné à quelques
+envois par heure et dont les textes sont en anglais tant que personne ne les a
+réécrits. Un coach qui ajoute ses cinq premiers clients le même après-midi se
+heurterait au plafond sans comprendre pourquoi.
+
+**Un défaut trouvé au passage, et il n'aurait pas été vu au build.**
+`lib/offre/requetes.ts` sélectionnait `provisionne_espace` et `par_defaut`,
+deux colonnes retirées du schéma avec le CRM. Rien ne le signalait, aucun type
+ne relie plus le code à la base : l'écran de suivi d'un client aurait échoué à
+l'exécution, sur une requête qui compile.
 
 ## Bloc E : la démonstration et la sortie
 

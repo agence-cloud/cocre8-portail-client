@@ -34,10 +34,12 @@ L'espace est **le même pour tout le monde, et modifiable pour chacun** : le
 parcours type donne la structure commune, et le coach ajuste ensuite chez qui
 il veut.
 
-**Un manque connu : les objectifs.** L'outil sait poser des tâches, pas des
-objectifs. Reste à trancher si un objectif est une partie du parcours (auquel
-cas il existe déjà, sous un autre nom) ou une chose à part, posée par client
-et suivie à côté des tâches.
+**Un objectif est une partie, pas une chose de plus** (tranché le
+2026-09-01). Les parties sont les étapes de l'accompagnement, et le coach les
+remplit de tâches propres à chaque client. C'est ce que `TachesCoach` fait
+déjà : appliquer le parcours type, puis ajouter ce qui ne concerne que cette
+personne. Un coach qui préfère le mot « objectif » le règle depuis son écran,
+et rien d'autre ne bouge.
 
 ## Les deux côtés
 

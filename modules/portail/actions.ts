@@ -11,7 +11,11 @@ import { redirect } from "next/navigation";
 import { creerClientServeur } from "@/lib/supabase/serveur";
 import { headers } from "next/headers";
 import { exigerConnecte, exigerAdmin } from "@/lib/auth/compte";
-import { envoyerLesAcces as envoyer } from "@/lib/auth/creation";
+import {
+  creerLeCompteDuMembre as creerLeCompte,
+  envoyerLesAcces as envoyer,
+  genererLeLienDAcces as genererLien,
+} from "@/lib/auth/creation";
 import { versInstantUTC } from "@/lib/dates";
 
 export async function cocherTache(id: string, faite: boolean): Promise<void> {
@@ -494,4 +498,113 @@ export async function envoyerLesAcces(
 
   revalidatePath("/pilotage/membres", "layout");
   return resultat;
+}
+
+/**
+ * Le lien d'accès, fabriqué mais pas envoyé.
+ *
+ * L'autre moitié de l'invitation : le coach le copie et le transmet
+ * lui-même, par le canal qu'il utilise déjà avec ses clients. Rien ne sort
+ * de l'application ici, ce qui en fait le geste le plus discret des deux.
+ */
+export async function genererLeLien(
+  personneId: string,
+): Promise<{ lien?: string; email?: string; pourquoi?: string }> {
+  await exigerAdmin();
+
+  const entetes = await headers();
+  const hote = entetes.get("host");
+  if (!hote) return { pourquoi: "Adresse du site introuvable." };
+
+  const protocole =
+    entetes.get("x-forwarded-proto") ?? (hote.startsWith("localhost") ? "http" : "https");
+
+  return genererLien(personneId, `${protocole}://${hote}`);
+}
+
+/**
+ * Ajoute un client : sa fiche, son accompagnement, son parcours, son
+ * calendrier et son compte, d'un seul geste.
+ *
+ * **Le seul chemin par lequel un client naît ici.** L'application dont cet
+ * outil est extrait les créait à la bascule commerciale d'un CRM qui n'existe
+ * plus : sans ce geste, un coach ne pourrait ajouter personne.
+ *
+ * **Rien n'est envoyé.** Le compte est créé et l'espace prêt, mais
+ * l'invitation reste un clic séparé sur l'écran de suivi. C'est la règle du
+ * dépôt : l'espace se prépare tout seul, ce qui sort vers quelqu'un attend
+ * qu'un humain le décide.
+ *
+ * **L'ordre compte.** La fiche d'abord, l'accompagnement ensuite, le compte en
+ * dernier : `creerLeCompteDuMembre` refuse une fiche sans accompagnement, et
+ * c'est ce refus qui garantit qu'un contact ajouté pour mémoire ne reçoit pas
+ * d'accès à un espace vide.
+ */
+export async function ajouterUnClient(champs: {
+  nom: string;
+  prenom: string;
+  email: string;
+  offreId: string;
+  prix: number;
+  demarrage: string;
+}): Promise<{ fait: boolean; personneId?: string; pourquoi?: string }> {
+  await exigerAdmin();
+  const supabase = await creerClientServeur();
+
+  const { data: personne, error: erreurFiche } = await supabase
+    .from("personne")
+    .insert({
+      nom: champs.nom.trim(),
+      prenom: champs.prenom.trim() || null,
+      email: champs.email.trim() || null,
+    })
+    .select("id")
+    .single();
+
+  // L'index unique sur l'email en minuscules : deux clients ne peuvent pas
+  // porter la même adresse, et le message le dit plutôt que de laisser
+  // remonter une contrainte PostgreSQL.
+  if (erreurFiche) {
+    const doublon = erreurFiche.code === "23505";
+    return {
+      fait: false,
+      pourquoi: doublon
+        ? "Un client porte déjà cette adresse email."
+        : erreurFiche.message,
+    };
+  }
+
+  const { error: erreurAccompagnement } = await supabase.from("accompagnement").insert({
+    personne_id: personne.id,
+    offre_id: champs.offreId,
+    prix_negocie: champs.prix,
+    date_debut: champs.demarrage,
+  });
+
+  if (erreurAccompagnement) {
+    // Sans ce retrait, la fiche resterait sans accompagnement, donc sans
+    // accès possible, et son adresse bloquerait une seconde tentative.
+    await supabase.from("personne").delete().eq("id", personne.id);
+    return { fait: false, pourquoi: erreurAccompagnement.message };
+  }
+
+  await supabase.rpc("appliquer_parcours_modele", { p_personne: personne.id });
+  await supabase.rpc("planifier_piliers", {
+    p_personne: personne.id,
+    p_demarrage: champs.demarrage,
+  });
+
+  // Le compte peut échouer sans que tout soit perdu : la fiche, son
+  // accompagnement et son parcours restent, et le coach relance l'envoi de
+  // ses accès depuis l'écran de suivi.
+  const compte = await creerLeCompte(personne.id);
+
+  revalidatePath("/pilotage");
+  revalidatePath("/pilotage/membres", "layout");
+
+  return {
+    fait: true,
+    personneId: personne.id,
+    pourquoi: compte.fait === "impossible" ? compte.pourquoi : undefined,
+  };
 }

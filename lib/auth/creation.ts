@@ -182,3 +182,52 @@ export async function envoyerLesAcces(
 
   return { envoye: true, email: personne.email };
 }
+
+/**
+ * Fabrique le lien d'accès sans l'envoyer, pour que le coach le transmette
+ * lui-même.
+ *
+ * **Pourquoi les deux existent.** Une installation neuve utilise le service
+ * d'email de Supabase, qui plafonne à quelques envois par heure et dont les
+ * textes sont en anglais tant que personne ne les a réécrits. Un coach qui
+ * ajoute ses cinq premiers clients le même après-midi se heurterait au
+ * plafond, sans comprendre pourquoi. Le lien copié passe par WhatsApp, et
+ * l'outil marche le premier jour sans configurer quoi que ce soit.
+ *
+ * Ce lien vaut une heure et ouvre l'espace de son porteur : il se colle dans
+ * une conversation privée, jamais ailleurs. C'est la même prudence que
+ * l'envoi par email, avec la responsabilité déplacée sur celui qui colle.
+ *
+ * Passe par la clé de service, contrairement à l'envoi : fabriquer un lien
+ * sans l'envoyer est une opération d'administration, l'API publique ne sait
+ * que déclencher un email.
+ */
+export async function genererLeLienDAcces(
+  personneId: string,
+  origine: string,
+): Promise<{ lien?: string; email?: string; pourquoi?: string }> {
+  const service = clienteDeService();
+
+  const { data: personne, error } = await service
+    .from("personne")
+    .select("email, accompagnement (id)")
+    .eq("id", personneId)
+    .maybeSingle();
+
+  if (error) return { pourquoi: error.message };
+  if (!personne) return { pourquoi: "Cette fiche n'existe plus." };
+  if ((personne.accompagnement ?? []).length === 0) {
+    return { pourquoi: "Cette fiche n'a pas d'accompagnement." };
+  }
+  if (!personne.email) return { pourquoi: "Cette fiche n'a pas d'email." };
+
+  const { data, error: erreurLien } = await service.auth.admin.generateLink({
+    type: "recovery",
+    email: personne.email,
+    options: { redirectTo: `${origine}/auth/confirmer` },
+  });
+
+  if (erreurLien) return { pourquoi: erreurLien.message };
+
+  return { lien: data.properties.action_link, email: personne.email };
+}
