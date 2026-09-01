@@ -69,10 +69,30 @@ surtout rien qu'un numéro qui appartient à quelqu'un d'autre.
 première mise en service et l'écran de réglages : ce sont les prochaines
 tâches de `docs/plans/`.
 
-**Aucun test d'intégration ni aucun parcours n'a encore tourné contre ce
-schéma.** Ils sont écrits, ils viennent de l'application d'origine, et ils
-attendent un projet Supabase. C'est la première chose à faire le jour où il
-existe, avant d'écrire quoi que ce soit de neuf.
+**Le schéma a été appliqué à un vrai projet Supabase et son modèle de
+permissions a été éprouvé** (2026-09-01). Ce qui a été vérifié, en SQL, en
+prenant l'identité d'un client puis celle d'un anonyme :
+
+- un client ne lit pas la table `appel`, mais lit son coaching à travers la
+  vue, et **seulement le coaching** : son ancien appel de prospection n'y
+  apparaît pas ;
+- la vue ne porte aucune colonne `notes` ;
+- ni `update` ni `delete` à travers la vue ne touchent la ligne ;
+- un client ne voit que sa propre fiche ;
+- un anonyme ne voit rien nulle part, et la vue lui est refusée à la porte.
+
+**Les tests d'intégration et les parcours, eux, n'ont jamais tourné.** Ce
+n'est pas un oubli : le proxy réseau des sessions d'agent bloque
+`*.supabase.co`, donc aucun test qui se connecte pour de vrai ne peut partir
+d'ici. **Ils se lancent depuis un poste**, avec un `.env.local` renseigné, et
+c'est la première chose à faire avant d'écrire du neuf.
+
+**Le conseiller de sécurité Supabase signale une erreur, et elle est
+acceptée** : `coaching_membre` est une vue `SECURITY DEFINER`. C'est exactement
+ce qui la fait fonctionner. Elle lit `appel` avec les droits de son
+propriétaire, alors que le client n'a aucun droit sur cette table, et elle
+filtre elle-même sur `ma_personne()`. La passer en `SECURITY INVOKER` ne
+rendrait plus rien au client. **Ne pas la corriger.**
 
 Ce qui est là : l'espace client entier (tableau de bord, profil et sa porte,
 parties et tâches, séances et comptes rendus, documents), l'écran de suivi

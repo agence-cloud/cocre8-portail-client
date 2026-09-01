@@ -79,9 +79,16 @@ client lit son propre coaching, ne lit pas ses appels de vente, ne lit pas le
 coaching d'un autre, ne peut rien écrire à travers la vue (ni corriger, ni
 effacer, ni ajouter), et ne voit jamais la note interne.
 
-Rien à écrire, donc. **Mais il n'a jamais été exécuté contre ce schéma-ci**,
-et il ne le sera pas avant qu'un projet Supabase existe. C'est la première
-chose à lancer ce jour-là.
+Rien à écrire, donc. **Mais il n'a jamais été exécuté**, et il ne peut pas
+l'être depuis une session d'agent : le proxy réseau bloque `*.supabase.co`.
+Il se lance depuis un poste.
+
+**Ce que ce test affirme a été vérifié autrement**, en SQL, sur le vrai
+projet, en prenant l'identité d'un client puis d'un anonyme : lecture de
+`appel` impossible, coaching lisible par la vue et lui seul, aucune colonne
+`notes`, écritures à travers la vue sans effet, une seule fiche visible, et
+rien du tout pour un anonyme. Le test reste à lancer, il n'est plus la seule
+preuve.
 
 **Toute modification de la vue doit se heurter à ce test.**
 

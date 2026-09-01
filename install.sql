@@ -625,18 +625,27 @@ create policy membre_lit_ses_fichiers on storage.objects
 -- ---------------------------------------------------------------------
 --  10. La surface exposée en RPC
 --
---  PostgREST expose toute fonction du schéma public. Le droit ne vient pas
---  du rôle `anon` mais de `PUBLIC`, dont il hérite : révoquer à `anon` seul
---  ne retire rien. On révoque à `PUBLIC`, puis on rend à `authenticated` ce
---  dont les politiques ont besoin, car elles appellent ces fonctions au nom
---  de l'appelant. Sans cette seconde moitié, toutes les permissions par
---  ligne tomberaient d'un coup.
+--  PostgREST expose toute fonction du schéma public. Le droit d'exécuter
+--  arrive par deux chemins à la fois, et il faut couper les deux : `anon`
+--  hérite de `PUBLIC`, et Supabase lui accorde en plus le droit en direct
+--  sur toute fonction nouvelle du schéma. Révoquer à `PUBLIC` seul laisse
+--  donc la porte ouverte, et révoquer à `anon` seul aussi.
+--
+--  Mesuré, pas supposé : avec un `revoke from public` seul, le conseiller de
+--  sécurité a signalé les quatre fonctions comme exécutables par `anon`, et
+--  `has_function_privilege('anon', ...)` l'a confirmé. Trois d'entre elles
+--  ne disent rien d'utile à un anonyme, `pilier_ouvert` répondait sur la
+--  personne qu'on lui nommait.
+--
+--  Puis on rend à `authenticated` ce dont les politiques ont besoin : elles
+--  appellent ces fonctions au nom de l'appelant. Sans cette seconde moitié,
+--  toutes les permissions par ligne tomberaient d'un coup.
 -- ---------------------------------------------------------------------
 
-revoke execute on function public.ma_personne() from public;
-revoke execute on function public.est_admin() from public;
-revoke execute on function public.a_un_compte() from public;
-revoke execute on function public.pilier_ouvert(uuid, uuid) from public;
+revoke execute on function public.ma_personne() from public, anon;
+revoke execute on function public.est_admin() from public, anon;
+revoke execute on function public.a_un_compte() from public, anon;
+revoke execute on function public.pilier_ouvert(uuid, uuid) from public, anon;
 
 grant execute on function public.ma_personne() to authenticated;
 grant execute on function public.est_admin() to authenticated;
