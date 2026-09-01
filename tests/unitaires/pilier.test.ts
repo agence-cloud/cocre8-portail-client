@@ -67,16 +67,17 @@ describe("calendrierPropose", () => {
 
 describe("phraseCadenas", () => {
   it("insère la date quand elle existe", () => {
-    expect(phraseCadenas(2, "2026-10-01")).toContain("1er octobre");
+    expect(phraseCadenas("2026-10-01", "module")).toContain("1er octobre");
   });
 
-  it("dit la même chose quel que soit le numéro de la partie", () => {
-    // Une phrase par numéro serait fausse dès qu'un coach renomme ses parties
-    // ou en ajoute une : leurs noms se règlent depuis l'app.
-    expect(phraseCadenas(2, "2026-10-01")).toBe(phraseCadenas(7, "2026-10-01"));
+  it("emploie le mot que le coach a choisi", () => {
+    // Une phrase écrite pour « la partie 2 » serait fausse dès qu'un coach
+    // renomme ses parties ou en ajoute une. Le mot vient de ses réglages.
+    expect(phraseCadenas(null, "module")).toContain("Ce module");
+    expect(phraseCadenas(null, "axe")).toContain("Cet axe".replace("Cet ", "Ce "));
   });
 
   it("reste compréhensible quand aucune date n'est posée", () => {
-    expect(phraseCadenas(2, null)).toContain("pas encore programmé");
+    expect(phraseCadenas(null, "module")).toContain("pas encore programmé");
   });
 });

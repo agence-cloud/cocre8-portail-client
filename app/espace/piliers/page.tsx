@@ -5,6 +5,7 @@ import { etatPilier } from "@/lib/pilier/etat";
 import { lireTaches } from "@/modules/portail/requetes";
 import { progressionPilier } from "@/modules/portail/progression";
 import { CartePilier } from "@/modules/portail/CartePilier";
+import { lireReglages } from "@/lib/reglages/requetes";
 
 export default async function PagePiliers() {
   const compte = await exigerMembre();
@@ -13,6 +14,7 @@ export default async function PagePiliers() {
   const personneId = compte.personneId!;
   await exigerProfilComplet(personneId);
 
+  const reglages = await lireReglages();
   const [piliers, calendrier, taches] = await Promise.all([
     lirePiliers(),
     lireCalendrier(personneId),
@@ -25,7 +27,7 @@ export default async function PagePiliers() {
   return (
     <>
       <h1 className="text-4xl">
-        Tes <span className="text-orange">piliers</span>
+        Tes <span className="text-orange">{reglages.mot_partie.pluriel}</span>
       </h1>
       <p className="mt-2 text-texte-doux">
         Ils s'ouvrent au fil de ton accompagnement. Un à la fois, dans l'ordre.
@@ -34,6 +36,7 @@ export default async function PagePiliers() {
       <div className="mt-8 grid gap-5 md:grid-cols-2">
         {piliers.map((pilier) => (
           <CartePilier
+            mot={reglages.mot_partie.singulier}
             key={pilier.id}
             pilier={pilier}
             etat={etatPilier(dates.get(pilier.id) ?? null, aujourdhui)}

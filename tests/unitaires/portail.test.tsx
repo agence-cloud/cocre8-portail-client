@@ -46,7 +46,7 @@ describe("CartePilier", () => {
 
   it("mène au pilier quand il est ouvert", () => {
     render(
-      <CartePilier pilier={pilier} etat={{ statut: "ouvert" }} progression={40} />,
+      <CartePilier pilier={pilier} etat={{ statut: "ouvert" }} progression={40} mot="module" />,
     );
     expect(screen.getByRole("link")).toHaveAttribute("href", "/espace/piliers/2");
   });
@@ -54,6 +54,7 @@ describe("CartePilier", () => {
   it("affiche la date et la phrase quand il est à venir", () => {
     render(
       <CartePilier
+        mot="module"
         pilier={pilier}
         etat={{ statut: "a_venir", date: "2026-10-01" }}
         progression={0}
@@ -79,7 +80,7 @@ describe("CartePilier, son bandeau", () => {
     // uns des autres. Compter les tracés est la seule façon de le vérifier,
     // une icône décorative n'ayant ni texte ni rôle accessible.
     const { container } = render(
-      <CartePilier pilier={pilier} etat={{ statut: "ouvert" }} progression={40} />,
+      <CartePilier pilier={pilier} etat={{ statut: "ouvert" }} progression={40} mot="module" />,
     );
 
     expect(container.querySelectorAll("svg")).toHaveLength(2);
@@ -88,6 +89,7 @@ describe("CartePilier, son bandeau", () => {
   it("ajoute le cadenas quand le pilier n'est pas ouvert", () => {
     const { container } = render(
       <CartePilier
+        mot="module"
         pilier={pilier}
         etat={{ statut: "a_venir", date: "2026-10-01" }}
         progression={0}

@@ -9,6 +9,7 @@ import { lireProchainsCoachings } from "@/lib/coaching/requetes";
 import { lireTaches } from "@/modules/portail/requetes";
 import { joindreLeCoach } from "@/modules/portail/coach";
 import { lireReglages } from "@/lib/reglages/requetes";
+import { majuscule } from "@/lib/reglages/types";
 import {
   progression,
   progressionPilier,
@@ -98,7 +99,7 @@ export default async function AccueilEspace() {
         />
         <CarteStat
           icone="piliers"
-          libelle="Piliers ouverts"
+          libelle={`${majuscule(reglages.mot_partie.pluriel)} ouverts`}
           valeur={ouverts.size}
           detail={`Sur les ${piliers.length} du parcours`}
         />
@@ -123,7 +124,7 @@ export default async function AccueilEspace() {
               <>
                 <div className="flex items-baseline justify-between gap-4">
                   <div>
-                    <MicroLibelle>Ton pilier en cours</MicroLibelle>
+                    <MicroLibelle>Ton {reglages.mot_partie.singulier} en cours</MicroLibelle>
                     <h2 className="mt-2 text-[28px] tracking-[-0.035em] lg:text-[32px]">
                       {courant.numero}. {courant.nom}
                     </h2>
@@ -141,7 +142,7 @@ export default async function AccueilEspace() {
                 <MicroLibelle className="mt-8">
                   {restantes.length > 0
                     ? "Tes prochaines étapes"
-                    : "Tout est fait sur ce pilier"}
+                    : `Tout est fait sur ce ${reglages.mot_partie.singulier}`}
                 </MicroLibelle>
                 <div className="mt-2 divide-y divide-bordure">
                   {restantes.slice(0, 3).map((tache) => (
@@ -184,7 +185,7 @@ export default async function AccueilEspace() {
               <Anneau pourcentage={progression(taches, ouverts)} />
             </div>
             <p className="mt-4 text-sm text-texte-doux">
-              Sur tes piliers ouverts
+              Sur tes {reglages.mot_partie.pluriel} ouverts
             </p>
           </Carte>
 
@@ -235,7 +236,7 @@ export default async function AccueilEspace() {
                 </a>
               )}
               <Link href="/espace/piliers" className={LIGNE_ACCES}>
-                <span className="flex-1">Tes piliers</span>
+                <span className="flex-1">Tes {reglages.mot_partie.pluriel}</span>
                 <span aria-hidden="true" className={CHEVRON}>
                   ↗
                 </span>

@@ -48,9 +48,16 @@ manipuler.
 ## Ce qui se règle, et ce qui ne se règle pas
 
 **Se règle, depuis l'app, sans toucher au code :** le nom du programme, le mot
-employé pour les grandes parties de l'accompagnement, le nom et le numéro du
-coach, les liens externes. Viendront s'y ajouter les parties elles-mêmes, les
-questions du profil et les tâches modèles.
+employé pour les grandes parties de l'accompagnement, ces parties elles-mêmes,
+les questions d'accueil, les tâches du parcours type, le nom et le numéro du
+coach, les liens externes.
+
+**Deux suppressions sont refusées, et le message dit quoi faire à la place :**
+retirer une partie où un client a déjà coché une tâche (la base efface en
+cascade, sa progression disparaîtrait), et retirer une question déjà répondue
+(on la décoche pour ne plus la poser, ce qui garde les réponses). Une tâche du
+parcours type se retire librement : les tâches des clients en sont des copies,
+et c'est pour ça que la copie existe.
 
 Les réglages vivent dans la table `reglage`, en clé-valeur, et
 `lib/reglages/types.ts` porte leur forme et leurs valeurs par défaut. **Une

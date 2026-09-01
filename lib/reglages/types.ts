@@ -90,3 +90,15 @@ export function composerReglages(lignes: { cle: string; valeur: unknown }[]): Re
 export function motPartie(reglages: Reglages, nombre: number): string {
   return nombre > 1 ? reglages.mot_partie.pluriel : reglages.mot_partie.singulier;
 }
+
+/**
+ * Le mot en tête de phrase.
+ *
+ * Le coach saisit son mot en minuscules, et l'app en a besoin des deux
+ * façons : « Tes modules » en titre, « ce module » au fil du texte. Une
+ * fonction plutôt que deux réglages, pour la raison habituelle : deux
+ * chaînes saisies à la main finissent par ne plus dire la même chose.
+ */
+export function majuscule(mot: string): string {
+  return mot.charAt(0).toUpperCase() + mot.slice(1);
+}

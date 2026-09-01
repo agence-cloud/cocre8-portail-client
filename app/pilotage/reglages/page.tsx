@@ -1,12 +1,25 @@
 import { exigerAdmin } from "@/lib/auth/compte";
 import { lireReglages } from "@/lib/reglages/requetes";
+import { lirePiliers } from "@/lib/pilier/requetes";
+import { lireToutesLesQuestions } from "@/lib/profil/requetes";
+import { lireTachesModeles } from "@/lib/parcours/requetes";
 import { Reglages } from "@/modules/portail/Reglages";
+import {
+  ReglagesParties,
+  ReglagesQuestions,
+  ReglagesTaches,
+} from "@/modules/portail/ReglagesReferentiel";
 
 export default async function PageReglages() {
   // Chaque page se garde elle-même, le layout ne suffit pas.
   await exigerAdmin();
 
-  const reglages = await lireReglages();
+  const [reglages, piliers, questions, taches] = await Promise.all([
+    lireReglages(),
+    lirePiliers(),
+    lireToutesLesQuestions(),
+    lireTachesModeles(),
+  ]);
 
   return (
     <>
@@ -19,6 +32,13 @@ export default async function PageReglages() {
 
       <div className="mt-8 max-w-2xl">
         <Reglages reglages={reglages} />
+        <ReglagesParties
+          piliers={piliers}
+          motSingulier={reglages.mot_partie.singulier}
+          motPluriel={reglages.mot_partie.pluriel}
+        />
+        <ReglagesQuestions questions={questions} />
+        <ReglagesTaches taches={taches} piliers={piliers} mot={reglages.mot_partie.singulier} />
       </div>
     </>
   );

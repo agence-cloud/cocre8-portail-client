@@ -6,6 +6,8 @@ import type { EtatPilier } from "@/lib/pilier/etat";
 
 type Props = {
   pilier: Pilier;
+  /** Le mot du coach au singulier, pour la phrase du cadenas. */
+  mot: string;
   etat: EtatPilier;
   progression: number;
 };
@@ -51,7 +53,7 @@ function Bandeau({ pilier, ouvert }: { pilier: Pilier; ouvert: boolean }) {
  * attend le membre donne envie, le cacher ne raconte rien. Le cadenas est
  * accompagné d'une phrase qui explique l'attente et enseigne la méthode.
  */
-export function CartePilier({ pilier, etat, progression }: Props) {
+export function CartePilier({ pilier, etat, progression, mot }: Props) {
   if (etat.statut !== "ouvert") {
     const date = etat.statut === "a_venir" ? etat.date : null;
 
@@ -64,7 +66,7 @@ export function CartePilier({ pilier, etat, progression }: Props) {
             {pilier.numero}. {pilier.nom}
           </h2>
           <p className="mt-2 text-sm text-texte-doux">
-            {phraseCadenas(pilier.numero, date)}
+            {phraseCadenas(date, mot)}
           </p>
         </div>
       </Carte>

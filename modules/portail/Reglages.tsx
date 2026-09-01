@@ -5,14 +5,11 @@ import { Bouton } from "@/lib/design/Bouton";
 import { BoutonStylo } from "@/lib/design/BoutonStylo";
 import { Carte } from "@/lib/design/Carte";
 import { MicroLibelle } from "@/lib/design/MicroLibelle";
+import { CHAMP, ETIQUETTE } from "@/lib/design/champs";
 import { enregistrerLesReglages, type EtatReglages } from "@/modules/portail/actions-reglages";
 import type { Reglages as TypeReglages } from "@/lib/reglages/types";
 
 const INITIAL: EtatReglages = { erreur: null, enregistre: false };
-
-const ETIQUETTE = "mb-1.5 block text-[13px] text-texte-doux";
-const CHAMP =
-  "w-full rounded-xl border-[1.5px] border-bordure bg-fond px-4 py-3 text-[15px] outline-none transition-colors duration-200 focus:border-orange";
 
 /**
  * Les réglages de l'outil : ce que le coach change pour se l'approprier.

@@ -19,7 +19,7 @@ const INITIAL: EtatConnexion = { erreur: null };
  * inventaire qu'on survole.
  */
 const CE_QUI_ATTEND = [
-  "Tes piliers, tes tâches et ta progression",
+  "Ton programme, tes tâches et ta progression",
   "Tes coachings, leurs enregistrements et leurs résumés",
   "Tes documents et ceux de ton coach",
 ];

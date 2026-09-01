@@ -182,7 +182,7 @@ racine rend toute l'app dynamique, y compris l'écran de connexion qui était
 figé à la construction. Une requête légère de plus sur une page publique,
 contre un logotype qui dit le bon nom partout.
 
-### Tâche 6 : l'écran de réglages, à moitié faite le 2026-09-01
+### Tâche 6 : l'écran de réglages, faite le 2026-09-01
 
 **Fichiers :** `app/pilotage/reglages/page.tsx`, `modules/portail/Reglages.tsx`,
 `modules/portail/actions-reglages.ts`, `app/pilotage/layout.tsx`.
@@ -192,31 +192,53 @@ contre un logotype qui dit le bon nom partout.
 - [x] Les valeurs simples : nom du programme, mot des parties, nom et
       téléphone du coach, trois liens externes.
 - [x] Le lien « Réglages » dans la barre du coach.
-- [ ] Les parties : nom, description, ordre, ajouter, retirer. **Retirer une
-      partie qui porte des tâches déjà cochées doit être refusé**, pas caché :
-      la progression d'un client en dépend.
-- [ ] Les questions du profil. Désactiver plutôt que supprimer quand une
-      réponse existe.
-- [ ] Les tâches modèles, par partie.
+- [x] Les parties : nom, description, ordre, ajouter, retirer. **Retirer une
+      partie où un client a déjà coché une tâche est refusé**, avec le nom de
+      la partie dans le message : la base efface en cascade, et la progression
+      de ce client disparaîtrait sans qu'il comprenne pourquoi.
+- [x] Les questions du profil. **Une question déjà répondue ne se retire
+      pas**, le message renvoie vers la case « Posée », qui la retire des
+      formulaires à venir sans effacer les réponses.
+- [x] Les tâches modèles, avec leur partie et leur section. **Aucune garde
+      ici, volontairement** : une tâche modèle est un patron, les tâches des
+      clients en sont des copies, et c'est exactement pour ça que la copie
+      existe.
 
-Les trois listes restantes sont des écrans à part entière : les mettre dans le
-même formulaire ferait un mur, et chacune a sa règle de suppression.
+Trois cartes et non un formulaire : elles n'ont ni la même longueur ni les
+mêmes règles, et un seul « Enregistrer » obligerait à tout revalider pour
+corriger un titre.
 
-### Tâche 7 : le mot « partie » s'affiche partout depuis le réglage
+**Chaque liste s'envoie en JSON dans un champ caché.** Des noms de champs
+indexés se seraient décalés au premier retrait de ligne.
+
+**La renumérotation se fait en deux passes**, et c'est éprouvé en base : le
+numéro d'une partie est unique, et une seule passe qui échange deux valeurs se
+heurte à la contrainte en cours de route. On écarte d'abord tout le monde dans
+les négatifs, où personne n'est.
+
+### Tâche 7 : le mot s'affiche partout depuis le réglage, faite le 2026-09-01
 
 **Fichiers :** les écrans de `app/espace/piliers/`, `modules/portail/CartePilier.tsx`,
 `CalendrierPiliers.tsx`, `SectionTaches.tsx`, `app/espace/layout.tsx`.
 
-- [ ] Remplacer les occurrences visibles de « pilier » et « piliers ». **Ni
-      les noms de tables, ni les routes, ni les variables** : `pilier` reste
-      `pilier` dans le code et dans l'URL.
-- [ ] Un test unitaire sur la fonction qui accorde le mot, pour que « Ton
-      module 2 » et « Tes modules » sortent d'une seule écriture.
-- [ ] **Les quatre icônes de partie sont taillées pour une méthode qui n'est
-      plus là** (un temple, un colis, un aimant). Et elles ne passent pas à
-      l'échelle : le nombre de parties est réglable, donc une cinquième partie
-      n'aurait pas d'icône. Les remplacer par un jeu qui ne dépend pas du
-      nombre.
+- [x] Les occurrences visibles de « pilier » et « piliers » viennent du
+      réglage. **Ni les noms de tables, ni les routes, ni les variables** :
+      `pilier` reste `pilier` dans le code et dans l'URL.
+- [x] `motPartie` et `majuscule` accordent le mot depuis une seule écriture,
+      pour que « Ton module 2 » et « Tes modules » ne divergent pas.
+- [x] `iconePilier` parcourt les glyphes en boucle : une sixième partie a une
+      icône plutôt qu'un trou.
+
+**Les écrans d'authentification ont perdu le mot plutôt que de le lire.** Ils
+s'affichent avant toute session, et le réglage n'est pas lisible là : leur
+phrase dit « Ton programme, tes tâches et ta progression ». Une valeur de plus
+ouverte aux anonymes pour une puce de liste aurait été un mauvais échange.
+
+**Les icônes restent décoratives, et c'est un reste.** Elles ont été dessinées
+pour une méthode précise, où la deuxième partie parlait de livraison. Aucun
+dessin ne peut plus dire ce qu'une partie contient, puisqu'elle se nomme
+depuis les réglages. Un jeu neutre reste à dessiner, c'est du travail de
+design et non de code.
 
 ---
 

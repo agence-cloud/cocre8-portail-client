@@ -26,6 +26,7 @@ import { ListeDocuments } from "@/modules/portail/ListeDocuments";
 import { DepotDocument } from "@/modules/portail/DepotDocument";
 import { Carte } from "@/lib/design/Carte";
 import { nomComplet } from "@/lib/personne/types";
+import { lireReglages } from "@/lib/reglages/requetes";
 
 export default async function SuiviMembre({
   params,
@@ -82,6 +83,7 @@ export default async function SuiviMembre({
     ),
   );
 
+  const reglages = await lireReglages();
   const nom = nomComplet(personne);
   const valeurs = new Map(reponses.map((r) => [r.question_id, r.reponse]));
 
@@ -115,11 +117,11 @@ export default async function SuiviMembre({
       {courant && (
         <div className="mt-6">
           <h2 className="text-lg">
-            Où il en est : pilier {courant.numero}, {courant.nom} (
+            Où il en est : {reglages.mot_partie.singulier} {courant.numero}, {courant.nom} (
             {progressionPilier(taches, courant.id)} %)
           </h2>
           <p className="mt-1 text-sm text-texte-doux">
-            Seul le pilier en cours est déroulé ici. Les autres se lisent dans
+            Seul le {reglages.mot_partie.singulier} en cours est déroulé ici. Les autres se lisent dans
             le calendrier ci-dessus.
           </p>
           {sections.map((section) => (

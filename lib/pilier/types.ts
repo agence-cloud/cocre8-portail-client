@@ -20,20 +20,31 @@ export type AccesPilier = {
  *
  * Une seule phrase pour toutes les parties, et non une par numéro : leurs
  * noms se règlent depuis l'app, donc une phrase écrite pour « la partie 2 »
- * serait fausse dès que quelqu'un renomme la sienne.
+ * serait fausse dès que quelqu'un renomme la sienne. Le mot lui-même est un
+ * réglage, il arrive donc en paramètre.
  */
-export function phraseCadenas(_numero: number, date: string | null): string {
-  if (!date) return "Cette partie n'est pas encore programmée, ton coach s'en occupe.";
+export function phraseCadenas(date: string | null, mot: string): string {
+  if (!date) return `Ce ${mot} n'est pas encore programmé, ton coach s'en occupe.`;
 
-  return `Elle s'ouvre le ${formaterJourMois(date)}.`;
+  return `Il s'ouvre le ${formaterJourMois(date)}.`;
 }
 
+/** Les cinq glyphes dessinés, parcourus en boucle. */
+const GLYPHES = 5;
+
 /**
- * Le numéro décide de l'icône. Une partie hors des cinq dessinées retombe sur
- * la première plutôt que de casser l'écran : le nombre de parties se règle
- * depuis l'app, il peut donc grandir avant que quelqu'un pense à dessiner.
+ * L'icône d'une partie.
+ *
+ * **Elle est décorative, et c'est le changement.** Les glyphes ont été
+ * dessinés pour une méthode précise, où le deuxième pilier parlait de
+ * livraison et le troisième d'acquisition. Ici les parties se nomment et se
+ * comptent depuis les réglages : aucun dessin ne peut plus dire ce qu'elles
+ * contiennent, et c'est le numéro affiché à côté du nom qui les distingue.
+ *
+ * Le tour de boucle sert donc à une seule chose : qu'une sixième partie ait
+ * une icône plutôt qu'un trou. Un jeu neutre reste à dessiner.
  */
 export function iconePilier(numero: number): NomIcone {
-  const nom = `pilier-${numero}` as NomIcone;
-  return numero >= 0 && numero <= 4 ? nom : ("pilier-0" as NomIcone);
+  const rang = ((numero % GLYPHES) + GLYPHES) % GLYPHES;
+  return `pilier-${rang}` as NomIcone;
 }
