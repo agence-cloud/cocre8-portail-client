@@ -31,7 +31,7 @@ pas d'écran de réglages.
 Rien ne peut être vérifié tant que la base n'existe pas. C'est donc le premier
 bloc, et le plus mécanique.
 
-### Tâche 1 : `install.sql` — **faite le 2026-09-01**
+### Tâche 1 : `install.sql`, faite le 2026-09-01
 
 **Fichiers :** `install.sql`, `lib/personne/types.ts`, `lib/personne/requetes.ts`,
 `lib/auth/creation.ts`, `lib/pilier/etat.ts`, `lib/pilier/types.ts`.
@@ -70,7 +70,7 @@ où quelqu'un veut un client typé.
 réserver aucune. La partie d'onboarding qui s'ouvrait le jour même et la
 partie 4 débloquée à la main étaient deux règles d'une méthode précise.
 
-### Tâche 2 : la frontière de confidentialité, éprouvée — **déjà couverte**
+### Tâche 2 : la frontière de confidentialité, déjà couverte
 
 **Fichier :** `tests/integration/coaching.test.ts`, venu avec la copie.
 
