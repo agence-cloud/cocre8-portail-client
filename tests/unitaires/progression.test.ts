@@ -123,19 +123,19 @@ describe("progressionPilier", () => {
 
 describe("pilierEnCours", () => {
   const piliers: Pilier[] = [
-    { id: "pilier-0", numero: 0, nom: "Commence ici", description: null, ordre: 0 },
     { id: "pilier-1", numero: 1, nom: "Clarté", description: null, ordre: 1 },
     { id: "pilier-2", numero: 2, nom: "Plan", description: null, ordre: 2 },
+    { id: "pilier-3", numero: 3, nom: "Action", description: null, ordre: 3 },
   ];
 
   it("prend le pilier ouvert le plus bas qui n'est pas fini", () => {
     const courant = pilierEnCours(
       piliers,
       [
-        tache({ id: "a", pilier_id: "pilier-0", faite: true }),
+        tache({ id: "a", pilier_id: "pilier-1", faite: true }),
         tache({ id: "b", pilier_id: "pilier-1" }),
       ],
-      new Set(["pilier-0", "pilier-1"]),
+      new Set(["pilier-1", "pilier-2"]),
     );
 
     expect(courant?.numero).toBe(1);
@@ -145,10 +145,10 @@ describe("pilierEnCours", () => {
     const courant = pilierEnCours(
       piliers,
       [
-        tache({ id: "a", pilier_id: "pilier-0", faite: true }),
+        tache({ id: "a", pilier_id: "pilier-1", faite: true }),
         tache({ id: "b", pilier_id: "pilier-1", faite: true }),
       ],
-      new Set(["pilier-0", "pilier-1"]),
+      new Set(["pilier-1", "pilier-2"]),
     );
 
     expect(courant?.numero).toBe(1);

@@ -15,33 +15,23 @@ export type AccesPilier = {
 };
 
 /**
- * Un pilier fermé n'affiche pas un cadenas muet mais une phrase qui explique
- * l'attente et enseigne la méthode au passage. Écrites une fois ici, la date
- * s'y insère au rendu.
+ * Un pilier fermé n'affiche pas un cadenas muet mais une phrase qui dit
+ * l'attente.
+ *
+ * Une seule phrase pour toutes les parties, et non une par numéro : leurs
+ * noms se règlent depuis l'app, donc une phrase écrite pour « la partie 2 »
+ * serait fausse dès que quelqu'un renomme la sienne.
  */
-const PHRASES: Record<number, string> = {
-  1: "Ton accompagnement démarre le {date}. D'ici là, boucle Commence ici, tu arriveras prêt.",
-  2: "Le cœur de la méthode. Il s'ouvre le {date}, une fois tes fondations posées.",
-  3: "On remet du carburant le {date}. Pas avant : un tunnel qui remplit une bassine percée, c'est de l'argent jeté.",
-  4: "Il se débloque quand tes chiffres sont au vert, ton coach t'ouvrira la porte.",
-};
+export function phraseCadenas(_numero: number, date: string | null): string {
+  if (!date) return "Cette partie n'est pas encore programmée, ton coach s'en occupe.";
 
-export function phraseCadenas(numero: number, date: string | null): string {
-  // Le pilier 4 se débloque à la main, jamais par le calendrier : lui poser
-  // une date serait un mensonge.
-  if (numero === 4) return PHRASES[4];
-
-  const phrase = PHRASES[numero];
-  if (!phrase) return "Ton coach ne l'a pas encore programmé.";
-  if (!date) return "Ce pilier n'est pas encore programmé, ton coach s'en occupe.";
-
-  return phrase.replace("{date}", formaterJourMois(date));
+  return `Elle s'ouvre le ${formaterJourMois(date)}.`;
 }
 
 /**
- * Le numéro décide de l'icône. Un pilier hors des cinq connus retombe sur
- * celle du départ plutôt que de casser l'écran : le référentiel peut
- * grandir avant que quelqu'un pense à dessiner.
+ * Le numéro décide de l'icône. Une partie hors des cinq dessinées retombe sur
+ * la première plutôt que de casser l'écran : le nombre de parties se règle
+ * depuis l'app, il peut donc grandir avant que quelqu'un pense à dessiner.
  */
 export function iconePilier(numero: number): NomIcone {
   const nom = `pilier-${numero}` as NomIcone;

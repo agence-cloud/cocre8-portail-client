@@ -50,7 +50,7 @@ describe("les coachings que le membre peut lire", () => {
 
     const { data: autre } = await admin
       .from("personne")
-      .insert({ nom: `Coaching ${Date.now()}`, etape: "client" })
+      .insert({ nom: `Coaching ${Date.now()}` })
       .select("id")
       .single();
     autrePersonne = autre!.id;

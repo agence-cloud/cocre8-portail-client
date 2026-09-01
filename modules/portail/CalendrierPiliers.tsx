@@ -37,11 +37,10 @@ export function CalendrierPiliers({
 
   return (
     <Carte className="mt-6">
-      <h2 className="text-lg">Son calendrier de piliers</h2>
+      <h2 className="text-lg">Son calendrier</h2>
       <p className="mt-2 text-sm text-texte-doux">
-        Le pilier 0 s'ouvre le jour où tu génères le calendrier, pour qu'il
-        fasse son onboarding sans attendre. Les trois suivants suivent la date
-        de démarrage, à un mois d'intervalle.
+        La première partie s'ouvre à la date de démarrage, puis une par mois.
+        C'est une proposition : corrige chaque date à la main en dessous.
       </p>
 
       <div className="mt-4 flex flex-wrap items-center gap-3">

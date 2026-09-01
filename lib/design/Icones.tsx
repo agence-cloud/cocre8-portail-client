@@ -168,7 +168,8 @@ const CHEMINS: Record<Nom, React.ReactNode> = {
       <path d="M5.5 15l3.5 3.5" />
     </>
   ),
-  // Pilier 0, Commence ici : un drapeau planté, le point de départ.
+  // L'icône de repli, servie à toute partie sans dessin : un drapeau
+  // planté, le point de départ.
   "pilier-0": (
     <>
       <path d="M6 21V4.5" />

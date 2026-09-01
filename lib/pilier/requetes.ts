@@ -1,7 +1,7 @@
 import { creerClientServeur } from "@/lib/supabase/serveur";
 import type { Pilier, AccesPilier } from "@/lib/pilier/types";
 
-/** Le référentiel, du pilier 0 au pilier 4. Lisible par tout compte connecté. */
+/** Les parties du parcours, dans l'ordre. Lisibles par tout compte connecté. */
 export async function lirePiliers(): Promise<Pilier[]> {
   const supabase = await creerClientServeur();
   const { data, error } = await supabase

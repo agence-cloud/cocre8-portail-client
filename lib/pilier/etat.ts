@@ -35,22 +35,18 @@ function ajouterMois(iso: string, mois: number): string {
 }
 
 /**
- * Le calendrier type d'un accompagnement.
+ * Le calendrier type d'un accompagnement : la première partie au démarrage,
+ * puis une par mois.
  *
- * Le pilier 0 ne suit pas la date de démarrage : il s'ouvre le jour même.
- * Un membre qui signe le 28 août pour une cohorte qui démarre le 1er
- * septembre fait son onboarding dans la foulée au lieu d'attendre quatre
- * jours devant un espace vide. Le pilier 4 n'est jamais proposé, il se
- * débloque à la main.
+ * Une proposition, pas une règle. Le coach corrige chaque date à la main sur
+ * l'écran de suivi, et c'est le cas courant : tous les accompagnements ne
+ * durent pas quatre mois.
  */
-export function calendrierPropose(
-  demarrage: string,
-  aujourdhui: Date,
-): { numero: number; date: string }[] {
+export function calendrierPropose(demarrage: string): { numero: number; date: string }[] {
   return [
-    { numero: 0, date: jourISO(aujourdhui) },
     { numero: 1, date: demarrage },
     { numero: 2, date: ajouterMois(demarrage, 1) },
     { numero: 3, date: ajouterMois(demarrage, 2) },
+    { numero: 4, date: ajouterMois(demarrage, 3) },
   ];
 }

@@ -25,6 +25,7 @@ import { CaseTache } from "@/modules/portail/CaseTache";
 import { ListeDocuments } from "@/modules/portail/ListeDocuments";
 import { DepotDocument } from "@/modules/portail/DepotDocument";
 import { Carte } from "@/lib/design/Carte";
+import { nomComplet } from "@/lib/personne/types";
 
 export default async function SuiviMembre({
   params,
@@ -81,7 +82,7 @@ export default async function SuiviMembre({
     ),
   );
 
-  const nomComplet = [personne.prenom, personne.nom].filter(Boolean).join(" ");
+  const nom = nomComplet(personne);
   const valeurs = new Map(reponses.map((r) => [r.question_id, r.reponse]));
 
   return (
@@ -92,7 +93,7 @@ export default async function SuiviMembre({
 
       <div className="mt-4 flex items-start justify-between gap-6">
         <div>
-          <h1 className="text-4xl">{nomComplet}</h1>
+          <h1 className="text-4xl">{nom}</h1>
           <p className="mt-2 text-texte-doux">
             {accompagnements.length > 0
               ? accompagnements.map((a) => a.offre?.nom).filter(Boolean).join(", ")

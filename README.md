@@ -29,10 +29,10 @@ Quatre étapes, une vingtaine de minutes, aucune ligne de commande.
 4. **Regarde-le vivre.** Charge le jeu de démonstration depuis les réglages,
    promène-toi dedans, puis vide-le et ajoute ton premier vrai client.
 
-> **En chantier.** Les étapes 2 à 4 ne sont pas encore prêtes : le fichier
-> `install.sql`, l'écran de première mise en service et les réglages sont les
-> premières tâches de `docs/plans/`. En l'état, le dépôt compile et ses tests
-> unitaires passent, mais il ne se déploie pas encore tout seul.
+> **En chantier.** L'étape 2 est prête, `install.sql` est là. Les étapes 3 et
+> 4 ne le sont pas : l'écran de première mise en service et les réglages sont
+> les prochaines tâches de `docs/plans/`. En attendant, le premier compte se
+> crée à la main depuis le tableau de bord Supabase.
 
 ## Le régler
 

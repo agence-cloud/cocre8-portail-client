@@ -3,6 +3,7 @@ import "server-only";
 import { createClient } from "@supabase/supabase-js";
 import { lireConfigSupabase } from "@/lib/supabase/config";
 import { clienteDeService } from "@/lib/supabase/service";
+import { nomComplet } from "@/lib/personne/types";
 
 /**
  * Le seul endroit du dépôt où la clé de service est lue.
@@ -24,9 +25,11 @@ import { clienteDeService } from "@/lib/supabase/service";
  * 2. **Il ne sait créer qu'un membre.** Jamais d'admin, jamais de
  *    suppression, jamais de modification d'un compte existant. Une clé qui
  *    peut tout ne doit servir qu'à une chose.
- * 3. **Il refuse une fiche qui n'est pas cliente**, et ne fait rien si un
- *    compte existe déjà. Rejouable sans dégât : une bascule relancée ne crée
- *    pas un second compte.
+ * 3. **Il refuse une fiche sans accompagnement**, et ne fait rien si un
+ *    compte existe déjà. C'est l'accompagnement qui fait d'une fiche un
+ *    client : sans lui, un contact ajouté pour mémoire recevrait un accès à
+ *    un espace qui n'a rien à lui montrer. Rejouable sans dégât : relancer
+ *    ne crée pas un second compte.
  *
  * **Rien ne part d'ici.** L'utilisateur est créé déjà confirmé, avec un mot
  * de passe aléatoire que personne ne connaîtra jamais, et Supabase n'envoie
@@ -45,12 +48,12 @@ export type ResultatCreation =
   | { fait: "impossible"; pourquoi: string };
 
 /**
- * Crée le compte membre d'une fiche devenue cliente.
+ * Crée le compte de connexion d'un client.
  *
- * Ne lève pas quand elle ne peut pas : elle renvoie pourquoi. La bascule en
- * client ne doit pas se défaire parce qu'une fiche n'a pas d'email, sinon on
- * perdrait la partie qui a marché (l'étape, le prix figé) pour une raison
- * qui se corrige en dix secondes.
+ * Ne lève pas quand elle ne peut pas : elle renvoie pourquoi. L'ajout d'un
+ * client ne doit pas se défaire parce que sa fiche n'a pas d'email, sinon on
+ * perdrait la partie qui a marché (la fiche, son accompagnement, son
+ * parcours) pour une raison qui se corrige en dix secondes.
  */
 export async function creerLeCompteDuMembre(
   personneId: string,
@@ -59,15 +62,21 @@ export async function creerLeCompteDuMembre(
 
   const { data: personne, error: erreurFiche } = await service
     .from("personne")
-    .select("id, nom, prenom, email, etape")
+    .select("id, nom, prenom, email, accompagnement (id)")
     .eq("id", personneId)
     .maybeSingle();
 
   if (erreurFiche) return { fait: "impossible", pourquoi: erreurFiche.message };
   if (!personne) return { fait: "impossible", pourquoi: "Cette fiche n'existe plus." };
 
-  if (personne.etape !== "client") {
-    return { fait: "impossible", pourquoi: "Cette fiche n'est pas cliente." };
+  // Un accompagnement, et non un drapeau posé sur la fiche : c'est lui qui
+  // fait d'une fiche un client. Sans cette garde, un contact ajouté pour
+  // mémoire recevrait un accès à un espace qui n'a rien à lui montrer.
+  if ((personne.accompagnement ?? []).length === 0) {
+    return {
+      fait: "impossible",
+      pourquoi: "Cette fiche n'a pas d'accompagnement. Ajoute-lui son offre, puis renvoie ses accès.",
+    };
   }
 
   if (!personne.email) {
@@ -105,13 +114,13 @@ export async function creerLeCompteDuMembre(
     return { fait: "impossible", pourquoi: erreurUtilisateur.message };
   }
 
-  const nomComplet = [personne.prenom, personne.nom].filter(Boolean).join(" ");
+  const nom = nomComplet(personne);
 
   const { error: erreurCompte } = await service.from("compte").insert({
     id: utilisateur.user.id,
     role: "membre",
     personne_id: personneId,
-    nom: nomComplet,
+    nom,
   });
 
   if (erreurCompte) {
@@ -146,14 +155,14 @@ export async function envoyerLesAcces(
 
   const { data: personne, error } = await service
     .from("personne")
-    .select("email, etape")
+    .select("email, accompagnement (id)")
     .eq("id", personneId)
     .maybeSingle();
 
   if (error) return { envoye: false, pourquoi: error.message };
   if (!personne) return { envoye: false, pourquoi: "Cette fiche n'existe plus." };
-  if (personne.etape !== "client") {
-    return { envoye: false, pourquoi: "Cette fiche n'est pas cliente." };
+  if ((personne.accompagnement ?? []).length === 0) {
+    return { envoye: false, pourquoi: "Cette fiche n'a pas d'accompagnement." };
   }
   if (!personne.email) {
     return { envoye: false, pourquoi: "Cette fiche n'a pas d'email." };

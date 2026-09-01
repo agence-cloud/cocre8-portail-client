@@ -64,9 +64,15 @@ surtout rien qu'un numéro qui appartient à quelqu'un d'autre.
 
 ## Où en est le dépôt
 
-**Le code compile et les tests unitaires passent. Rien ne se déploie encore.**
-Il manque le schéma de la base, la première mise en service et l'écran de
-réglages : ce sont les premières tâches de `docs/plans/`.
+**Le code compile, les tests unitaires passent, et le schéma existe**
+(`install.sql`, à coller dans l'éditeur SQL de Supabase). Il manque la
+première mise en service et l'écran de réglages : ce sont les prochaines
+tâches de `docs/plans/`.
+
+**Aucun test d'intégration ni aucun parcours n'a encore tourné contre ce
+schéma.** Ils sont écrits, ils viennent de l'application d'origine, et ils
+attendent un projet Supabase. C'est la première chose à faire le jour où il
+existe, avant d'écrire quoi que ce soit de neuf.
 
 Ce qui est là : l'espace client entier (tableau de bord, profil et sa porte,
 parties et tâches, séances et comptes rendus, documents), l'écran de suivi

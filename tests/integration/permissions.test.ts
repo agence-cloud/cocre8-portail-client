@@ -81,25 +81,6 @@ describe("permissions par ligne", () => {
     expect(data![0].email).toBe(process.env.TEST_MEMBRE_EMAIL);
   });
 
-  it("un membre ne voit pas les paiements, même les siens", async () => {
-    const { data: fiche } = await membre.from("personne").select("id").single();
-    const { data: cree, error } = await admin
-      .from("paiement")
-      .insert({
-        personne_id: fiche!.id,
-        montant: 1500,
-        statut: "paye",
-        plan: 1,
-      })
-      .select()
-      .single();
-    expect(error).toBeNull();
-
-    await neVoitRien(membre.from("paiement").select("id"));
-
-    await admin.from("paiement").delete().eq("id", cree!.id);
-  });
-
   it("personne ne voit une ligne sans personne, membre compris", async () => {
     // Une ligne sans personne était lisible par tout membre connecté : c'est
     // ainsi qu'un coaching collectif atteignait tout le monde d'un coup. La
@@ -295,7 +276,7 @@ describe("permissions par ligne", () => {
     // Une fiche qui n'est pas la sienne, avec un calendrier posé dessus.
     const { data: autre } = await admin
       .from("personne")
-      .insert({ nom: `Calendrier ${Date.now()}`, etape: "client" })
+      .insert({ nom: `Calendrier ${Date.now()}` })
       .select("id")
       .single();
 

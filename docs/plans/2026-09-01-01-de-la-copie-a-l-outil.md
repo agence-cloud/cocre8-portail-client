@@ -31,35 +31,59 @@ pas d'écran de réglages.
 Rien ne peut être vérifié tant que la base n'existe pas. C'est donc le premier
 bloc, et le plus mécanique.
 
-### Tâche 1 : `install.sql`
+### Tâche 1 : `install.sql` — **faite le 2026-09-01**
 
-**Fichiers :** créer `install.sql`, regénérer `lib/supabase/types.ts`.
+**Fichiers :** `install.sql`, `lib/personne/types.ts`, `lib/personne/requetes.ts`,
+`lib/auth/creation.ts`, `lib/pilier/etat.ts`, `lib/pilier/types.ts`.
 
-- [ ] Le schéma dont le portail a besoin, **à plat** : `personne`, `compte`,
-      `offre`, `accompagnement`, `pilier`, `question_profil`,
-      `reponse_profil`, `document`, `appel`, `parcours_modele`,
-      `tache_modele`, `tache`, plus la vue `coaching_membre`.
-- [ ] Les types `enum` qui restent, **débarrassés du vocabulaire d'origine** :
-      `academie` n'a de sens pour personne ici, ni comme étape, ni comme canal,
-      ni comme chemin d'entrée.
-- [ ] Les permissions par ligne, **révoquer avant d'accorder** sur chaque
-      table et chaque vue.
-- [ ] Le jeu de départ neutre : les quatre parties (Clarté, Plan, Action,
-      Ancrage), les huit questions de profil, trois tâches par partie, trois
-      offres sans prix.
-- [ ] Regénérer les types TypeScript depuis ce schéma. Ceux qui sont là
-      viennent de l'app d'origine et décrivent encore des tables retirées.
+- [x] Le schéma à plat : `personne`, `compte`, `offre`, `accompagnement`,
+      `pilier`, `question_profil`, `reponse_profil`, `document`,
+      `acces_pilier`, `appel`, `parcours_modele`, `tache_modele`, `tache`,
+      plus la vue `coaching_membre`.
+- [x] Les permissions par ligne, révoquer avant d'accorder, et la surface RPC
+      refermée sur `PUBLIC` et non sur `anon` seul.
+- [x] Le jeu de départ neutre : quatre parties, huit questions, trois tâches
+      par partie, trois offres sans prix.
 
-### Tâche 2 : la frontière de confidentialité, éprouvée
+**Trois écarts avec ce qui était prévu, tous dans le sens du produit :**
 
-**Fichiers :** `tests/integration/coaching-etanche.test.ts`.
+**Le vocabulaire du pipe ne s'est pas allégé, il a disparu.** Le plan disait
+de retirer `academie` des `enum`. En pratique `etape`, `motif_sortie`,
+`canal`, `chemin`, les UTM, `a_relier` et `renvoye_academie` n'ont aucun sens
+dans un outil qui ne suit pas de prospects : la fiche ne garde que l'identité,
+et les quatre types `enum` correspondants ne sont pas créés. Toute fiche est
+celle d'un client.
 
-- [ ] La vue `coaching_membre` ne laisse pas passer la note interne du coach,
-      **avec témoin positif** : le client voit bien son propre coaching, sans
-      quoi l'assertion serait verte même si la vue ne rendait plus rien.
-- [ ] Une ligne sans client n'est lisible par personne.
+**La garde de `creation.ts` a changé de critère.** Elle refusait « une fiche
+qui n'est pas cliente », ce qui se lisait sur `etape`. Elle refuse maintenant
+une fiche **sans accompagnement**, ce qui est le même sens sans le pipe :
+c'est l'accompagnement qui fait d'une fiche un client.
 
-**Toute modification de cette vue doit se heurter à ce test.**
+**`lib/supabase/types.ts` a été supprimé au lieu d'être regénéré.** Personne
+ne l'importait, et il décrivait encore `lead_entrant`, `paiement` et
+`etape_pipe`. Un fichier de types que rien ne relit et qui ment sur le schéma
+vaut moins que pas de fichier. Il se regénère depuis un vrai projet le jour
+où quelqu'un veut un client typé.
+
+**Le pilier 0 n'existe plus.** Les parties sont numérotées de 1 à 4 et
+`planifier_piliers` les ouvre une par mois à partir du démarrage, sans en
+réserver aucune. La partie d'onboarding qui s'ouvrait le jour même et la
+partie 4 débloquée à la main étaient deux règles d'une méthode précise.
+
+### Tâche 2 : la frontière de confidentialité, éprouvée — **déjà couverte**
+
+**Fichier :** `tests/integration/coaching.test.ts`, venu avec la copie.
+
+Il porte déjà les cinq assertions qui comptent, témoin positif compris : le
+client lit son propre coaching, ne lit pas ses appels de vente, ne lit pas le
+coaching d'un autre, ne peut rien écrire à travers la vue (ni corriger, ni
+effacer, ni ajouter), et ne voit jamais la note interne.
+
+Rien à écrire, donc. **Mais il n'a jamais été exécuté contre ce schéma-ci**,
+et il ne le sera pas avant qu'un projet Supabase existe. C'est la première
+chose à lancer ce jour-là.
+
+**Toute modification de la vue doit se heurter à ce test.**
 
 ---
 

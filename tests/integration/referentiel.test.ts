@@ -29,7 +29,7 @@ describe("le référentiel", () => {
     const { data } = await admin.from("pilier").select("numero, nom").order("ordre");
 
     expect(data?.map((p) => p.numero)).toEqual([0, 1, 2, 3, 4]);
-    expect(data?.[0].nom).toBe("Commence ici");
+    expect(data?.[0].nom).toBe("Clarté");
   });
 
   it("pose dix questions de profil actives", async () => {
@@ -59,14 +59,14 @@ describe("le référentiel", () => {
       parPilier.set(numero, (parPilier.get(numero) ?? 0) + 1);
     }
 
-    expect(data).toHaveLength(46);
-    expect(parPilier.get(0)).toBe(4);
-    expect(parPilier.get(1)).toBe(10);
-    expect(parPilier.get(2)).toBe(16);
-    expect(parPilier.get(3)).toBe(16);
-    // Le pilier 4 reste sans parcours : il se débloque à la main, et son
-    // contenu n'est pas écrit.
-    expect(parPilier.get(4)).toBeUndefined();
+    // Le jeu de départ : trois tâches par partie, quatre parties. Ces
+    // chiffres bougeront dès qu'un coach écrira son propre parcours depuis
+    // ses réglages, et c'est bien pour ça que ce test vit ici et pas chez
+    // lui : il éprouve le jeu livré, pas le sien.
+    expect(data).toHaveLength(12);
+    for (const numero of [1, 2, 3, 4]) {
+      expect(parPilier.get(numero)).toBe(3);
+    }
   });
 
   it("range chaque tâche sous une section", async () => {
@@ -84,7 +84,7 @@ describe("les gestes de mise en service", () => {
     admin = await connecterAdmin();
     const { data } = await admin
       .from("personne")
-      .insert({ nom: `Jetable ${Date.now()}`, etape: "client" })
+      .insert({ nom: `Jetable ${Date.now()}` })
       .select("id")
       .single();
     personneId = data!.id as string;
@@ -123,20 +123,16 @@ describe("les gestes de mise en service", () => {
     expect(parNumero.get(1)).toBe("2026-01-31");
     expect(parNumero.get(2)).toBe("2026-02-28");
     expect(parNumero.get(3)).toBe("2026-03-31");
-    // Le pilier 0 s'ouvre le jour même, pas à la date de démarrage.
-    expect(parNumero.get(0)).toBe(new Date().toISOString().slice(0, 10));
-    // Le pilier 4 n'est jamais touché.
-    expect(parNumero.has(4)).toBe(false);
-
+    expect(parNumero.get(4)).toBe("2026-04-30");
     // Et le couplage : la base et l'écran calculent ces dates chacun de leur
     // côté, en SQL ici et en TypeScript dans calendrierPropose. Comparer les
     // deux aux mêmes littéraux ne suffit pas : le jour où l'un des deux
     // dérive, ce test doit rougir, sinon l'écran promet au membre une date
     // que la base ne pose pas.
     const attendu = new Map(
-      calendrierPropose("2026-01-31", new Date()).map((l) => [l.numero, l.date]),
+      calendrierPropose("2026-01-31").map((l) => [l.numero, l.date]),
     );
-    for (const numero of [0, 1, 2, 3]) {
+    for (const numero of [1, 2, 3, 4]) {
       expect(parNumero.get(numero)).toBe(attendu.get(numero));
     }
   });

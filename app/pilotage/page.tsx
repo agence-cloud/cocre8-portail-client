@@ -4,6 +4,7 @@ import { lireClients } from "@/lib/personne/requetes";
 import { Badge } from "@/lib/design/Badge";
 import { Carte } from "@/lib/design/Carte";
 import { Icone } from "@/lib/design/Icones";
+import { nomComplet } from "@/lib/personne/types";
 
 export default async function AccueilPilotage() {
   // Chaque page se garde elle-même, le layout ne suffit pas.
@@ -38,7 +39,7 @@ export default async function AccueilPilotage() {
               <span className="flex min-w-0 flex-col">
                 <span className="flex items-center gap-2">
                   <span className="text-sm font-medium transition-colors duration-200 group-hover:text-orange">
-                    {[client.prenom, client.nom].filter(Boolean).join(" ")}
+                    {nomComplet(client)}
                   </span>
                   {/* Le client du jeu de démonstration reste dans la liste,
                       sans quoi son écran de suivi deviendrait inatteignable.
