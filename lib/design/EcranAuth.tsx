@@ -168,4 +168,4 @@ export const ETIQUETTE_AUTH =
  * il gagne à être celui-là.
  */
 export const BOUTON_AUTH =
-  "group mt-7 flex w-full items-center justify-center gap-2.5 hover:-translate-y-px hover:shadow-[0_8px_20px_-6px_rgba(255,99,32,0.45)] disabled:translate-y-0 disabled:shadow-none";
+  "group mt-7 flex w-full items-center justify-center gap-2.5 hover:-translate-y-px hover:shadow-[0_8px_20px_-6px_var(--color-accent-fonce)] disabled:translate-y-0 disabled:shadow-none";

@@ -157,7 +157,7 @@ export default async function AccueilEspace() {
                 </div>
 
                 <Link href={`/espace/piliers/${courant.numero}`}>
-                  <Bouton className="group mt-6 inline-flex items-center gap-2.5 hover:-translate-y-px hover:shadow-[0_8px_20px_-6px_rgba(255,99,32,0.45)]">
+                  <Bouton className="group mt-6 inline-flex items-center gap-2.5 hover:-translate-y-px hover:shadow-[0_8px_20px_-6px_var(--color-accent-fonce)]">
                     Ouvrir le pilier
                     <span
                       aria-hidden="true"
