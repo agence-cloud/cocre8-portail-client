@@ -29,6 +29,11 @@ export const ROUTES_PUBLIQUES = [
   // installé, ce qui est le cas de toutes les installations sauf pendant
   // leurs premières minutes.
   "/installation",
+  // Le diagnostic de l'installation. Publique parce qu'elle sert justement
+  // quand personne ne peut se connecter, et qu'elle ne montre rien que le
+  // navigateur ne reçoive déjà : l'adresse du projet, et la longueur des
+  // clés, jamais leur valeur.
+  "/diagnostic",
 ];
 
 export async function rafraichirSession(requete: NextRequest) {

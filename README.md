@@ -39,6 +39,24 @@ Quatre étapes, une vingtaine de minutes, aucune ligne de commande.
    derrière toi. Charge ensuite le jeu de démonstration depuis tes réglages,
    promène-toi dedans, puis vide-le et ajoute ton premier vrai client.
 
+## Si quelque chose ne répond pas
+
+Ouvre `/diagnostic` sur ton installation, par exemple
+`https://ton-app.vercel.app/diagnostic`. La page dit l'adresse qu'elle
+interroge, si tes trois valeurs sont bien arrivées, et si ton projet Supabase
+lui répond. C'est la première chose à regarder quand la connexion refuse : une
+adresse ou une clé fausse produit exactement le même écran qu'un mot de passe
+faux.
+
+Deux pièges qui coûtent une soirée chacun :
+
+- Sur Vercel, une variable de type **Secret** n'est pas lisible pendant la
+  construction. Les deux valeurs `NEXT_PUBLIC_` doivent être de type
+  **Config**, sinon elles arrivent vides sans que rien ne le montre. Seule
+  `SUPABASE_SERVICE_ROLE_KEY` reste un Secret.
+- Une valeur corrigée ne prend effet qu'au **déploiement suivant**. Corrige,
+  puis redéploie.
+
 ## Le régler
 
 Tout se règle depuis l'app, sans toucher au code : le nom de ton programme,

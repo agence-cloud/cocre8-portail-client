@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { ROUTES_PUBLIQUES } from "@/lib/supabase/session";
 
 /**
- * Ces quatre adresses sont les seules que le proxy laisse passer sans session.
+ * Ces cinq adresses sont les seules que le proxy laisse passer sans session.
  *
  * Trois sont les écrans du chemin d'accès d'un client : `/connexion` est
  * traversé par tous, les deux autres demandent un vrai lien reçu par email.
@@ -10,6 +10,12 @@ import { ROUTES_PUBLIQUES } from "@/lib/supabase/session";
  * La quatrième est la première mise en service, traversée une seule fois dans
  * la vie de l'outil. Elle est publique par nécessité, et elle se garde
  * elle-même : elle rend un 404 dès que l'installation est faite.
+ *
+ * La cinquième est le diagnostic de l'installation. Publique par nécessité
+ * elle aussi : elle sert quand personne ne peut se connecter, et la fermer
+ * derrière une session la rendrait inutile. Elle n'affiche que l'adresse du
+ * projet, déjà recopiée dans le code envoyé au navigateur, et la longueur des
+ * clés, jamais leur valeur.
  *
  * Un test qui les nomme toutes est le seul filet qui reste. Sans lui, retirer
  * `/auth/confirmer` de la liste casserait tout le chemin d'accès d'un nouveau
@@ -22,6 +28,7 @@ describe("les adresses ouvertes sans session", () => {
       "/connexion/mot-de-passe",
       "/auth/confirmer",
       "/installation",
+      "/diagnostic",
     ]);
   });
 
