@@ -174,6 +174,15 @@ Next.js, Supabase, Tailwind. Tout le code est là, tu peux le modifier.
 
 ## Licence
 
-MIT. Fais-en ce que tu veux, y compris pour tes clients à toi.
+**Cet outil t'est donné.** Tu peux t'en servir pour ton activité, le modifier
+autant que tu veux, l'héberger sous ton nom, et le faire tourner pour tes
+propres clients. Tu n'as rien à payer et rien à demander.
+
+**La seule chose que tu ne peux pas faire, c'est le revendre**, le redonner, ou
+le proposer comme s'il était ton produit. Le texte complet est dans
+[`LICENSE`](./LICENSE), en français, et il se lit en deux minutes.
+
+Un usage qui ne rentre dans aucune case ? Écris-nous. La réponse est souvent
+oui.
 
 Édité par [Cocre8](https://cocre8.fr).

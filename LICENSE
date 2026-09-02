@@ -1,21 +1,118 @@
-MIT License
+Licence d'utilisation
+Cocre8, 2026
 
-Copyright (c) 2026 COCRE8
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+EN CLAIR, AVANT LE TEXTE EXACT
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+Cet outil t'est donné. Tu peux t'en servir pour ton activité, le modifier
+autant que tu veux, et le faire tourner pour tes propres clients. Tu n'as rien
+à payer et rien à demander.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+La seule chose que tu ne peux pas faire, c'est le revendre, le redonner, ou le
+proposer comme s'il était ton produit à toi.
+
+Le texte ci-dessous dit exactement la même chose, en plus précis. C'est lui qui
+fait foi.
+
+
+1. DÉFINITIONS
+
+« Le Logiciel » désigne le code de ce dépôt, ses fichiers de configuration, sa
+documentation, et toute version que tu en tirerais.
+
+« L'Éditeur » désigne Cocre8.
+
+« Toi » désigne la personne ou l'entreprise qui reçoit le Logiciel.
+
+
+2. CE QUE TU AS LE DROIT DE FAIRE
+
+L'Éditeur t'accorde un droit gratuit, mondial et sans limite de durée de :
+
+  a) installer et exécuter le Logiciel, y compris pour ton activité
+     professionnelle et pour en tirer un revenu ;
+
+  b) le modifier, l'adapter, le compléter, en tout ou en partie ;
+
+  c) l'héberger où tu veux, sous ton propre nom, à ton propre nom de domaine,
+     sans mention de l'Éditeur sur l'interface ;
+
+  d) donner accès à ton installation à tes propres clients, salariés,
+     associés et prestataires, dans le cadre de ton activité ;
+
+  e) confier l'installation ou la modification à un prestataire qui travaille
+     pour toi, à condition qu'il soit lui aussi tenu par cette licence.
+
+
+3. CE QUE TU N'AS PAS LE DROIT DE FAIRE
+
+Sans accord écrit préalable de l'Éditeur, tu ne peux pas :
+
+  a) vendre, louer, ou céder le Logiciel, modifié ou non, à titre gratuit ou
+     onéreux ;
+
+  b) le redistribuer, le republier, ou le mettre à disposition de tiers, sous
+     quelque forme que ce soit, y compris en dépôt public, en archive, en
+     modèle, ou en contenu offert en échange d'une adresse email ;
+
+  c) le proposer comme un produit, un service, un outil ou un modèle dont tu
+     serais l'auteur ou l'éditeur ;
+
+  d) en faire un service hébergé pour le compte de tiers, où d'autres que toi
+     et tes propres clients disposeraient de leur propre installation ;
+
+  e) retirer, masquer ou modifier la présente licence dans les copies que tu
+     conserves.
+
+Le point d) ne t'empêche pas d'installer le Logiciel pour un client que tu
+accompagnes : ce qui est interdit, c'est d'en faire une offre à part entière.
+
+
+4. CE QUI T'APPARTIENT
+
+Les modifications que tu écris t'appartiennent. Cette licence ne revendique
+rien sur ton code, tes données, tes clients ni ton contenu.
+
+Le Logiciel ne communique avec l'Éditeur d'aucune façon, et l'Éditeur n'a accès
+à rien de ce que tu y mets.
+
+
+5. FIN DE LA LICENCE
+
+Cette licence prend fin automatiquement si tu enfreins l'article 3. Elle
+reprend effet si tu corriges le manquement dans les trente jours suivant le
+moment où tu en as connaissance.
+
+La fin de la licence ne remet pas en cause ce que tu as fait légitimement
+avant.
+
+
+6. AUCUNE GARANTIE
+
+Le Logiciel est fourni « tel quel », sans garantie d'aucune sorte, expresse ou
+implicite, notamment de qualité marchande, d'adéquation à un usage particulier
+ou d'absence de contrefaçon.
+
+Tu es seul responsable de son installation, de son hébergement, de la sécurité
+de tes accès, de la sauvegarde de tes données et du respect de tes obligations,
+notamment en matière de données personnelles.
+
+
+7. AUCUNE RESPONSABILITÉ
+
+Dans la limite permise par la loi, l'Éditeur ne pourra être tenu responsable
+d'aucun dommage, direct ou indirect, résultant de l'utilisation ou de
+l'impossibilité d'utiliser le Logiciel, y compris toute perte de données, de
+chiffre d'affaires ou de clientèle.
+
+
+8. DROIT APPLICABLE
+
+La présente licence est régie par le droit français. Tout litige relève de la
+compétence des tribunaux du ressort du siège de l'Éditeur.
+
+
+---
+
+Une question sur ce que tu as le droit de faire, ou un usage qui ne rentre dans
+aucune des cases ci-dessus ? Écris à l'Éditeur. La réponse est souvent oui.
