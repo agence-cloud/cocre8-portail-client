@@ -21,17 +21,44 @@ export default defineConfig({
     },
   },
   test: {
-    environment: "jsdom",
-    setupFiles: ["./tests/setup.ts"],
-    include: ["tests/unitaires/**/*.test.{ts,tsx}", "tests/integration/**/*.test.ts"],
-    testTimeout: 20000,
-    // Les fichiers d'intégration écrivent dans la vraie base et partagent le
-    // même compte de test membre : deux fichiers ouverts en même temps
-    // finissent par se marcher dessus (un calendrier posé par l'un que
-    // l'autre efface), et la rafale de connexions par mot de passe qu'un
-    // lancement en parallèle déclenche finit par se faire refuser par
-    // Supabase. Un fichier à la fois coûte quelques secondes, contre une
-    // suite qui échoue en bloc une fois sur deux.
-    fileParallelism: false,
+    /**
+     * **Deux projets, et c'est ce qui rend `npm test` utilisable à froid.**
+     *
+     * Les unitaires ne touchent rien : ils passent sur un dépôt qu'on vient
+     * de récupérer, sans base, sans `.env.local`, sans compte. C'est eux que
+     * `npm test` lance.
+     *
+     * Les tests d'intégration se connectent pour de vrai à un projet
+     * Supabase et y écrivent. Ils ont donc leur propre commande,
+     * `npm run test:integration` : les mêler aux autres faisait échouer
+     * cinq fichiers sur une installation neuve, pour la seule raison
+     * qu'aucune base n'existait encore.
+     */
+    projects: [
+      {
+        extends: true,
+        test: {
+          name: "unitaires",
+          environment: "jsdom",
+          setupFiles: ["./tests/setup.ts"],
+          include: ["tests/unitaires/**/*.test.{ts,tsx}"],
+        },
+      },
+      {
+        extends: true,
+        test: {
+          name: "integration",
+          environment: "node",
+          include: ["tests/integration/**/*.test.ts"],
+          testTimeout: 20000,
+          // Les fichiers d'intégration écrivent dans la vraie base et
+          // partagent le même compte de test : deux fichiers ouverts en même
+          // temps finissent par se marcher dessus, et la rafale de connexions
+          // qu'un lancement en parallèle déclenche finit par se faire refuser
+          // par Supabase.
+          fileParallelism: false,
+        },
+      },
+    ],
   },
 });

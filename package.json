@@ -7,10 +7,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "vitest run",
-    "test:watch": "vitest",
+    "test": "vitest run --project unitaires",
+    "test:watch": "vitest --project unitaires",
     "test:parcours": "playwright test",
-    "verifier": "node scripts/verifier-la-purge.mjs"
+    "verifier": "node scripts/verifier-la-purge.mjs",
+    "test:integration": "vitest run --project integration"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.5",
