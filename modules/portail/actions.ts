@@ -34,10 +34,10 @@ export async function cocherTache(id: string, faite: boolean): Promise<void> {
   if (error) throw new Error(`Enregistrement impossible : ${error.message}`);
 
   // Une mise à jour qu'aucune politique n'autorise ne lève pas d'erreur, elle
-  // ne touche aucune ligne. Sans cette vérification, cocher la tâche d'un
-  // pilier fermé passerait pour un succès et la case resterait cochée à
+  // ne touche aucune ligne. Sans cette vérification, cocher la tâche de
+  // quelqu'un d'autre passerait pour un succès et la case resterait cochée à
   // l'écran alors que la base n'a rien enregistré.
-  if (!data) throw new Error("Cette tâche ne t'appartient pas, ou son pilier n'est pas ouvert.");
+  if (!data) throw new Error("Cette tâche ne t'appartient pas.");
 
   revalidatePath("/espace", "layout");
   revalidatePath("/pilotage/membres", "layout");
@@ -217,98 +217,87 @@ export async function deposerDocument(
   return { erreur: null };
 }
 
-/** Le coach pose le calendrier complet à partir d'une date de démarrage. */
-export async function planifierCalendrier(
+/**
+ * Les objectifs d'un client, écrits par son coach.
+ *
+ * **Ils ont remplacé le parcours type et son calendrier.** L'outil copiait
+ * auparavant un parcours commun chez chaque client, puis ouvrait ses parties
+ * une par mois. C'était la méthode de l'éditeur imposée à tous ceux qui
+ * installent l'outil : deux clients d'un même coach n'ont pas les mêmes
+ * objectifs, et deux coachs encore moins. Tout se saisit donc à la main, pour
+ * un client, sur son écran de suivi.
+ */
+export async function ajouterObjectif(
   personneId: string,
-  demarrage: string,
+  titre: string,
+  description: string | null,
+  echeance: string | null,
 ): Promise<void> {
-  await exigerAdmin();
+  const compte = await exigerAdmin();
   const supabase = await creerClientServeur();
 
-  const { error } = await supabase.rpc("planifier_piliers", {
-    p_personne: personneId,
-    p_demarrage: demarrage,
+  // Il se range à la fin : un objectif ajouté en cours de route s'intercalerait
+  // en tête s'il prenait l'ordre 0, et bousculerait la lecture du client.
+  const { data: dernier } = await supabase
+    .from("objectif")
+    .select("ordre")
+    .eq("personne_id", personneId)
+    .order("ordre", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  const { error } = await supabase.from("objectif").insert({
+    personne_id: personneId,
+    titre,
+    description,
+    echeance,
+    ordre: ((dernier?.ordre as number) ?? 0) + 1,
+    cree_par: compte.id,
   });
 
-  if (error) throw new Error(`Calendrier impossible : ${error.message}`);
+  if (error) throw new Error(`Objectif non ajouté : ${error.message}`);
 
   revalidatePath("/pilotage/membres", "layout");
   revalidatePath("/espace", "layout");
 }
 
 /**
- * Une date corrigée à la main. Une date vide retire la ligne, donc ferme le
- * pilier sans date : c'est ce qui permet de refermer un pilier ouvert par
- * erreur, plutôt que de le repousser à l'an prochain.
+ * Retire un objectif, et ses tâches avec lui par cascade.
+ *
+ * Rien ne demande confirmation ici : c'est l'écran qui la demande, parce que
+ * lui seul peut dire combien de tâches partent avec, et que le nombre est ce
+ * qui fait hésiter.
  */
-export async function changerDateOuverture(
-  personneId: string,
-  pilierId: string,
-  date: string | null,
-): Promise<void> {
+export async function retirerObjectif(id: string): Promise<void> {
   await exigerAdmin();
   const supabase = await creerClientServeur();
 
-  const { error } = date
-    ? await supabase
-        .from("acces_pilier")
-        .upsert(
-          { personne_id: personneId, pilier_id: pilierId, date_ouverture: date },
-          { onConflict: "personne_id,pilier_id" },
-        )
-    : await supabase
-        .from("acces_pilier")
-        .delete()
-        .eq("personne_id", personneId)
-        .eq("pilier_id", pilierId);
-
-  if (error) throw new Error(`Date non enregistrée : ${error.message}`);
+  const { error } = await supabase.from("objectif").delete().eq("id", id);
+  if (error) throw new Error(`Objectif non retiré : ${error.message}`);
 
   revalidatePath("/pilotage/membres", "layout");
   revalidatePath("/espace", "layout");
 }
 
-/** Copie le parcours type. Renvoie le nombre de tâches réellement ajoutées. */
-export async function appliquerParcours(personneId: string): Promise<number> {
-  await exigerAdmin();
-  const supabase = await creerClientServeur();
-
-  const { data, error } = await supabase.rpc("appliquer_parcours_modele", {
-    p_personne: personneId,
-  });
-
-  if (error) throw new Error(`Application impossible : ${error.message}`);
-
-  revalidatePath("/pilotage/membres", "layout");
-  revalidatePath("/espace", "layout");
-  return (data as number) ?? 0;
-}
-
-/** Une tâche sur mesure, en plus du parcours type. */
+/** Une sous-tâche sous son objectif. */
 export async function ajouterTache(
-  personneId: string,
-  pilierId: string,
+  objectifId: string,
   titre: string,
   description: string | null,
 ): Promise<void> {
   const compte = await exigerAdmin();
   const supabase = await creerClientServeur();
 
-  // Elle se range à la fin du pilier : une tâche ajoutée en cours de route
-  // s'intercalerait au milieu du parcours si elle prenait l'ordre 0.
   const { data: derniere } = await supabase
     .from("tache")
     .select("ordre")
-    .eq("personne_id", personneId)
-    .eq("pilier_id", pilierId)
+    .eq("objectif_id", objectifId)
     .order("ordre", { ascending: false })
     .limit(1)
     .maybeSingle();
 
   const { error } = await supabase.from("tache").insert({
-    personne_id: personneId,
-    pilier_id: pilierId,
-    groupe: "Ce que ton coach a ajouté",
+    objectif_id: objectifId,
     titre,
     description,
     ordre: ((derniere?.ordre as number) ?? 0) + 1,
@@ -316,6 +305,17 @@ export async function ajouterTache(
   });
 
   if (error) throw new Error(`Tâche non ajoutée : ${error.message}`);
+
+  revalidatePath("/pilotage/membres", "layout");
+  revalidatePath("/espace", "layout");
+}
+
+export async function retirerTache(id: string): Promise<void> {
+  await exigerAdmin();
+  const supabase = await creerClientServeur();
+
+  const { error } = await supabase.from("tache").delete().eq("id", id);
+  if (error) throw new Error(`Tâche non retirée : ${error.message}`);
 
   revalidatePath("/pilotage/membres", "layout");
   revalidatePath("/espace", "layout");
@@ -523,8 +523,13 @@ export async function genererLeLien(
 }
 
 /**
- * Ajoute un client : sa fiche, son accompagnement, son parcours, son
- * calendrier et son compte, d'un seul geste.
+ * Ajoute un client : sa fiche, son accompagnement et son compte, d'un seul
+ * geste.
+ *
+ * **Son espace naît vide d'objectifs, et c'est voulu.** Il en recevait
+ * auparavant un parcours type recopié, écrit par l'éditeur : le premier écran
+ * du client montrait donc les tâches de quelqu'un d'autre. Le coach écrit les
+ * siens juste après, sur l'écran de suivi qui s'ouvre.
  *
  * **Le seul chemin par lequel un client naît ici.** L'application dont cet
  * outil est extrait les créait à la bascule commerciale d'un CRM qui n'existe
@@ -588,15 +593,9 @@ export async function ajouterUnClient(champs: {
     return { fait: false, pourquoi: erreurAccompagnement.message };
   }
 
-  await supabase.rpc("appliquer_parcours_modele", { p_personne: personne.id });
-  await supabase.rpc("planifier_piliers", {
-    p_personne: personne.id,
-    p_demarrage: champs.demarrage,
-  });
-
-  // Le compte peut échouer sans que tout soit perdu : la fiche, son
-  // accompagnement et son parcours restent, et le coach relance l'envoi de
-  // ses accès depuis l'écran de suivi.
+  // Le compte peut échouer sans que tout soit perdu : la fiche et son
+  // accompagnement restent, et le coach relance l'envoi de ses accès depuis
+  // l'écran de suivi.
   const compte = await creerLeCompte(personne.id);
 
   revalidatePath("/pilotage");

@@ -8,13 +8,14 @@ base. Personne d'autre n'a accès à tes données, nous compris.
 
 ## Ce qu'il fait
 
-**Côté client :** son tableau de bord, son programme découpé en parties avec
-ses tâches à cocher, le profil qu'il remplit en arrivant, ses séances passées
-avec leur compte rendu, ses documents.
+**Côté client :** son tableau de bord, ses objectifs découpés en étapes à
+cocher, le profil qu'il remplit en arrivant, ses séances passées avec leur
+compte rendu, ses documents.
 
-**Côté coach :** la liste de tes clients, la fiche de suivi de chacun (ses
-tâches, ses séances, les comptes rendus, ses documents), l'ajout d'un client
-et l'envoi de ses accès, et les réglages.
+**Côté coach :** la liste de tes clients, la fiche de suivi de chacun (où tu
+écris ses objectifs et leurs étapes, et où tu retrouves ses séances, les
+comptes rendus et ses documents), l'ajout d'un client et l'envoi de ses accès,
+et les réglages.
 
 ## L'installer
 
@@ -65,10 +66,12 @@ Trois pièges qui coûtent une soirée chacun :
 ## Le régler
 
 Tout se règle depuis l'app, sans toucher au code : le nom de ton programme,
-le mot que tu emploies pour les grandes parties de ton accompagnement
-(module, pilier, phase, axe), ces parties elles-mêmes, les questions du
-profil, les tâches que chaque client reçoit, ton nom et ton numéro, et tes
-liens externes.
+les questions du profil, ton nom et ton numéro, et tes liens externes.
+
+**Les objectifs de tes clients ne se règlent pas ici**, et c'est voulu : tu
+les écris pour chacun, sur son écran de suivi, avec leurs étapes en dessous.
+Deux de tes clients n'ont pas les mêmes objectifs, et l'outil n'a aucune
+méthode à t'imposer.
 
 ## Donner ses accès à un client
 

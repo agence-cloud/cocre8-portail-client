@@ -9,6 +9,7 @@ import {
 import { creerClientServeur } from "@/lib/supabase/serveur";
 import {
   CLIENTE,
+  OBJECTIFS,
   REPONSES,
   REPONSES_PAR_TYPE,
   SEANCES,
@@ -106,37 +107,35 @@ export async function chargerLaDemonstration(): Promise<{
     return { fait: false, pourquoi: erreurAccompagnement.message };
   }
 
-  await supabase.rpc("appliquer_parcours_modele", { p_personne: personne.id });
-  await supabase.rpc("planifier_piliers", {
-    p_personne: personne.id,
-    p_demarrage: demarrage,
-  });
+  // Ses objectifs, leurs étapes, et une partie cochée. Une progression à 0 %
+  // ou à 100 % ne montrerait ni ce que l'anneau sait faire, ni la carte
+  // repliée d'un objectif atteint : c'est justement ce qu'on veut faire voir.
+  for (const [rang, modele] of OBJECTIFS.entries()) {
+    const { data: objectif, error: erreurObjectif } = await supabase
+      .from("objectif")
+      .insert({
+        personne_id: personne.id,
+        titre: modele.titre,
+        description: modele.description,
+        echeance: ilYA(-modele.dansJours),
+        ordre: rang + 1,
+      })
+      .select("id")
+      .single();
 
-  // Une partie de ses tâches est faite, et pas toutes : une progression à
-  // 0 % ou à 100 % ne montre pas ce que l'anneau et la barre savent faire.
-  // Seules les tâches des parties ouvertes sont cochées, les autres lui
-  // seraient invisibles.
-  const { data: ouvertes } = await supabase
-    .from("acces_pilier")
-    .select("pilier_id")
-    .eq("personne_id", personne.id)
-    .lte("date_ouverture", ilYA(0));
+    if (erreurObjectif) return { fait: false, pourquoi: erreurObjectif.message };
 
-  const { data: taches } = await supabase
-    .from("tache")
-    .select("id, pilier_id")
-    .eq("personne_id", personne.id)
-    .order("ordre");
+    const { error: erreurTaches } = await supabase.from("tache").insert(
+      modele.taches.map((titre, rangTache) => ({
+        objectif_id: objectif.id,
+        titre,
+        ordre: rangTache + 1,
+        faite: rangTache < modele.faites,
+        faite_le: rangTache < modele.faites ? ilYAHorodate(7 + rangTache) : null,
+      })),
+    );
 
-  const idsOuverts = new Set((ouvertes ?? []).map((a) => a.pilier_id));
-  const cochables = (taches ?? []).filter((t) => idsOuverts.has(t.pilier_id));
-  const aCocher = cochables.slice(0, Math.ceil(cochables.length * 0.6));
-
-  if (aCocher.length > 0) {
-    await supabase
-      .from("tache")
-      .update({ faite: true, faite_le: ilYAHorodate(7) })
-      .in("id", aCocher.map((t) => t.id));
+    if (erreurTaches) return { fait: false, pourquoi: erreurTaches.message };
   }
 
   // Le profil est rempli en entier, et c'est structurel : tant qu'une réponse

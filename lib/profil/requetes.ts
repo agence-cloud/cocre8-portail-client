@@ -10,7 +10,7 @@ export async function lireQuestions(): Promise<QuestionProfil[]> {
   const supabase = await creerClientServeur();
   const { data, error } = await supabase
     .from("question_profil")
-    .select("id, pilier_id, libelle, aide, type, options, ordre")
+    .select("id, libelle, aide, type, options, ordre")
     .eq("active", true)
     .order("ordre");
 

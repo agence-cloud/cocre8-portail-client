@@ -174,21 +174,21 @@ test("le membre coche une tâche et voit sa progression bouger", async ({ page }
   const profilRempli = await assurerProfilComplet(page);
 
   // Déclarée avant le try : le finally doit pouvoir décocher la case même si
-  // une assertion échoue après le clic, sans quoi le pilier 1 finirait, au
-  // bout de quelques passages, sans plus aucune tâche à cocher.
+  // une assertion échoue après le clic, sans quoi les objectifs de la
+  // démonstration finiraient, au bout de quelques passages, tout cochés.
   let case_: Locator | undefined;
 
   try {
-    await page.goto("/espace/piliers/1");
+    await page.goto("/espace/objectifs");
 
     // La progression avant, lue dans l'anneau.
     const anneau = page.getByLabel(/pour cent/);
     const avant = Number((await anneau.textContent())!.replace(/\D/g, ""));
 
-    // Toutes les tâches du pilier, dans leur ordre d'affichage (stable :
-    // grouperEnSections trie par "ordre", jamais par "faite"). aria-pressed
-    // filtre le bouton de repli de la navigation et le pli d'une section, qui
-    // n'ont pas cet attribut.
+    // Toutes les étapes affichées, dans leur ordre (stable : la requête trie
+    // par "ordre", jamais par "faite"). aria-pressed filtre le bouton de repli
+    // de la navigation et le pli d'une carte d'objectif, qui n'ont pas cet
+    // attribut.
     const taches = page.locator('main button[aria-pressed]');
     // Attendre qu'au moins une tâche existe avant de les compter. Depuis que
     // les pages annoncent leur chargement par un squelette, la page répond
@@ -202,12 +202,12 @@ test("le membre coche une tâche et voit sa progression bouger", async ({ page }
       boutons.findIndex((bouton) => bouton.getAttribute("aria-pressed") === "false"),
     );
     // Un message clair plutôt qu'un délai de 30 secondes : nth(-1) attendrait
-    // en vain une case qui n'existe pas si le pilier 1 se retrouvait un jour
-    // entièrement coché avant que ce test démarre.
+    // en vain une case qui n'existe pas si tous les objectifs se retrouvaient
+    // un jour entièrement cochés avant que ce test démarre.
     if (indexPremiereNonCochee === -1) {
       const total = await taches.count();
       throw new Error(
-        `Aucune tâche non cochée sur le pilier 1, parmi ${total} affichées : le jeu de démo n'est plus dans son état de départ.`,
+        `Aucune étape non cochée parmi les ${total} affichées : le jeu de démo n'est plus dans son état de départ.`,
       );
     }
     // Cibler par position et pas par [aria-pressed="false"] : une fois cochée,
@@ -224,7 +224,7 @@ test("le membre coche une tâche et voit sa progression bouger", async ({ page }
     expect(apres).toBeGreaterThan(avant);
   } finally {
     // Décochée pour que le test reste rejouable indéfiniment, au lieu de
-    // consommer une tâche du pilier 1 à chaque passage. Reload après le
+    // consommer une étape à chaque passage. Reload après le
     // clic, comme pour la case cochée plus haut : la mise à jour optimiste
     // affiche l'état voulu tout de suite, seul un aller-retour serveur
     // prouve que le décochage a réellement été écrit avant que le test se
@@ -239,69 +239,31 @@ test("le membre coche une tâche et voit sa progression bouger", async ({ page }
   }
 });
 
-test("un pilier fermé montre sa date et ferme son adresse", async ({ page }) => {
-  const admin = await connecterAdmin();
-  const { data: personne } = await admin
-    .from("personne")
-    .select("id")
-    .eq("email", process.env.DEMO_EMAIL!)
-    .single();
-  const { data: pilier } = await admin.from("pilier").select("id").eq("numero", 2).single();
-  const { data: acces } = await admin
-    .from("acces_pilier")
-    .select("date_ouverture")
-    .eq("personne_id", personne!.id)
-    .eq("pilier_id", pilier!.id)
-    .single();
-  const dateOrigine = acces!.date_ouverture as string;
-
-  await connecter(page, process.env.DEMO_EMAIL!, process.env.DEMO_MOTDEPASSE!);
-  const profilRempli = await assurerProfilComplet(page);
-
-  try {
-    // Une date lointaine posée par le test lui-même, plutôt que de compter
-    // sur l'âge du jeu de démo : scripts/peupler-espace.mts ouvre le pilier 2
-    // cinq jours après son passage, et ce test cesserait de passer le
-    // sixième jour si sa fermeture ne tenait qu'à cette date-là.
-    await admin
-      .from("acces_pilier")
-      .update({ date_ouverture: "2099-01-01" })
-      .eq("personne_id", personne!.id)
-      .eq("pilier_id", pilier!.id);
-
-    await page.goto("/espace/piliers");
-    await expect(page.getByText(/Le cœur de la méthode/)).toBeVisible();
-
-    // Son adresse ne mène nulle part : la page renvoie à la liste.
-    await page.goto("/espace/piliers/2");
-    await expect(page).toHaveURL(/\/espace\/piliers$/);
-  } finally {
-    await admin
-      .from("acces_pilier")
-      .update({ date_ouverture: dateOrigine })
-      .eq("personne_id", personne!.id)
-      .eq("pilier_id", pilier!.id);
-    if (profilRempli) await viderProfilComplete(page);
-  }
-});
-
-test("la date posée par le coach apparaît chez le membre", async ({ browser }) => {
+test("l'objectif posé par le coach apparaît chez son client", async ({ browser }) => {
+  // Le parcours qui remplace « la date posée par le coach apparaît chez le
+  // membre ». Il n'y a plus de calendrier d'ouverture : ce qui traverse d'un
+  // côté à l'autre, c'est l'objectif lui-même.
   const cote_coach = await browser.newContext();
   const pageCoach = await cote_coach.newPage();
   await connecter(pageCoach, process.env.TEST_ADMIN_EMAIL!, process.env.TEST_ADMIN_MOTDEPASSE!);
 
+  const TITRE = `Objectif de test ${Date.now()}`;
+
   await pageCoach.goto("/pilotage");
   await pageCoach.getByRole("link", { name: /Léa/ }).click();
-  await expect(pageCoach.getByText("Son calendrier de piliers")).toBeVisible();
+  await expect(pageCoach.getByText("Ses objectifs")).toBeVisible();
 
-  // Repousser le pilier 3 à une date lointaine et reconnaissable, puis la
-  // remettre comme on l'a trouvée : un test de parcours écrit dans la vraie
-  // base, une date de 2027 qui traîne casserait les prochains passages.
-  const ligne = pageCoach.locator("div").filter({ hasText: /^3\. Action/ }).last();
-  const dateOrigine = await ligne.locator('input[type="date"]').inputValue();
   try {
-    await ligne.locator('input[type="date"]').fill("2027-03-15");
-    await expect(pageCoach.getByText("le 15 mars")).toBeVisible();
+    await pageCoach.getByRole("button", { name: "Ajouter un objectif" }).click();
+    await pageCoach.getByLabel("L'objectif").fill(TITRE);
+    await pageCoach.getByRole("button", { name: "Poser cet objectif" }).click();
+    await expect(pageCoach.getByText(TITRE)).toBeVisible();
+
+    // Une étape dessous, pour que la carte du client ne soit pas vide.
+    const carte = pageCoach.locator("div").filter({ hasText: TITRE }).last();
+    await carte.getByPlaceholder("Ajouter une étape").fill("La première étape");
+    await carte.getByRole("button", { name: "Ajouter" }).click();
+    await expect(pageCoach.getByText("La première étape")).toBeVisible();
 
     const cote_membre = await browser.newContext();
     const pageMembre = await cote_membre.newPage();
@@ -309,9 +271,10 @@ test("la date posée par le coach apparaît chez le membre", async ({ browser })
     try {
       await connecter(pageMembre, process.env.DEMO_EMAIL!, process.env.DEMO_MOTDEPASSE!);
       profilRempli = await assurerProfilComplet(pageMembre);
-      await pageMembre.goto("/espace/piliers");
+      await pageMembre.goto("/espace/objectifs");
 
-      await expect(pageMembre.getByText(/15 mars/)).toBeVisible();
+      await expect(pageMembre.getByText(TITRE)).toBeVisible();
+      await expect(pageMembre.getByText("La première étape")).toBeVisible();
     } finally {
       // Dans son propre finally, imbriqué : une assertion qui échoue plus
       // haut ne doit ni laisser le profil de Léa complet à 100 %, ni
@@ -320,14 +283,10 @@ test("la date posée par le coach apparaît chez le membre", async ({ browser })
       await cote_membre.close();
     }
   } finally {
-    await ligne.locator('input[type="date"]').fill(dateOrigine);
-    await expect(ligne.locator('input[type="date"]')).toHaveValue(dateOrigine);
-    // Le champ n'est pas contrôlé : sa valeur affichée change dès le fill(),
-    // avant même que l'écriture ait atteint la base. Un reload la relit
-    // depuis le serveur, seule preuve que la restauration a réellement
-    // abouti avant que le contexte ferme et coupe la requête en vol.
-    await pageCoach.reload();
-    await expect(ligne.locator('input[type="date"]')).toHaveValue(dateOrigine);
+    // Retiré comme on l'a trouvé : ce parcours écrit dans la vraie base, et
+    // un objectif de test qui traîne fausserait la démonstration commerciale.
+    const admin = await connecterAdmin();
+    await admin.from("objectif").delete().eq("titre", TITRE);
   }
 
   await cote_coach.close();
@@ -499,7 +458,7 @@ test("la porte pose une question à la fois, et n'ouvre qu'à la dernière", asy
 
   // « Au centre directement avec aucune interface nulle part » : pas de barre
   // latérale, donc aucun lien vers le reste de l'espace.
-  await expect(page.getByRole("link", { name: "Mes piliers" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Mes objectifs" })).toHaveCount(0);
   await expect(page.getByRole("link", { name: "Mes documents" })).toHaveCount(0);
 
   // Une question, et une seule. On vient de vider les deux dernières, la
@@ -522,7 +481,7 @@ test("la porte pose une question à la fois, et n'ouvre qu'à la dernière", asy
   await expect(page.getByText("On prépare ton espace.")).toBeVisible();
   await expect(page.getByText("Ton espace est prêt")).toBeVisible();
   await page.waitForURL(/\/espace$/, { timeout: 15000 });
-  await expect(page.getByRole("link", { name: "Mes piliers" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Mes objectifs" })).toBeVisible();
 
   // Aucun `finally` qui revide, et c'est le changement du 2026-09-01 : ce
   // test se termine en franchissant la porte, donc il laisse Léa dans

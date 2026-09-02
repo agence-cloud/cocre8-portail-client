@@ -59,17 +59,22 @@ manipuler.
 
 ## Ce qui se règle, et ce qui ne se règle pas
 
-**Se règle, depuis l'app, sans toucher au code :** le nom du programme, le mot
-employé pour les grandes parties de l'accompagnement, ces parties elles-mêmes,
-les questions d'accueil, les tâches du parcours type, le nom et le numéro du
-coach, les liens externes.
+**Se règle, depuis l'app, sans toucher au code :** le nom du programme, les
+questions d'accueil, le nom et le numéro du coach, les liens externes.
 
-**Deux suppressions sont refusées, et le message dit quoi faire à la place :**
-retirer une partie où un client a déjà coché une tâche (la base efface en
-cascade, sa progression disparaîtrait), et retirer une question déjà répondue
-(on la décoche pour ne plus la poser, ce qui garde les réponses). Une tâche du
-parcours type se retire librement : les tâches des clients en sont des copies,
-et c'est pour ça que la copie existe.
+**Ce qui appartient à un client se saisit sur son écran de suivi**, pas dans
+les réglages : ses objectifs, et les étapes de chacun. C'est la bascule du
+2026-09-02. L'outil portait avant des « parties » communes à tous, ouvertes
+une par mois selon un calendrier, remplies depuis un parcours type recopié
+chez chaque nouveau client. C'était la méthode de l'éditeur imposée à tous
+ceux qui installent l'outil, alors que deux clients d'un même coach n'ont pas
+les mêmes objectifs, et deux coachs encore moins.
+
+**Une suppression est refusée, et le message dit quoi faire à la place :**
+retirer une question déjà répondue (on la décoche pour ne plus la poser, ce
+qui garde les réponses). Un objectif se retire librement, avec ses étapes :
+l'écran demande confirmation et dit combien partent avec lui, parce que c'est
+le nombre qui fait hésiter.
 
 Les réglages vivent dans la table `reglage`, en clé-valeur, et
 `lib/reglages/types.ts` porte leur forme et leurs valeurs par défaut. **Une
@@ -83,8 +88,8 @@ que par le coach. **Le nom du programme a sa propre fonction de base**,
 avant toute session, et ouvrir la table entière aurait donné le numéro du
 coach avec.
 
-**Ne se règle pas :** la structure (un programme, des parties, des tâches, un
-profil rempli à l'entrée), le profil comme porte d'entrée, le tutoiement,
+**Ne se règle pas :** la structure (des objectifs, leurs étapes, un profil
+rempli à l'entrée), le profil comme porte d'entrée, le tutoiement,
 l'habillage. Les valeurs qui sont des `enum` PostgreSQL non plus :
 changer un type demande de recréer le type et de convertir les tables qui s'en
 servent, ce n'est pas un écran.
@@ -130,7 +135,7 @@ surtout pas être « corrigés », à commencer par la vue `coaching_membre` en
 toucher, et le relancer après toute migration.
 
 Ce qui est là : l'espace client entier (tableau de bord, profil et sa porte,
-parties et tâches, séances et comptes rendus, documents), l'écran de suivi
+objectifs et étapes, séances et comptes rendus, documents), l'écran de suivi
 d'un client côté coach, la connexion et le chemin de récupération de mot de
 passe.
 

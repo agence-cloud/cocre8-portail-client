@@ -27,19 +27,8 @@ export async function enregistrerLesReglages(
 
   const texte = (champ: string) => String(donnees.get(champ) ?? "").trim();
 
-  const singulier = texte("mot_singulier");
-  const pluriel = texte("mot_pluriel");
-
-  // Le mot des parties est le seul réglage qu'on refuse de laisser vide : il
-  // s'affiche dans des phrases entières côté client, et une phrase à trou est
-  // pire qu'un mot qu'on n'aime pas.
-  if (!singulier || !pluriel) {
-    return { erreur: "Le mot des parties ne peut pas rester vide.", enregistre: false };
-  }
-
   const reglages: Partial<Reglages> = {
     nom_programme: texte("nom_programme") || "Espace Client",
-    mot_partie: { singulier, pluriel },
     coach_nom: texte("coach_nom"),
     coach_telephone: texte("coach_telephone"),
     liens_externes: {

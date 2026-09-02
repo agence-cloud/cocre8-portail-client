@@ -13,7 +13,7 @@ export const CLIENTE = {
   nom: "Marchand",
   email: "lea.marchand@exemple.test",
   entreprise: "Atelier Marchand",
-  /** Assez ancien pour que deux parties soient ouvertes et deux séances passées. */
+  /** Assez ancien pour que deux séances soient déjà passées. */
   ilYAJours: 45,
 };
 
@@ -86,3 +86,55 @@ export const SEANCES = [
   },
 ];
 
+
+/**
+ * Ses objectifs, et leurs étapes.
+ *
+ * **Ils racontent la même histoire que ses réponses**, celle d'une graphiste
+ * qui vend à l'heure et veut passer au forfait. C'est tout l'intérêt du jeu :
+ * un coach qui l'ouvre doit reconnaître un vrai client, pas un remplissage.
+ *
+ * Trois objectifs et pas cinq : le premier est fini, le deuxième en cours, le
+ * troisième pas commencé. C'est ce qui montre les trois états de la carte en
+ * un écran, là où trois objectifs à moitié faits n'en montreraient qu'un.
+ *
+ * `faites` est le nombre d'étapes cochées, en partant du haut. Un nombre
+ * plutôt que la liste des titres cochés : le jour où l'on réécrit une étape,
+ * il n'y a pas deux endroits à tenir d'accord.
+ */
+export const OBJECTIFS = [
+  {
+    titre: "Arrêter de facturer à l'heure",
+    description: "Le temps est fini, donc le chiffre plafonne tant qu'il s'y adosse.",
+    dansJours: -20,
+    faites: 3,
+    taches: [
+      "Lister les cinq dernières missions et leur temps réel",
+      "Calculer ce que chacune aurait coûté au forfait",
+      "Écrire les trois forfaits, avec ce qu'ils contiennent et ce qu'ils excluent",
+    ],
+  },
+  {
+    titre: "Annoncer le prix sans se justifier",
+    description: "Le blocage n'est pas le tarif, c'est la phrase qui l'accompagne.",
+    dansJours: 25,
+    faites: 1,
+    taches: [
+      "Écrire la phrase d'annonce, mot pour mot",
+      "La dire à voix haute dix fois avant le prochain rendez-vous",
+      "L'essayer sur un devis, et noter la réaction",
+      "Refaire le même devis sans donner aucun nombre d'heures",
+    ],
+  },
+  {
+    titre: "Trois forfaits signés d'affilée",
+    description: "Le signe que le changement a tenu, et pas seulement qu'il a été essayé.",
+    dansJours: 80,
+    faites: 0,
+    taches: [
+      "Relancer les deux clients réguliers avec la nouvelle offre",
+      "Proposer un forfait à chaque nouvelle demande, sans exception",
+      "Faire le point sur les trois premiers signés",
+    ],
+  },
+];

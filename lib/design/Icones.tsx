@@ -5,7 +5,7 @@ type Nom =
   | "tableau"
   | "profil"
   | "personne"
-  | "piliers"
+  | "objectifs"
   | "documents"
   | "depot"
   | "image"
@@ -15,20 +15,21 @@ type Nom =
   | "direct"
   | "demo"
   | "replier"
-  | "cadenas"
+
   | "coche"
-  | "stylo"
-  | "pilier-0"
-  | "pilier-1"
-  | "pilier-2"
-  | "pilier-3"
-  | "pilier-4";
+  | "croix"
+  | "stylo";
 
 /**
  * Icônes dessinées à la main plutôt qu'importées : une librairie ajouterait
- * une dépendance pour huit glyphes, et rendrait l'outil reconnaissable au jeu
- * d'icônes qu'il emprunte. Toutes en trait, jamais pleines, sur une grille de
- * 24.
+ * une dépendance pour une poignée de glyphes, et rendrait l'outil
+ * reconnaissable au jeu d'icônes qu'il emprunte. Toutes en trait, jamais
+ * pleines, sur une grille de 24.
+ *
+ * Cinq glyphes numérotés vivaient ici, un par partie du parcours, plus un
+ * cadenas pour les parties fermées. Les deux sont partis avec les parties
+ * elles-mêmes : un objectif appartient à un client, il ne se range pas dans
+ * une grille et rien ne l'attend derrière une date.
  */
 const CHEMINS: Record<Nom, React.ReactNode> = {
   // Trois colonnes : un pipe se lit comme un tableau de colonnes.
@@ -77,7 +78,7 @@ const CHEMINS: Record<Nom, React.ReactNode> = {
     </>
   ),
   // Des paliers à gravir.
-  piliers: (
+  objectifs: (
     <>
       <path d="M3 20h5v-5H3zM9.5 20h5V10h-5zM16 20h5V4h-5z" />
     </>
@@ -151,14 +152,8 @@ const CHEMINS: Record<Nom, React.ReactNode> = {
   ),
   // Un chevron : il pivote selon le sens.
   replier: <path d="M14 6l-6 6 6 6" />,
-  // Un cadenas fermé : l'anse au-dessus, le corps en dessous.
-  cadenas: (
-    <>
-      <rect x="4.5" y="10.5" width="15" height="10" rx="2.5" />
-      <path d="M8 10.5V7.5a4 4 0 0 1 8 0v3" />
-    </>
-  ),
   coche: <path d="M5 12.5l4.5 4.5L19 7.5" />,
+  croix: <path d="M6 6l12 12M18 6L6 18" />,
   // Un crayon en diagonale, la pointe en bas à gauche, comme quand on le
   // tient pour écrire. Le second tracé sépare la mine du corps : sans
   // lui la forme se lit comme un simple losange allongé, c'est ce trait qui
@@ -167,53 +162,6 @@ const CHEMINS: Record<Nom, React.ReactNode> = {
     <>
       <path d="M16.3 4.2l3.5 3.5L9 18.5l-4.6 1.1 1.1-4.6z" />
       <path d="M5.5 15l3.5 3.5" />
-    </>
-  ),
-  // L'icône de repli, servie à toute partie sans dessin : un drapeau
-  // planté, le point de départ.
-  "pilier-0": (
-    <>
-      <path d="M6 21V4.5" />
-      <path d="M6 5h10.5l-2.2 3.6L16.5 12H6" />
-    </>
-  ),
-  // Pilier 1 : des colonnes sur un socle, sous un fronton.
-  // Deux dessins ont précédé celui-ci, une maison à cheminée puis des blocs
-  // empilés qui ressemblaient à tout sauf à des fondations.
-  "pilier-1": (
-    <>
-      <path d="M2.8 8.6 12 3.5l9.2 5.1" />
-      <path d="M4.5 20.5h15" />
-      <path d="M6.5 20.5v-9M12 20.5v-9M17.5 20.5v-9" />
-    </>
-  ),
-  // Pilier 2 : un colis. La boucle abstraite qui l'a précédé
-  // disait le mécanisme, pas la promesse. Ce pilier parle de ce qu'on livre.
-  "pilier-2": (
-    <>
-      <path d="M12 3 3.5 7.5v9L12 21l8.5-4.5v-9z" />
-      <path d="M3.5 7.5 12 12l8.5-4.5" />
-      <path d="M12 12v9" />
-    </>
-  ),
-  // Pilier 3 : un aimant en fer à cheval, ses deux pôles
-  // marqués. Sans les pôles, la forme se lit comme un simple U.
-  "pilier-3": (
-    <>
-      <path d="M5 5v7a7 7 0 0 0 14 0V5" />
-      <path d="M9 5v7a3 3 0 0 0 6 0V5" />
-      <path d="M5 10h4M15 10h4" />
-    </>
-  ),
-  // Pilier 4 : la courbe qui passe par-dessus les paliers. Les
-  // paliers seuls se confondaient avec l'icône des statistiques.
-  "pilier-4": (
-    <>
-      <rect x="3.5" y="15" width="4" height="5.5" rx="1.4" />
-      <rect x="10" y="12" width="4" height="8.5" rx="1.4" />
-      <rect x="16.5" y="9" width="4" height="11.5" rx="1.4" />
-      <path d="M4 9.5 9.5 6l3.5 2.2L20 3.5" />
-      <path d="M20.5 7.6V3.5h-4.1" />
     </>
   ),
 };

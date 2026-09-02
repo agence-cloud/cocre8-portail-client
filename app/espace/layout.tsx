@@ -6,8 +6,7 @@ import { NavigationLaterale } from "@/lib/design/NavigationLaterale";
 import { construireLiensCircle } from "@/modules/portail/circle";
 import { lireReglages } from "@/lib/reglages/requetes";
 
-function liens(motPluriel: string) {
-  return [
+const LIENS = [
   {
     libelle: "Mon tableau de bord",
     href: "/espace",
@@ -19,9 +18,9 @@ function liens(motPluriel: string) {
     icone: "profil" as const,
   },
   {
-    libelle: `Mes ${motPluriel}`,
-    href: "/espace/piliers",
-    icone: "piliers" as const,
+    libelle: "Mes objectifs",
+    href: "/espace/objectifs",
+    icone: "objectifs" as const,
   },
   {
     libelle: "Mes coachings",
@@ -33,8 +32,7 @@ function liens(motPluriel: string) {
     href: "/espace/documents",
     icone: "documents" as const,
   },
-  ];
-}
+];
 
 export default async function LayoutEspace({
   children,
@@ -61,7 +59,7 @@ export default async function LayoutEspace({
   return (
     <div className="flex min-h-screen">
       <NavigationLaterale
-        liens={liens(reglages.mot_partie.pluriel)}
+        liens={LIENS}
         nom={compte.nom}
         zone="Ton espace"
         repliee={repliee}

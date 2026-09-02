@@ -90,21 +90,37 @@ create table accompagnement (
 
 create index accompagnement_personne_idx on accompagnement (personne_id);
 
--- Les grandes parties de ton accompagnement. Le mot qui les désigne à
--- l'écran (module, pilier, phase, axe) se règle depuis l'app.
-create table pilier (
+-- Un objectif d'un client, posé par son coach, et ses sous-tâches en dessous.
+--
+-- **Il appartient au client, pas à l'outil.** Le schéma portait auparavant des
+-- « parties » communes à tout le monde, ouvertes une par mois selon un
+-- calendrier, avec un parcours type recopié chez chacun. C'était la méthode
+-- d'un coach imposée à tous ceux qui installent l'outil. Deux clients d'un
+-- même coach n'ont pas les mêmes objectifs, et un coach n'a pas les mêmes que
+-- son voisin : l'objectif se saisit donc pour un client, à la main, et rien
+-- ne le range dans une grille.
+--
+-- Pas d'état « atteint » : un objectif est atteint quand ses tâches le sont,
+-- et une colonne de plus se contredirait avec elles au premier oubli.
+create table objectif (
   id uuid primary key default gen_random_uuid(),
-  numero smallint not null unique,
-  nom text not null,
+  personne_id uuid not null references personne (id) on delete cascade,
+  titre text not null,
   description text,
-  ordre smallint not null
+  -- Facultative : tous les objectifs ne se datent pas, et une date obligatoire
+  -- se remplirait au hasard.
+  echeance date,
+  ordre smallint not null default 0,
+  cree_par uuid references compte (id) on delete set null,
+  cree_le timestamptz not null default now()
 );
+
+create index objectif_personne_idx on objectif (personne_id, ordre);
 
 -- Le questionnaire que le client remplit en arrivant. Configurable sans
 -- toucher au code.
 create table question_profil (
   id uuid primary key default gen_random_uuid(),
-  pilier_id uuid references pilier (id) on delete set null,
   libelle text not null,
   aide text,
   type text not null check (type in ('texte_court', 'texte_long', 'nombre', 'choix')),
@@ -135,25 +151,6 @@ create table document (
   visible_membre boolean not null default true,
   cree_le timestamptz not null default now()
 );
-
--- Quelles parties sont ouvertes pour un client, et quand les autres
--- s'ouvriront.
---
--- Trois états dans une seule colonne. Une date passée : la partie est
--- ouverte. Une date à venir : elle s'ouvrira ce jour-là, et c'est ce que le
--- client lit sur son cadenas. Pas de ligne : la partie n'est pas prévue pour
--- lui.
-create table acces_pilier (
-  id uuid primary key default gen_random_uuid(),
-  personne_id uuid not null references personne (id) on delete cascade,
-  pilier_id uuid not null references pilier (id) on delete cascade,
-  date_ouverture date not null,
-  par_compte uuid references compte (id) on delete set null,
-  cree_le timestamptz not null default now(),
-  unique (personne_id, pilier_id)
-);
-
-create index acces_pilier_personne_idx on acces_pilier (personne_id);
 
 -- Une seule table dit « une réunion ».
 --
@@ -194,36 +191,20 @@ create unique index appel_reference_externe_idx
 
 
 -- ---------------------------------------------------------------------
---  3. Les tables du parcours
+--  3. Les sous-tâches d'un objectif
 -- ---------------------------------------------------------------------
 
--- Le parcours type, copié dans l'espace d'un client à son arrivée. Sans lui,
--- son espace est vide à la première connexion.
-create table parcours_modele (
-  id uuid primary key default gen_random_uuid(),
-  nom text not null,
-  offre_id uuid references offre (id) on delete set null,
-  actif boolean not null default true,
-  cree_le timestamptz not null default now()
-);
-
-create table tache_modele (
-  id uuid primary key default gen_random_uuid(),
-  parcours_modele_id uuid not null references parcours_modele (id) on delete cascade,
-  pilier_id uuid not null references pilier (id) on delete cascade,
-  -- Le titre de section sous lequel la tâche se range. Une colonne texte et
-  -- non une table : un titre de section n'a ni identité ni attribut.
-  groupe text,
-  titre text not null,
-  description text,
-  ordre smallint not null
-);
-
+-- Une sous-tâche, sous son objectif. Le coach les écrit, le client les coche.
+--
+-- **Elle ne porte pas `personne_id`**, alors que la version précédente le
+-- faisait. Le propriétaire se lit sur l'objectif, donc une tâche ne peut pas
+-- se retrouver rattachée à un client et rangée sous l'objectif d'un autre :
+-- le cas n'existe plus, au lieu d'être interdit par une contrainte de plus.
+-- Les politiques de permission passent par une jointure, ce qui est le prix
+-- honnête de cette garantie.
 create table tache (
   id uuid primary key default gen_random_uuid(),
-  personne_id uuid not null references personne (id) on delete cascade,
-  pilier_id uuid not null references pilier (id) on delete cascade,
-  groupe text,
+  objectif_id uuid not null references objectif (id) on delete cascade,
   titre text not null,
   description text,
   ordre smallint not null default 0,
@@ -236,7 +217,7 @@ create table tache (
     check ((faite and faite_le is not null) or (not faite and faite_le is null))
 );
 
-create index tache_personne_idx on tache (personne_id, pilier_id);
+create index tache_objectif_idx on tache (objectif_id, ordre);
 
 -- Les réglages de l'outil : ce que chaque coach change pour se
 -- l'approprier, sans toucher au code.
@@ -339,19 +320,6 @@ as $$
   select exists (select 1 from installation);
 $$;
 
-create or replace function pilier_ouvert(p_personne uuid, p_pilier uuid)
-returns boolean
-language sql stable security definer set search_path = public
-as $$
-  select exists (
-    select 1 from acces_pilier
-    where personne_id = p_personne
-      and pilier_id = p_pilier
-      and date_ouverture <= current_date
-  );
-$$;
-
-
 -- ---------------------------------------------------------------------
 --  5. Les déclencheurs
 -- ---------------------------------------------------------------------
@@ -403,10 +371,8 @@ begin
 
   if new.titre is distinct from old.titre
     or new.description is distinct from old.description
-    or new.pilier_id is distinct from old.pilier_id
-    or new.personne_id is distinct from old.personne_id
+    or new.objectif_id is distinct from old.objectif_id
     or new.ordre is distinct from old.ordre
-    or new.groupe is distinct from old.groupe
     or new.cree_par is distinct from old.cree_par
   then
     raise exception 'Un client peut cocher ses tâches, pas les modifier.';
@@ -422,9 +388,9 @@ execute function tache_membre_coche_seulement();
 
 -- La progression d'un accompagnement, recalculée à chaque tâche touchée.
 --
--- Le calcul ne porte que sur les parties ouvertes. Compter les quatre
--- bloquerait un client à 25 % pendant tout son premier mois, au moment où il
--- a le plus besoin de voir que ça avance.
+-- Toutes les tâches de tous ses objectifs, sans exception. Le calcul écartait
+-- auparavant les parties non encore ouvertes, ce qui n'a plus lieu d'être :
+-- un objectif est visible le jour où le coach le pose.
 --
 -- `security definer` : un client qui coche une tâche n'a le droit que de lire
 -- son accompagnement. Sans lui, sa progression ne s'écrirait jamais.
@@ -432,16 +398,22 @@ create or replace function rafraichir_progression()
 returns trigger language plpgsql security definer set search_path = public
 as $$
 declare
-  v_personne uuid := coalesce(new.personne_id, old.personne_id);
+  v_objectif uuid := coalesce(new.objectif_id, old.objectif_id);
+  v_personne uuid;
   v_progression smallint;
 begin
+  select personne_id into v_personne from objectif where id = v_objectif;
+  if v_personne is null then
+    return null;
+  end if;
+
   select coalesce(
     round(100.0 * count(*) filter (where t.faite) / nullif(count(*), 0)), 0
   )
   into v_progression
   from tache t
-  where t.personne_id = v_personne
-    and pilier_ouvert(v_personne, t.pilier_id);
+  join objectif o on o.id = t.objectif_id
+  where o.personne_id = v_personne;
 
   update accompagnement
   set progression = v_progression
@@ -455,73 +427,34 @@ create trigger tache_rafraichit_la_progression
 after insert or update or delete on tache for each row
 execute function rafraichir_progression();
 
--- Le jour où une partie s'ouvre, le dénominateur du calcul change mais la
--- colonne garderait son ancienne valeur jusqu'à ce que le client coche
--- quelque chose : sur l'écran du coach qui regarde ce jour-là, la progression
--- mentirait.
-create trigger acces_pilier_rafraichit_la_progression
-after insert or update or delete on acces_pilier for each row
-execute function rafraichir_progression();
-
-
--- ---------------------------------------------------------------------
---  6. Les deux gestes de mise en service d'un client
---
---  Pas de `security definer`, volontairement : elles s'exécutent avec les
---  droits de qui les appelle, donc les permissions continuent de
---  s'appliquer. Un client qui les appellerait n'écrirait rien.
--- ---------------------------------------------------------------------
-
-create or replace function appliquer_parcours_modele(p_personne uuid)
-returns integer language plpgsql set search_path = public
+-- Un objectif supprimé emporte ses tâches en cascade, sans que le déclencheur
+-- ci-dessus ne voie passer les lignes une à une : la progression garderait
+-- l'ancien dénominateur.
+create or replace function rafraichir_progression_objectif()
+returns trigger language plpgsql security definer set search_path = public
 as $$
 declare
-  ajoutees integer;
+  v_progression smallint;
 begin
-  insert into tache (personne_id, pilier_id, groupe, titre, description, ordre)
-  select p_personne, tm.pilier_id, tm.groupe, tm.titre, tm.description, tm.ordre
-  from tache_modele tm
-  join parcours_modele pm on pm.id = tm.parcours_modele_id
-  where pm.actif
-    -- Idempotente : relancer n'ajoute que ce qui manque. Sans cette
-    -- condition, un coach qui reclique doublerait tout le parcours de son
-    -- client, cases cochées d'un côté et vides de l'autre.
-    and not exists (
-      select 1 from tache t
-      where t.personne_id = p_personne
-        and t.pilier_id = tm.pilier_id
-        and t.titre = tm.titre
-    );
+  select coalesce(
+    round(100.0 * count(*) filter (where t.faite) / nullif(count(*), 0)), 0
+  )
+  into v_progression
+  from tache t
+  join objectif o on o.id = t.objectif_id
+  where o.personne_id = coalesce(new.personne_id, old.personne_id);
 
-  get diagnostics ajoutees = row_count;
-  return ajoutees;
+  update accompagnement
+  set progression = v_progression
+  where personne_id = coalesce(new.personne_id, old.personne_id) and statut = 'actif';
+
+  return null;
 end;
 $$;
 
--- Le calendrier d'ouverture des parties : la première au démarrage, puis une
--- par mois. Le coach corrige ensuite chaque date à la main.
---
--- L'addition d'intervalle de PostgreSQL ramène au dernier jour du mois quand
--- le jour n'existe pas : 31 janvier plus un mois donne le 28 février.
-create or replace function planifier_piliers(p_personne uuid, p_demarrage date)
-returns integer language plpgsql set search_path = public
-as $$
-declare
-  posees integer;
-begin
-  insert into acces_pilier (personne_id, pilier_id, date_ouverture)
-  select p_personne, p.id,
-    (p_demarrage + make_interval(months => greatest(p.numero - 1, 0)))::date
-  from pilier p
-  -- Écrase les dates existantes, y compris celles corrigées à la main :
-  -- l'écran demande donc confirmation avant d'appeler.
-  on conflict (personne_id, pilier_id)
-    do update set date_ouverture = excluded.date_ouverture;
-
-  get diagnostics posees = row_count;
-  return posees;
-end;
-$$;
+create trigger objectif_rafraichit_la_progression
+after insert or delete on objectif for each row
+execute function rafraichir_progression_objectif();
 
 
 -- ---------------------------------------------------------------------
@@ -536,14 +469,11 @@ alter table personne enable row level security;
 alter table compte enable row level security;
 alter table offre enable row level security;
 alter table accompagnement enable row level security;
-alter table pilier enable row level security;
+alter table objectif enable row level security;
 alter table question_profil enable row level security;
 alter table reponse_profil enable row level security;
 alter table document enable row level security;
-alter table acces_pilier enable row level security;
 alter table appel enable row level security;
-alter table parcours_modele enable row level security;
-alter table tache_modele enable row level security;
 alter table tache enable row level security;
 
 -- Le coach fait tout, partout.
@@ -551,14 +481,11 @@ create policy admin_tout on personne for all to authenticated using (est_admin()
 create policy admin_tout on compte for all to authenticated using (est_admin()) with check (est_admin());
 create policy admin_tout on offre for all to authenticated using (est_admin()) with check (est_admin());
 create policy admin_tout on accompagnement for all to authenticated using (est_admin()) with check (est_admin());
-create policy admin_tout on pilier for all to authenticated using (est_admin()) with check (est_admin());
+create policy admin_tout on objectif for all to authenticated using (est_admin()) with check (est_admin());
 create policy admin_tout on question_profil for all to authenticated using (est_admin()) with check (est_admin());
 create policy admin_tout on reponse_profil for all to authenticated using (est_admin()) with check (est_admin());
 create policy admin_tout on document for all to authenticated using (est_admin()) with check (est_admin());
-create policy admin_tout on acces_pilier for all to authenticated using (est_admin()) with check (est_admin());
 create policy admin_tout on appel for all to authenticated using (est_admin()) with check (est_admin());
-create policy admin_tout on parcours_modele for all to authenticated using (est_admin()) with check (est_admin());
-create policy admin_tout on tache_modele for all to authenticated using (est_admin()) with check (est_admin());
 create policy admin_tout on tache for all to authenticated using (est_admin()) with check (est_admin());
 
 -- Un client lit son compte, sa fiche et son accompagnement, rien d'autre.
@@ -571,11 +498,8 @@ create policy membre_lit_sa_fiche on personne
 create policy membre_lit_son_accompagnement on accompagnement
   for select to authenticated using (personne_id = ma_personne());
 
--- Les référentiels : sans les parties ni les questions, l'espace du client
--- n'a rien à afficher.
-create policy tous_lisent_les_piliers on pilier
-  for select to authenticated using (a_un_compte());
-
+-- Le questionnaire : sans lui, la porte d'entrée du profil n'a rien à
+-- demander.
 create policy tous_lisent_les_questions on question_profil
   for select to authenticated using (a_un_compte() and active);
 
@@ -583,21 +507,31 @@ create policy membre_gere_ses_reponses on reponse_profil
   for all to authenticated using (personne_id = ma_personne())
   with check (personne_id = ma_personne());
 
--- Un client lit et coche les tâches d'une partie qui lui est ouverte, et il
--- ne peut ni en créer ni en supprimer : c'est le coach qui pose le parcours.
+-- Un client lit ses objectifs et coche leurs tâches. Il ne peut ni en créer
+-- ni en supprimer : c'est son coach qui les pose.
+--
+-- La jointure remplace la colonne `personne_id` que `tache` portait : le
+-- propriétaire d'une tâche se lit sur son objectif, et nulle part ailleurs.
+create policy membre_lit_ses_objectifs on objectif
+  for select to authenticated using (personne_id = ma_personne());
+
 create policy membre_lit_ses_taches on tache
   for select to authenticated
-  using (personne_id = ma_personne() and pilier_ouvert(ma_personne(), pilier_id));
+  using (exists (
+    select 1 from objectif o
+    where o.id = tache.objectif_id and o.personne_id = ma_personne()
+  ));
 
 create policy membre_coche_ses_taches on tache
   for update to authenticated
-  using (personne_id = ma_personne() and pilier_ouvert(ma_personne(), pilier_id))
-  with check (personne_id = ma_personne() and pilier_ouvert(ma_personne(), pilier_id));
-
--- Il lit tout son calendrier, dates à venir comprises : c'est ce qu'on lui
--- montre sur une partie fermée.
-create policy membre_lit_son_calendrier on acces_pilier
-  for select to authenticated using (personne_id = ma_personne());
+  using (exists (
+    select 1 from objectif o
+    where o.id = tache.objectif_id and o.personne_id = ma_personne()
+  ))
+  with check (exists (
+    select 1 from objectif o
+    where o.id = tache.objectif_id and o.personne_id = ma_personne()
+  ));
 
 -- Les réglages : tout compte connecté les lit, le coach seul les écrit.
 --
@@ -714,7 +648,7 @@ create policy membre_lit_ses_fichiers on storage.objects
 --  Mesuré, pas supposé : avec un `revoke from public` seul, le conseiller de
 --  sécurité a signalé les quatre fonctions comme exécutables par `anon`, et
 --  `has_function_privilege('anon', ...)` l'a confirmé. Trois d'entre elles
---  ne disent rien d'utile à un anonyme, `pilier_ouvert` répondait sur la
+--  ne disaient rien d'utile à un anonyme, la quatrième répondait sur la
 --  personne qu'on lui nommait.
 --
 --  Puis on rend à `authenticated` ce dont les politiques ont besoin : elles
@@ -725,12 +659,10 @@ create policy membre_lit_ses_fichiers on storage.objects
 revoke execute on function public.ma_personne() from public, anon;
 revoke execute on function public.est_admin() from public, anon;
 revoke execute on function public.a_un_compte() from public, anon;
-revoke execute on function public.pilier_ouvert(uuid, uuid) from public, anon;
 
 grant execute on function public.ma_personne() to authenticated;
 grant execute on function public.est_admin() to authenticated;
 grant execute on function public.a_un_compte() to authenticated;
-grant execute on function public.pilier_ouvert(uuid, uuid) to authenticated;
 
 -- Les deux gestes de mise en service sont appelés avec la session du coach.
 -- Celle-ci répond à un anonyme, et c'est voulu : il n'y a personne d'autre
@@ -743,17 +675,13 @@ grant execute on function public.installation_faite() to anon, authenticated;
 revoke execute on function public.nom_du_programme() from public;
 grant execute on function public.nom_du_programme() to anon, authenticated;
 
-revoke execute on function public.appliquer_parcours_modele(uuid) from public, anon;
-revoke execute on function public.planifier_piliers(uuid, date) from public, anon;
-grant execute on function public.appliquer_parcours_modele(uuid) to authenticated;
-grant execute on function public.planifier_piliers(uuid, date) to authenticated;
-
 -- Les fonctions de déclencheur ne s'appellent pas : PostgreSQL les exécute
 -- lui-même, sans vérifier le droit de l'appelant. Les exposer n'apporte rien.
 revoke execute on function public.touche_modifie_le() from public, anon, authenticated;
 revoke execute on function public.normalise_email_personne() from public, anon, authenticated;
 revoke execute on function public.tache_membre_coche_seulement() from public, anon, authenticated;
 revoke execute on function public.rafraichir_progression() from public, anon, authenticated;
+revoke execute on function public.rafraichir_progression_objectif() from public, anon, authenticated;
 
 
 -- ---------------------------------------------------------------------
@@ -762,12 +690,6 @@ revoke execute on function public.rafraichir_progression() from public, anon, au
 --  Tout ce qui suit se renomme, se réécrit et se supprime depuis l'app.
 --  Ce sont des valeurs de départ, pas une méthode.
 -- ---------------------------------------------------------------------
-
-insert into pilier (numero, nom, description, ordre) values
-  (1, 'Clarté', 'Où tu en es, où tu veux aller, et ce qui bloque.', 1),
-  (2, 'Plan', 'Le chemin, découpé et daté.', 2),
-  (3, 'Action', 'L''exécution, semaine après semaine.', 3),
-  (4, 'Ancrage', 'Tenir dans la durée, sans ton coach.', 4);
 
 insert into offre (nom, prix_defaut, type, duree_mois) values
   ('Accompagnement 3 mois', 0, 'ponctuel', 3),
@@ -784,25 +706,9 @@ insert into question_profil (libelle, aide, type, ordre) values
   ('À quoi verras-tu que c''est réussi ?', 'Le signe concret, pas le sentiment.', 'texte_long', 7),
   ('Qu''attends-tu de ton coach ?', null, 'texte_long', 8);
 
--- Le parcours type. Sans offre rattachée : il s'applique à tous.
-insert into parcours_modele (nom) values ('Parcours type');
+-- Aucun objectif de départ, et c'est délibéré. Les objectifs appartiennent à
+-- un client, pas à l'outil : en poser d'avance reviendrait à imposer la
+-- méthode de l'éditeur à tous ceux qui l'installent. Le coach écrit les siens
+-- sur l'écran de suivi de chaque client, et le jeu de démonstration en montre
+-- l'usage.
 
-insert into tache_modele (parcours_modele_id, pilier_id, groupe, titre, description, ordre)
-select
-  (select id from parcours_modele where nom = 'Parcours type'),
-  p.id, t.groupe, t.titre, t.description, t.ordre
-from pilier p
-join (values
-  (1, 'Pour démarrer', 'Remplis ton profil', 'Tes réponses servent de point de départ à tout le reste.', 1),
-  (1, 'Pour démarrer', 'Écris ton objectif en une phrase', 'Une seule, et qu''elle soit vérifiable.', 2),
-  (1, 'Pour démarrer', 'Note ce qui te bloque vraiment', null, 3),
-  (2, 'Construire', 'Découpe ton objectif en trois étapes', null, 1),
-  (2, 'Construire', 'Pose une date sur chaque étape', null, 2),
-  (2, 'Construire', 'Choisis la première action à faire cette semaine', null, 3),
-  (3, 'Avancer', 'Bloque un créneau récurrent dans ton agenda', 'Le même jour, à la même heure.', 1),
-  (3, 'Avancer', 'Fais le point chaque semaine', null, 2),
-  (3, 'Avancer', 'Note ce qui a marché et ce qui a coincé', null, 3),
-  (4, 'Tenir', 'Écris ta routine, celle que tu garderas', null, 1),
-  (4, 'Tenir', 'Identifie ce qui te ferait décrocher', null, 2),
-  (4, 'Tenir', 'Prévois quoi faire le jour où ça arrive', null, 3)
-) as t (numero, groupe, titre, description, ordre) on t.numero = p.numero;

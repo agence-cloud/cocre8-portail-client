@@ -18,9 +18,8 @@ describe("les permissions du portail", () => {
   let admin: SupabaseClient;
   let membre: SupabaseClient;
   let personneId: string;
-  let pilierOuvert: string;
-  let pilierFerme: string;
-  const tachesCreees: string[] = [];
+  let objectifId: string;
+  let tacheId: string;
   const documentsCrees: string[] = [];
   const cheminsCrees: string[] = [];
 
@@ -49,129 +48,104 @@ describe("les permissions du portail", () => {
       .single();
     personneId = compte!.personne_id as string;
 
-    const { data: piliers } = await admin
-      .from("pilier")
-      .select("id, numero")
-      .in("numero", [1, 3]);
-    pilierOuvert = piliers!.find((p) => p.numero === 1)!.id as string;
-    pilierFerme = piliers!.find((p) => p.numero === 3)!.id as string;
+    // Un objectif à soi, posé par le coach : les objectifs appartiennent
+    // désormais à un client, il n'y a plus de référentiel commun où piocher.
+    const { data: objectif } = await admin
+      .from("objectif")
+      .insert({ personne_id: personneId, titre: "Objectif de test", ordre: 99 })
+      .select("id")
+      .single();
+    objectifId = objectif!.id as string;
 
-    // Le pilier 1 est ouvert depuis hier, le pilier 3 s'ouvrira dans un an.
-    const hier = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10);
-    const dansUnAn = new Date(Date.now() + 365 * 86_400_000).toISOString().slice(0, 10);
-    await admin.from("acces_pilier").upsert(
-      [
-        { personne_id: personneId, pilier_id: pilierOuvert, date_ouverture: hier },
-        { personne_id: personneId, pilier_id: pilierFerme, date_ouverture: dansUnAn },
-      ],
-      { onConflict: "personne_id,pilier_id" },
-    );
-
-    const { data: taches } = await admin
+    const { data: tache } = await admin
       .from("tache")
-      .insert([
-        {
-          personne_id: personneId,
-          pilier_id: pilierOuvert,
-          groupe: "Section de test",
-          titre: "Tâche visible",
-          ordre: 1,
-        },
-        {
-          personne_id: personneId,
-          pilier_id: pilierFerme,
-          groupe: "Section de test",
-          titre: "Tâche cachée",
-          ordre: 1,
-        },
-      ])
-      .select("id");
-    tachesCreees.push(...(taches ?? []).map((t) => t.id as string));
+      .insert({ objectif_id: objectifId, titre: "Étape visible", ordre: 1 })
+      .select("id")
+      .single();
+    tacheId = tache!.id as string;
   });
 
   afterAll(async () => {
-    for (const id of tachesCreees) await admin.from("tache").delete().eq("id", id);
-    // Seulement les deux lignes posées ci-dessus, pas tout le calendrier du
-    // compte : permissions.test.ts ouvre aussi un pilier pour ce même compte
-    // de test, et un delete() sans filtre sur pilier_id effacerait sa ligne
-    // au passage si les deux fichiers se croisent.
-    await admin
-      .from("acces_pilier")
-      .delete()
-      .eq("personne_id", personneId)
-      .in("pilier_id", [pilierOuvert, pilierFerme]);
+    // Seulement l'objectif posé ci-dessus, pas tous ceux du compte :
+    // permissions.test.ts en pose aussi pour ce même compte de test, et un
+    // delete() sans filtre effacerait le sien si les deux fichiers se
+    // croisent. Ses étapes partent en cascade avec lui.
+    if (objectifId) await admin.from("objectif").delete().eq("id", objectifId);
     for (const id of documentsCrees) await admin.from("document").delete().eq("id", id);
     if (cheminsCrees.length > 0) await admin.storage.from("documents").remove(cheminsCrees);
   });
 
-  it("laisse le membre lire une tâche d'un pilier ouvert", async () => {
+  it("laisse le membre lire son objectif et ses étapes", async () => {
     const { data } = await membre
       .from("tache")
       .select("titre")
-      .eq("pilier_id", pilierOuvert);
+      .eq("objectif_id", objectifId);
 
-    expect(data?.map((t) => t.titre)).toContain("Tâche visible");
+    expect(data?.map((t) => t.titre)).toContain("Étape visible");
   });
 
-  it("cache au membre les tâches d'un pilier à venir", async () => {
-    const { data } = await membre
-      .from("tache")
-      .select("titre")
-      .eq("pilier_id", pilierFerme);
+  it("cache au membre les objectifs de quelqu'un d'autre", async () => {
+    // Le calendrier des parties tenait ce rôle auparavant : une tâche n'était
+    // lisible que si sa partie était ouverte. Il n'y a plus de calendrier,
+    // donc la seule frontière qui reste est celle du propriétaire, et c'est
+    // elle qu'il faut éprouver.
+    const { data: autre } = await admin
+      .from("personne")
+      .insert({ nom: `Cloison ${Date.now()}` })
+      .select("id")
+      .single();
 
-    expect(data).toEqual([]);
+    try {
+      const { data: sien } = await admin
+        .from("objectif")
+        .insert({ personne_id: autre!.id, titre: "Objectif d'un autre", ordre: 1 })
+        .select("id")
+        .single();
+      await admin
+        .from("tache")
+        .insert({ objectif_id: sien!.id, titre: "Étape d'un autre", ordre: 1 });
+
+      const { data: objectifs } = await membre.from("objectif").select("titre");
+      expect(objectifs?.map((o) => o.titre)).not.toContain("Objectif d'un autre");
+
+      const { data: taches } = await membre
+        .from("tache")
+        .select("titre")
+        .eq("objectif_id", sien!.id);
+      expect(taches).toEqual([]);
+    } finally {
+      await admin.from("personne").delete().eq("id", autre!.id);
+    }
   });
 
-  it("refuse au membre de cocher une tâche d'un pilier à venir", async () => {
+  it("laisse le membre cocher son étape", async () => {
     const { data } = await membre
       .from("tache")
       .update({ faite: true, faite_le: new Date().toISOString() })
-      .eq("pilier_id", pilierFerme)
+      .eq("id", tacheId)
       .select("id");
 
     // Une mise à jour qu'aucune politique n'autorise ne lève pas d'erreur :
     // elle ne touche simplement aucune ligne. Vérifier le compte est la
     // seule façon de distinguer un refus d'un succès.
-    expect(data).toEqual([]);
-  });
-
-  it("laisse le membre cocher une tâche d'un pilier ouvert", async () => {
-    // Viser la tâche créée par ce test, et non tout le pilier : le compte
-    // de test peut porter un parcours entier posé par ailleurs, et un filtre
-    // par pilier compterait alors onze lignes au lieu d'une. Le test
-    // échouerait en accusant la permission, qui n'y serait pour rien.
-    const { data: sienne } = await admin
-      .from("tache")
-      .select("id")
-      .eq("personne_id", personneId)
-      .eq("titre", "Tâche visible")
-      .single();
-
-    const { data } = await membre
-      .from("tache")
-      .update({ faite: true, faite_le: new Date().toISOString() })
-      .eq("id", sienne!.id)
-      .select("id");
-
     expect(data?.length).toBe(1);
   });
 
-  it("refuse au membre de créer une tâche", async () => {
+  it("refuse au membre de créer une étape", async () => {
     const { error } = await membre.from("tache").insert({
-      personne_id: personneId,
-      pilier_id: pilierOuvert,
-      titre: "Tâche que je m'invente",
+      objectif_id: objectifId,
+      titre: "Étape que je m'invente",
       ordre: 99,
     });
 
     expect(error).not.toBeNull();
   });
 
-  it("refuse au membre de renommer une de ses tâches", async () => {
+  it("refuse au membre de renommer une de ses étapes", async () => {
     const { error } = await membre
       .from("tache")
       .update({ titre: "Titre réécrit" })
-      .eq("pilier_id", pilierOuvert);
+      .eq("id", tacheId);
 
     expect(error?.message).toContain("pas les modifier");
   });

@@ -15,16 +15,9 @@ export type LiensExternes = {
   evenements: string;
 };
 
-export type MotPartie = {
-  singulier: string;
-  pluriel: string;
-};
-
 export type Reglages = {
   /** Le nom affiché en tête de l'espace du client et sur la connexion. */
   nom_programme: string;
-  /** Comment le coach appelle les grandes parties de son accompagnement. */
-  mot_partie: MotPartie;
   coach_nom: string;
   coach_telephone: string;
   liens_externes: LiensExternes;
@@ -38,7 +31,6 @@ export type Reglages = {
  */
 export const REGLAGES_PAR_DEFAUT: Reglages = {
   nom_programme: "Espace Client",
-  mot_partie: { singulier: "partie", pluriel: "parties" },
   coach_nom: "",
   coach_telephone: "",
   liens_externes: { communaute: "", formation: "", evenements: "" },
@@ -74,31 +66,13 @@ export function composerReglages(lignes: { cle: string; valeur: unknown }[]): Re
 
   return {
     nom_programme: texte("nom_programme", REGLAGES_PAR_DEFAUT.nom_programme),
-    mot_partie: objet("mot_partie", REGLAGES_PAR_DEFAUT.mot_partie),
     coach_nom: texte("coach_nom", REGLAGES_PAR_DEFAUT.coach_nom),
     coach_telephone: texte("coach_telephone", REGLAGES_PAR_DEFAUT.coach_telephone),
     liens_externes: objet("liens_externes", REGLAGES_PAR_DEFAUT.liens_externes),
   };
 }
 
-/**
- * Le mot des parties, accordé.
- *
- * Une seule écriture pour les deux formes, comme le numéro du coach : deux
- * chaînes saisies à la main divergent, et on se retrouve avec « Tes module ».
- */
-export function motPartie(reglages: Reglages, nombre: number): string {
-  return nombre > 1 ? reglages.mot_partie.pluriel : reglages.mot_partie.singulier;
-}
-
-/**
- * Le mot en tête de phrase.
- *
- * Le coach saisit son mot en minuscules, et l'app en a besoin des deux
- * façons : « Tes modules » en titre, « ce module » au fil du texte. Une
- * fonction plutôt que deux réglages, pour la raison habituelle : deux
- * chaînes saisies à la main finissent par ne plus dire la même chose.
- */
+/** Un mot en tête de phrase, quand un libellé réglé arrive en minuscules. */
 export function majuscule(mot: string): string {
   return mot.charAt(0).toUpperCase() + mot.slice(1);
 }

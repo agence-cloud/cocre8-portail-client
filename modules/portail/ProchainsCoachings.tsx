@@ -22,7 +22,7 @@ export function ProchainsCoachings({ coachings }: { coachings: Coaching[] }) {
           {coachings.map((coaching) => (
             <li key={coaching.id} className="-mx-2 flex gap-3 rounded-xl border-b border-bordure px-2 py-3 transition-colors duration-200 last:border-0 hover:bg-fond-alt">
               {/* Le glyphe dans son conteneur arrondi, comme les documents et
-                  les piliers : c'est ce qui fait qu'une liste se balaie de
+                  les objectifs : c'est ce qui fait qu'une liste se balaie de
                   l'oeil au lieu de se lire ligne à ligne. */}
               <span className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-icone bg-fond-alt">
                 <Icone nom="evenement" className="h-5 w-5 text-texte-doux" />

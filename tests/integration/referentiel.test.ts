@@ -1,8 +1,7 @@
 // @vitest-environment node
 
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { describe, it, expect, beforeAll } from "vitest";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import { calendrierPropose } from "@/lib/pilier/etat";
 
 async function connecterAdmin(): Promise<SupabaseClient> {
   const admin = createClient(
@@ -18,134 +17,64 @@ async function connecterAdmin(): Promise<SupabaseClient> {
   return admin;
 }
 
-describe("le référentiel", () => {
+/**
+ * Ce que `install.sql` laisse derrière lui.
+ *
+ * **Ce fichier était trois fois plus long.** Il éprouvait les parties du
+ * parcours, les quarante-six tâches modèles qui s'y rangeaient, et les deux
+ * fonctions qui les recopiaient chez un client avec un calendrier d'ouverture.
+ * Tout cela est parti : les objectifs appartiennent à un client et s'écrivent
+ * à la main, il n'y a plus de référentiel commun à vérifier.
+ *
+ * Ne reste que le questionnaire, seule liste que l'outil pose encore d'avance,
+ * parce qu'un profil vide ne demanderait rien à personne.
+ */
+describe("le jeu de départ", () => {
   let admin: SupabaseClient;
 
   beforeAll(async () => {
     admin = await connecterAdmin();
   });
 
-  it("compte cinq piliers, du 0 au 4", async () => {
-    const { data } = await admin.from("pilier").select("numero, nom").order("ordre");
-
-    expect(data?.map((p) => p.numero)).toEqual([0, 1, 2, 3, 4]);
-    expect(data?.[0].nom).toBe("Clarté");
-  });
-
-  it("pose dix questions de profil actives", async () => {
-    const { data } = await admin
+  it("pose les questions du profil, actives et ordonnées", async () => {
+    const { data, error } = await admin
       .from("question_profil")
       .select("libelle, type, ordre")
       .eq("active", true)
       .order("ordre");
 
-    expect(data).toHaveLength(10);
-    expect(data?.[0].libelle).toContain("12 derniers mois");
-    expect(data?.[8].type).toBe("choix");
+    expect(error).toBeNull();
+    // Le compte n'est pas figé ici : un coach a le droit d'ajouter ou de
+    // retirer ses questions depuis les réglages, et ce test tourne contre sa
+    // base. Ce qui doit tenir, c'est qu'il en reste au moins une et que la
+    // porte du profil ait donc quelque chose à demander.
+    expect((data ?? []).length).toBeGreaterThan(0);
+    expect(data?.[0].ordre).toBe(1);
   });
 
-  it("pose quarante-six tâches modèles, réparties sur quatre piliers", async () => {
-    const { data } = await admin
-      .from("tache_modele")
-      .select("groupe, pilier:pilier_id (numero)");
+  it("ne pose aucun objectif d'avance", async () => {
+    // Délibéré, et c'est le coeur du changement : poser des objectifs à
+    // l'installation reviendrait à imposer la méthode de l'éditeur à tous
+    // ceux qui installent l'outil. Un objectif sans client n'existe pas.
+    const { data, error } = await admin
+      .from("objectif")
+      .select("id, personne_id")
+      .is("personne_id", null);
 
-    const parPilier = new Map<number, number>();
-    for (const ligne of data ?? []) {
-      // Supabase renvoie une jointure comme un tableau même quand elle ne
-      // porte qu'une ligne.
-      const jointure = ligne.pilier as unknown;
-      const pilier = Array.isArray(jointure) ? jointure[0] : jointure;
-      const numero = (pilier as { numero: number }).numero;
-      parPilier.set(numero, (parPilier.get(numero) ?? 0) + 1);
-    }
-
-    // Le jeu de départ : trois tâches par partie, quatre parties. Ces
-    // chiffres bougeront dès qu'un coach écrira son propre parcours depuis
-    // ses réglages, et c'est bien pour ça que ce test vit ici et pas chez
-    // lui : il éprouve le jeu livré, pas le sien.
-    expect(data).toHaveLength(12);
-    for (const numero of [1, 2, 3, 4]) {
-      expect(parPilier.get(numero)).toBe(3);
-    }
+    expect(error).toBeNull();
+    expect(data ?? []).toEqual([]);
   });
 
-  it("range chaque tâche sous une section", async () => {
-    const { data } = await admin.from("tache_modele").select("titre, groupe");
+  it("pose au moins une offre active", async () => {
+    // `creerLeCompteDuMembre` refuse une fiche sans accompagnement, et un
+    // accompagnement demande une offre : sans offre, personne ne peut être
+    // ajouté, et l'outil s'ouvre sur une impasse.
+    const { data, error } = await admin
+      .from("offre")
+      .select("nom")
+      .eq("active", true);
 
-    expect(data?.filter((t) => !t.groupe)).toEqual([]);
-  });
-});
-
-describe("les gestes de mise en service", () => {
-  let admin: SupabaseClient;
-  let personneId: string | undefined;
-
-  beforeAll(async () => {
-    admin = await connecterAdmin();
-    const { data } = await admin
-      .from("personne")
-      .insert({ nom: `Jetable ${Date.now()}` })
-      .select("id")
-      .single();
-    personneId = data!.id as string;
-  });
-
-  afterAll(async () => {
-    // personneId reste indéfini si le beforeAll échoue après la connexion
-    // mais avant la création de la fiche : sans ce garde, ce afterAll
-    // lèverait sa propre erreur sur un filtre sans valeur, et masquerait la
-    // vraie cause de l'échec derrière un second échec sans rapport.
-    if (personneId) await admin.from("personne").delete().eq("id", personneId);
-  });
-
-  it("pose le calendrier en ramenant au dernier jour du mois", async () => {
-    // Non-null : si le beforeAll avait échoué avant de poser la fiche, ce
-    // test ne serait jamais atteint, vitest le marque en échec avant.
-    await admin.rpc("planifier_piliers", {
-      p_personne: personneId!,
-      p_demarrage: "2026-01-31",
-    });
-
-    const { data } = await admin
-      .from("acces_pilier")
-      .select("date_ouverture, pilier:pilier_id (numero)")
-      .eq("personne_id", personneId!);
-
-    const parNumero = new Map<number, string>();
-    for (const ligne of data ?? []) {
-      const jointure = ligne.pilier as unknown;
-      const pilier = Array.isArray(jointure) ? jointure[0] : jointure;
-      parNumero.set((pilier as { numero: number }).numero, ligne.date_ouverture as string);
-    }
-
-    // L'ancre absolue : PostgreSQL ramène au dernier jour du mois quand le
-    // jour n'existe pas. Le 31 janvier plus un mois donne le 28 février.
-    expect(parNumero.get(1)).toBe("2026-01-31");
-    expect(parNumero.get(2)).toBe("2026-02-28");
-    expect(parNumero.get(3)).toBe("2026-03-31");
-    expect(parNumero.get(4)).toBe("2026-04-30");
-    // Et le couplage : la base et l'écran calculent ces dates chacun de leur
-    // côté, en SQL ici et en TypeScript dans calendrierPropose. Comparer les
-    // deux aux mêmes littéraux ne suffit pas : le jour où l'un des deux
-    // dérive, ce test doit rougir, sinon l'écran promet au membre une date
-    // que la base ne pose pas.
-    const attendu = new Map(
-      calendrierPropose("2026-01-31").map((l) => [l.numero, l.date]),
-    );
-    for (const numero of [1, 2, 3, 4]) {
-      expect(parNumero.get(numero)).toBe(attendu.get(numero));
-    }
-  });
-
-  it("copie le parcours, et le relancer n'ajoute rien", async () => {
-    const premiere = await admin.rpc("appliquer_parcours_modele", {
-      p_personne: personneId!,
-    });
-    const seconde = await admin.rpc("appliquer_parcours_modele", {
-      p_personne: personneId!,
-    });
-
-    expect(premiere.data).toBe(46);
-    expect(seconde.data).toBe(0);
+    expect(error).toBeNull();
+    expect((data ?? []).length).toBeGreaterThan(0);
   });
 });

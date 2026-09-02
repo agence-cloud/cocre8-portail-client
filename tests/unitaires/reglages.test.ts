@@ -1,7 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
   composerReglages,
-  motPartie,
   REGLAGES_PAR_DEFAUT,
 } from "@/lib/reglages/types";
 
@@ -39,31 +38,10 @@ describe("composerReglages", () => {
     // laisse le client devant une page cassée.
     const reglages = composerReglages([
       { cle: "nom_programme", valeur: { pas: "une chaîne" } },
-      { cle: "mot_partie", valeur: "module" },
       { cle: "liens_externes", valeur: null },
     ]);
 
     expect(reglages.nom_programme).toBe(REGLAGES_PAR_DEFAUT.nom_programme);
-    expect(reglages.mot_partie).toEqual(REGLAGES_PAR_DEFAUT.mot_partie);
     expect(reglages.liens_externes).toEqual(REGLAGES_PAR_DEFAUT.liens_externes);
-  });
-});
-
-describe("motPartie", () => {
-  it("accorde le mot sur le nombre", () => {
-    // Les deux formes sortent d'un seul réglage : deux chaînes saisies à la
-    // main divergent, et on se retrouve avec « Tes module ».
-    const reglages = composerReglages([
-      { cle: "mot_partie", valeur: { singulier: "module", pluriel: "modules" } },
-    ]);
-
-    expect(motPartie(reglages, 1)).toBe("module");
-    expect(motPartie(reglages, 4)).toBe("modules");
-  });
-
-  it("garde le singulier à zéro", () => {
-    // « 0 modules » se lit mal en français, et l'écran dit plutôt « aucun
-    // module ». Le singulier est le bon choix par défaut.
-    expect(motPartie(REGLAGES_PAR_DEFAUT, 0)).toBe(REGLAGES_PAR_DEFAUT.mot_partie.singulier);
   });
 });

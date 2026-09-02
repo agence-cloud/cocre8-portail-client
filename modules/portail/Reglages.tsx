@@ -19,9 +19,9 @@ const INITIAL: EtatReglages = { erreur: null, enregistre: false };
  * l'impression que ces valeurs se modifient tout le temps, alors qu'on y
  * touche une fois à l'installation et presque plus jamais.
  *
- * Ne sont ici que les valeurs simples. Les parties, les questions du profil
- * et les tâches modèles sont des listes à part entière : elles auront leur
- * propre écran, et les mettre dans le même formulaire ferait un mur.
+ * Ne sont ici que les valeurs simples. Les questions du profil sont une liste
+ * à part entière, elles ont leur propre bloc : les mettre dans le même
+ * formulaire ferait un mur.
  */
 export function Reglages({ reglages }: { reglages: TypeReglages }) {
   const [etat, action, enCours] = useActionState(enregistrerLesReglages, INITIAL);
@@ -37,10 +37,6 @@ export function Reglages({ reglages }: { reglages: TypeReglages }) {
 
         <dl className="mt-5 flex flex-col gap-4 text-sm">
           <Ligne intitule="Nom du programme" valeur={reglages.nom_programme} />
-          <Ligne
-            intitule="Le mot des parties"
-            valeur={`${reglages.mot_partie.singulier}, ${reglages.mot_partie.pluriel}`}
-          />
           <Ligne intitule="Ton nom" valeur={reglages.coach_nom} />
           <Ligne intitule="Ton téléphone" valeur={reglages.coach_telephone} />
           <Ligne intitule="Lien communauté" valeur={reglages.liens_externes.communaute} />
@@ -69,22 +65,6 @@ export function Reglages({ reglages }: { reglages: TypeReglages }) {
           aide="Affiché en tête de l'espace de tes clients, et sur l'écran de connexion."
           defaut={reglages.nom_programme}
         />
-
-        <div className="mt-5 grid gap-4 sm:grid-cols-2">
-          <Champ
-            nom="mot_singulier"
-            intitule="Une partie s'appelle"
-            aide="Module, pilier, phase, axe."
-            defaut={reglages.mot_partie.singulier}
-            requis
-          />
-          <Champ
-            nom="mot_pluriel"
-            intitule="Plusieurs s'appellent"
-            defaut={reglages.mot_partie.pluriel}
-            requis
-          />
-        </div>
 
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
           <Champ nom="coach_nom" intitule="Ton nom" defaut={reglages.coach_nom} />

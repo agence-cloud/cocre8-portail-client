@@ -2,8 +2,7 @@ import { describe, it, expect, afterEach, vi } from "vitest";
 import { render, screen, cleanup, fireEvent, waitFor } from "@testing-library/react";
 
 import { Anneau } from "@/modules/portail/Anneau";
-import { CartePilier } from "@/modules/portail/CartePilier";
-import { SectionTaches } from "@/modules/portail/SectionTaches";
+import { CarteObjectif } from "@/modules/portail/CarteObjectif";
 import { DepotDocument } from "@/modules/portail/DepotDocument";
 import { FormulaireProfil } from "@/modules/portail/FormulaireProfil";
 import { PorteProfil } from "@/modules/portail/PorteProfil";
@@ -35,89 +34,71 @@ describe("Anneau", () => {
   });
 });
 
-describe("CartePilier", () => {
-  const pilier = {
-    id: "pilier-2",
-    numero: 2,
-    nom: "Plan",
-    description: "Industrialiser la livraison.",
-    ordre: 2,
-  };
-
-  it("mène au pilier quand il est ouvert", () => {
+describe("CarteObjectif", () => {
+  it("s'ouvre repliée quand l'objectif est atteint", () => {
     render(
-      <CartePilier pilier={pilier} etat={{ statut: "ouvert" }} progression={40} mot="module" />,
+      <CarteObjectif
+        titre="Arrêter de facturer à l'heure"
+        description={null}
+        echeance={null}
+        faites={3}
+        total={3}
+        terminee
+      >
+        <p>Une étape</p>
+      </CarteObjectif>,
     );
-    expect(screen.getByRole("link")).toHaveAttribute("href", "/espace/piliers/2");
-  });
-
-  it("affiche la date et la phrase quand il est à venir", () => {
-    render(
-      <CartePilier
-        mot="module"
-        pilier={pilier}
-        etat={{ statut: "a_venir", date: "2026-10-01" }}
-        progression={0}
-      />,
-    );
-    expect(screen.getByText(/1er octobre/)).toBeInTheDocument();
-    expect(screen.queryByRole("link")).toBeNull();
-  });
-});
-
-describe("CartePilier, son bandeau", () => {
-  const pilier = {
-    id: "pilier-2",
-    numero: 2,
-    nom: "Plan",
-    description: "Industrialiser la livraison.",
-    ordre: 2,
-  };
-
-  it("pose l'icône du pilier deux fois, en cartouche et en filigrane", () => {
-    // C'est ce doublement qui fait le bandeau : la petite ancre le rend
-    // lisible, la grande, presque effacée, distingue les cinq piliers les
-    // uns des autres. Compter les tracés est la seule façon de le vérifier,
-    // une icône décorative n'ayant ni texte ni rôle accessible.
-    const { container } = render(
-      <CartePilier pilier={pilier} etat={{ statut: "ouvert" }} progression={40} mot="module" />,
-    );
-
-    expect(container.querySelectorAll("svg")).toHaveLength(2);
-  });
-
-  it("ajoute le cadenas quand le pilier n'est pas ouvert", () => {
-    const { container } = render(
-      <CartePilier
-        mot="module"
-        pilier={pilier}
-        etat={{ statut: "a_venir", date: "2026-10-01" }}
-        progression={0}
-      />,
-    );
-
-    expect(container.querySelectorAll("svg")).toHaveLength(3);
-  });
-});
-
-describe("SectionTaches", () => {
-  it("s'ouvre repliée quand la section est terminée", () => {
-    render(
-      <SectionTaches nom="Clarifie ta cible" faites={2} total={2} terminee>
-        <p>Une tâche</p>
-      </SectionTaches>,
-    );
-    expect(screen.queryByText("Une tâche")).toBeNull();
+    expect(screen.queryByText("Une étape")).toBeNull();
     expect(screen.getByRole("button")).toHaveAttribute("aria-expanded", "false");
   });
 
-  it("s'ouvre dépliée quand il reste une tâche", () => {
+  it("s'ouvre dépliée quand il reste une étape", () => {
     render(
-      <SectionTaches nom="Clarifie ta cible" faites={1} total={2} terminee={false}>
-        <p>Une tâche</p>
-      </SectionTaches>,
+      <CarteObjectif
+        titre="Annoncer le prix sans se justifier"
+        description="Le blocage n'est pas le tarif."
+        echeance={null}
+        faites={1}
+        total={4}
+        terminee={false}
+      >
+        <p>Une étape</p>
+      </CarteObjectif>,
     );
-    expect(screen.getByText("Une tâche")).toBeInTheDocument();
+    expect(screen.getByText("Une étape")).toBeInTheDocument();
+    expect(screen.getByText("Le blocage n'est pas le tarif.")).toBeInTheDocument();
+  });
+
+  it("affiche l'échéance quand il y en a une, et rien sinon", () => {
+    // Une échéance est facultative : tous les objectifs ne se datent pas, et
+    // une ligne « pour le » vide vaudrait moins que pas de ligne du tout.
+    const { rerender } = render(
+      <CarteObjectif
+        titre="Trois forfaits signés"
+        description={null}
+        echeance="2026-10-01"
+        faites={0}
+        total={3}
+        terminee={false}
+      >
+        <p>Une étape</p>
+      </CarteObjectif>,
+    );
+    expect(screen.getByText(/1er octobre/)).toBeInTheDocument();
+
+    rerender(
+      <CarteObjectif
+        titre="Trois forfaits signés"
+        description={null}
+        echeance={null}
+        faites={0}
+        total={3}
+        terminee={false}
+      >
+        <p>Une étape</p>
+      </CarteObjectif>,
+    );
+    expect(screen.queryByText(/pour le/)).toBeNull();
   });
 });
 
@@ -164,7 +145,6 @@ describe("la porte du profil entrepreneur", () => {
   const questions = [
     {
       id: "q1",
-      pilier_id: null,
       libelle: "Combien factures-tu par mois ?",
       aide: null,
       type: "nombre" as const,
@@ -173,7 +153,6 @@ describe("la porte du profil entrepreneur", () => {
     },
     {
       id: "q2",
-      pilier_id: null,
       libelle: "D'où viennent tes clients ?",
       aide: null,
       type: "choix" as const,
@@ -283,7 +262,6 @@ describe("le profil entrepreneur une fois rempli", () => {
   const questions = [
     {
       id: "q1",
-      pilier_id: null,
       libelle: "Combien factures-tu par mois ?",
       aide: null,
       type: "nombre" as const,
@@ -292,7 +270,6 @@ describe("le profil entrepreneur une fois rempli", () => {
     },
     {
       id: "q2",
-      pilier_id: null,
       libelle: "D'où viennent tes clients ?",
       aide: null,
       type: "texte_court" as const,

@@ -30,25 +30,26 @@ au-delà : c'est ce qui garde l'outil simple et donnable.
 4. **Deux vues sur la même chose** : le coach pose les tâches et les
    objectifs, le client les voit, avec ses coachings.
 
-L'espace est **le même pour tout le monde, et modifiable pour chacun** : le
-parcours type donne la structure commune, et le coach ajuste ensuite chez qui
-il veut.
+L'espace est **propre à chaque client, du premier jour au dernier** : rien
+n'est commun, le coach écrit les objectifs de chacun.
 
-**Un objectif est une partie, pas une chose de plus** (tranché le
-2026-09-01). Les parties sont les étapes de l'accompagnement, et le coach les
-remplit de tâches propres à chaque client. C'est ce que `TachesCoach` fait
-déjà : appliquer le parcours type, puis ajouter ce qui ne concerne que cette
-personne. Un coach qui préfère le mot « objectif » le règle depuis son écran,
-et rien d'autre ne bouge.
+**Cette ligne disait l'inverse jusqu'au 2026-09-02**, et c'est le seul virage
+de fond de l'outil. Il était écrit qu'un objectif était une « partie », que
+les parties donnaient la structure commune à tous, et qu'un coach préférant le
+mot « objectif » n'avait qu'à le régler. Trois conséquences en découlaient,
+toutes mauvaises pour un template : le coach héritait de la méthode de
+l'éditeur au lieu d'écrire la sienne, le premier écran d'un nouveau client
+montrait les tâches de quelqu'un d'autre, et un client ne pouvait rien avoir
+que son voisin n'ait pas.
 
 ## Les deux côtés
 
 Deux rôles, une base. `role_compte` vaut `admin` ou `membre`, et le rôle
 décide de l'atterrissage.
 
-**Côté client** (`/espace`) : son tableau de bord, son programme découpé en
-parties avec ses tâches, son profil rempli à l'entrée, ses séances passées
-avec leur compte rendu, ses documents.
+**Côté client** (`/espace`) : son tableau de bord, ses objectifs découpés en
+étapes, son profil rempli à l'entrée, ses séances passées avec leur compte
+rendu, ses documents.
 
 **Côté coach** (`/pilotage`) : la liste de ses clients, la fiche de suivi
 d'un client, l'ajout d'un client et l'envoi de ses accès, et les réglages.
@@ -65,45 +66,33 @@ La création elle-même ne bouge pas : elle reste dans le socle
 paramètre**, elle se lit en base à partir de l'identifiant de la fiche. Le
 coach crée donc la fiche, puis envoie les accès, en deux gestes.
 
-## Le vocabulaire
-
-L'app appelle « pilier » les grandes parties d'un accompagnement. C'est le mot
-d'une méthode particulière, pas un mot du marché.
-
-**Le mot affiché devient un réglage** (Module, Pilier, Phase, Axe, Étape). La
-table reste `pilier` : renommer une table pour un libellé coûterait une
-migration et une reprise de tout le code, pour rien.
-
 ## Le jeu par défaut
 
-Quatre parties, assez larges pour n'importe quel coaching, assez concrètes
-pour qu'on comprenne à quoi ça sert sans les renommer :
+**Aucun objectif.** Un objectif appartient à un client : en poser d'avance
+reviendrait à imposer la méthode de l'éditeur à tous ceux qui installent
+l'outil. L'espace d'un nouveau client est donc vide d'objectifs jusqu'à ce que
+son coach en écrive un, et le jeu de démonstration est là pour montrer à quoi
+ça ressemble une fois rempli.
 
-1. **Clarté** : où tu en es, où tu veux aller, ce qui bloque.
-2. **Plan** : le chemin, découpé et daté.
-3. **Action** : l'exécution semaine après semaine.
-4. **Ancrage** : tenir dans la durée sans le coach.
-
-Un parcours modèle de trois tâches par partie. Huit questions de profil
-génériques : objectif principal, situation actuelle, échéance, obstacle
-principal, tentatives passées, temps disponible par semaine, définition du
-succès, ce qu'il attend de son coach. Trois offres sans prix (Accompagnement
-3 mois, Accompagnement 6 mois, Suivi mensuel).
+Huit questions de profil génériques : objectif principal, situation actuelle,
+échéance, obstacle principal, tentatives passées, temps disponible par
+semaine, définition du succès, ce qu'il attend de son coach. Trois offres sans
+prix (Accompagnement 3 mois, Accompagnement 6 mois, Suivi mensuel).
 
 Aucune de ces valeurs n'est écrite dans du code : elles vivent dans
-`install.sql`, et se modifient toutes depuis l'écran de réglages.
+`install.sql`, et les questions se modifient depuis l'écran de réglages.
 
 ## Les réglages
 
 Un écran, côté coach, et rien à configurer nulle part ailleurs :
 
 - le nom du programme, affiché en tête de l'espace client ;
-- le mot qui remplace « pilier » ;
-- les parties : nom, description, ordre, en ajouter, en retirer ;
 - les questions du profil : libellé, aide, type, ordre, active ou non ;
-- les tâches modèles, par partie ;
 - le nom du coach et son numéro de téléphone ;
 - trois liens externes, vides par défaut.
+
+Les objectifs n'y sont pas : ils appartiennent à un client, et se saisissent
+sur son écran de suivi.
 
 **Une valeur vide n'affiche pas son lien.** Un groupe sans aucun lien ne
 dessine ni titre ni filet, et la carte du coach ne se dessine pas tant que son
@@ -111,8 +100,18 @@ numéro n'est pas renseigné.
 
 ## Ce qui n'est pas réglable, et pourquoi
 
-**La structure.** Un programme, des parties, des tâches, un profil rempli à
-l'entrée. C'est la forme de l'outil, pas un paramètre.
+**La structure.** Des objectifs, leurs étapes, un profil rempli à l'entrée.
+C'est la forme de l'outil, pas un paramètre.
+
+**Elle a changé le 2026-09-02, et c'est le seul virage de fond.** L'outil
+portait des « parties » communes à tous les clients, ouvertes une par mois
+selon un calendrier, remplies depuis un parcours type recopié chez chacun.
+Trois choses en découlaient, toutes mauvaises pour un template : le coach
+héritait de la méthode de l'éditeur au lieu d'écrire la sienne, le premier
+écran d'un nouveau client montrait les tâches de quelqu'un d'autre, et un
+client ne pouvait rien avoir que son voisin n'ait pas. Un objectif appartient
+désormais à un client, il se saisit à la main, et rien ne le range dans une
+grille.
 
 **Le profil comme porte d'entrée.** Tant qu'une réponse manque, l'espace
 entier renvoie vers la porte. Ça vaut pour n'importe quel coach : un

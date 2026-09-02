@@ -2,31 +2,20 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { exigerAdmin } from "@/lib/auth/compte";
 import { lirePersonne, aUnCompte } from "@/lib/personne/requetes";
-import { lirePiliers, lireCalendrier } from "@/lib/pilier/requetes";
-import { etatPilier } from "@/lib/pilier/etat";
+import { lireObjectifs } from "@/lib/objectif/requetes";
 import { lireAccompagnements } from "@/lib/offre/requetes";
 import { lireQuestions, lireReponses } from "@/lib/profil/requetes";
 import { lireDocuments, signerDocument } from "@/lib/document/requetes";
 import { lireCoachingsDuMembre } from "@/lib/coaching/requetes";
-import { lireTaches } from "@/modules/portail/requetes";
-import {
-  grouperEnSections,
-  progression,
-  progressionPilier,
-  pilierEnCours,
-} from "@/modules/portail/progression";
+import { progression } from "@/modules/portail/progression";
 import { Anneau } from "@/modules/portail/Anneau";
-import { CalendrierPiliers } from "@/modules/portail/CalendrierPiliers";
-import { TachesCoach } from "@/modules/portail/TachesCoach";
+import { ObjectifsCoach } from "@/modules/portail/ObjectifsCoach";
 import { CoachingsCoach } from "@/modules/portail/CoachingsCoach";
 import { EnvoyerLesAcces } from "@/modules/portail/EnvoyerLesAcces";
-import { SectionTaches } from "@/modules/portail/SectionTaches";
-import { CaseTache } from "@/modules/portail/CaseTache";
 import { ListeDocuments } from "@/modules/portail/ListeDocuments";
 import { DepotDocument } from "@/modules/portail/DepotDocument";
 import { Carte } from "@/lib/design/Carte";
 import { nomComplet } from "@/lib/personne/types";
-import { lireReglages } from "@/lib/reglages/requetes";
 
 export default async function SuiviMembre({
   params,
@@ -40,39 +29,22 @@ export default async function SuiviMembre({
   if (!personne) notFound();
 
   const [
-    piliers,
-    calendrier,
-    taches,
+    objectifs,
     accompagnements,
     questions,
     reponses,
     documents,
     coachings,
     compteExiste,
-  ] =
-    await Promise.all([
-      lirePiliers(),
-      lireCalendrier(id),
-      lireTaches(id),
-      lireAccompagnements(id),
-      lireQuestions(),
-      lireReponses(id),
-      lireDocuments(id),
-      lireCoachingsDuMembre(id),
-      aUnCompte(id),
-    ]);
-
-  const aujourdhui = new Date();
-  const ouverts = new Set(
-    calendrier
-      .filter((a) => etatPilier(a.date_ouverture, aujourdhui).statut === "ouvert")
-      .map((a) => a.pilier_id),
-  );
-
-  const courant = pilierEnCours(piliers, taches, ouverts);
-  const sections = courant
-    ? grouperEnSections(taches.filter((t) => t.pilier_id === courant.id))
-    : [];
+  ] = await Promise.all([
+    lireObjectifs(id),
+    lireAccompagnements(id),
+    lireQuestions(),
+    lireReponses(id),
+    lireDocuments(id),
+    lireCoachingsDuMembre(id),
+    aUnCompte(id),
+  ]);
 
   const liens = Object.fromEntries(
     await Promise.all(
@@ -83,7 +55,6 @@ export default async function SuiviMembre({
     ),
   );
 
-  const reglages = await lireReglages();
   const nom = nomComplet(personne);
   const valeurs = new Map(reponses.map((r) => [r.question_id, r.reponse]));
 
@@ -102,49 +73,10 @@ export default async function SuiviMembre({
               : "Aucun accompagnement enregistré"}
           </p>
         </div>
-        <Anneau pourcentage={progression(taches, ouverts)} taille={88} />
+        <Anneau pourcentage={progression(objectifs)} taille={88} />
       </div>
 
-      <CalendrierPiliers
-        personneId={id}
-        piliers={piliers}
-        calendrier={calendrier}
-        demarrageSuggere={accompagnements[0]?.date_debut ?? null}
-      />
-
-      <TachesCoach personneId={id} piliers={piliers} />
-
-      {courant && (
-        <div className="mt-6">
-          <h2 className="text-lg">
-            Où il en est : {reglages.mot_partie.singulier} {courant.numero}, {courant.nom} (
-            {progressionPilier(taches, courant.id)} %)
-          </h2>
-          <p className="mt-1 text-sm text-texte-doux">
-            Seul le {reglages.mot_partie.singulier} en cours est déroulé ici. Les autres se lisent dans
-            le calendrier ci-dessus.
-          </p>
-          {sections.map((section) => (
-            <SectionTaches
-              key={section.nom ?? "sans-section"}
-              nom={section.nom}
-              faites={section.faites}
-              total={section.taches.length}
-              terminee={section.terminee}
-            >
-              {section.taches.map((tache) => (
-                <CaseTache
-                  key={tache.id}
-                  id={tache.id}
-                  titre={tache.titre}
-                  description={tache.description}
-                  faite={tache.faite}
-                />
-              ))}
-            </SectionTaches>
-          ))}
-        </div>
-      )}
+      <ObjectifsCoach personneId={id} objectifs={objectifs} />
 
       <CoachingsCoach personneId={id} coachings={coachings} />
 

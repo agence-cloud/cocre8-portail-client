@@ -2,7 +2,6 @@ export type TypeQuestion = "texte_court" | "texte_long" | "nombre" | "choix";
 
 export type QuestionProfil = {
   id: string;
-  pilier_id: string | null;
   libelle: string;
   aide: string | null;
   type: TypeQuestion;
@@ -12,7 +11,7 @@ export type QuestionProfil = {
 };
 
 /**
- * Une question telle que le coach la règle : sans `pilier_id` ni `options`,
+ * Une question telle que le coach la règle : sans `options`,
  * que l'écran des réglages ne propose pas encore, mais avec `active`, qu'il
  * est seul à voir.
  */

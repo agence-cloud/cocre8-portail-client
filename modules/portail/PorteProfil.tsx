@@ -28,7 +28,7 @@ const CHAMP =
 /** Ce que l'écran de chargement annonce, dans l'ordre où il l'annonce. */
 const ETAPES_CHARGEMENT = [
   "Ton point de départ est enregistré",
-  "On ouvre tes piliers",
+  "On ouvre ton espace",
   "On prépare tes coachings",
   "Ton espace est prêt",
 ];
@@ -54,7 +54,7 @@ const RYTHME = 550;
  *
  * **Le chargement** occupe l'attente pendant que l'espace s'ouvre. Il ne
  * ment pas : chacune de ses lignes correspond à quelque chose qui existe
- * derrière (les piliers, les coachings), et il dure le temps qu'il annonce.
+ * derrière (les objectifs, les coachings), et il dure le temps qu'il annonce.
  *
  * **La porte reste une porte** : rien n'est accessible
  * tant que les dix réponses ne sont pas là. Seule la traversée change.

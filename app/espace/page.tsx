@@ -1,19 +1,16 @@
 import Link from "next/link";
 import { exigerMembre } from "@/lib/auth/compte";
 import { exigerProfilComplet } from "@/modules/portail/garde";
-import { lirePiliers, lireCalendrier } from "@/lib/pilier/requetes";
-import { etatPilier } from "@/lib/pilier/etat";
+import { lireObjectifs } from "@/lib/objectif/requetes";
 import { lireQuestions, lireReponses } from "@/lib/profil/requetes";
 import { completude } from "@/lib/profil/completude";
 import { lireProchainsCoachings } from "@/lib/coaching/requetes";
-import { lireTaches } from "@/modules/portail/requetes";
 import { joindreLeCoach } from "@/modules/portail/coach";
 import { lireReglages } from "@/lib/reglages/requetes";
-import { majuscule } from "@/lib/reglages/types";
 import {
   progression,
-  progressionPilier,
-  pilierEnCours,
+  progressionObjectif,
+  objectifEnCours,
 } from "@/modules/portail/progression";
 import { Anneau } from "@/modules/portail/Anneau";
 import { CaseTache } from "@/modules/portail/CaseTache";
@@ -38,46 +35,32 @@ export default async function AccueilEspace() {
   const personneId = compte.personneId!;
   await exigerProfilComplet(personneId);
 
-  const [piliers, calendrier, taches, questions, reponses, coachings] =
-    await Promise.all([
-      lirePiliers(),
-      lireCalendrier(personneId),
-      lireTaches(personneId),
-      lireQuestions(),
-      lireReponses(personneId),
-      lireProchainsCoachings(2),
-    ]);
+  const [objectifs, questions, reponses, coachings] = await Promise.all([
+    lireObjectifs(personneId),
+    lireQuestions(),
+    lireReponses(personneId),
+    lireProchainsCoachings(2),
+  ]);
 
-  const aujourdhui = new Date();
-  const ouverts = new Set(
-    calendrier
-      .filter(
-        (a) => etatPilier(a.date_ouverture, aujourdhui).statut === "ouvert",
-      )
-      .map((a) => a.pilier_id),
-  );
-
-  const courant = pilierEnCours(piliers, taches, ouverts);
-  const restantes = courant
-    ? taches.filter((t) => t.pilier_id === courant.id && !t.faite)
-    : [];
+  const courant = objectifEnCours(objectifs);
+  const restantes = courant ? courant.taches.filter((t) => !t.faite) : [];
+  const restantesEnTout = objectifs.flatMap((o) => o.taches).filter((t) => !t.faite);
   const bilan = completude(questions, reponses);
   const reglages = await lireReglages();
   const contact = joindreLeCoach(reglages.coach_telephone);
 
   return (
     <>
-      {/* Le titre monte à 48 px et passe en bleu titre. La charte prévoit 56
-          pour un titre de page et l'app était à 36 : elle était en dessous de
-          son propre système. Le titre plutôt que le charcoal vient de la
-          décision 0020. */}
+      {/* Le titre de page monte à 48 px, l'app était à 36 : elle était en
+          dessous de son propre système. En blanc franc plutôt que dans la
+          couleur du texte courant, pour qu'il ouvre l'écran. */}
       <h1 className="text-[40px] tracking-[-0.035em] text-titre lg:text-5xl">
         Bonjour <span className="text-accent">{compte.nom}</span>
       </h1>
       <p className="mt-3 text-[17px] text-texte-doux">
         {courant
-          ? `Tu es sur le pilier ${courant.numero}, ${courant.nom}.`
-          : "Ton accompagnement démarre bientôt, ton coach prépare ton parcours."}
+          ? `Tu avances sur : ${courant.titre}.`
+          : "Ton accompagnement démarre bientôt, ton coach prépare tes objectifs."}
       </p>
 
       {/* La rangée de chiffres, motif que la charte décrit comme un élément de
@@ -88,8 +71,8 @@ export default async function AccueilEspace() {
         <CarteStat
           icone="coche"
           libelle="Tâches restantes"
-          valeur={courant ? restantes.length : 0}
-          detail={courant ? `Sur le pilier ${courant.numero}, ${courant.nom}` : "Ton parcours arrive"}
+          valeur={restantesEnTout.length}
+          detail={courant ? `Dont ${restantes.length} sur ton objectif en cours` : "Tes objectifs arrivent"}
         />
         <CarteStat
           icone="evenement"
@@ -98,10 +81,14 @@ export default async function AccueilEspace() {
           detail={coachings[0] ? "Ton coach t'attend" : "Aucun coaching programmé"}
         />
         <CarteStat
-          icone="piliers"
-          libelle={`${majuscule(reglages.mot_partie.pluriel)} ouverts`}
-          valeur={ouverts.size}
-          detail={`Sur les ${piliers.length} du parcours`}
+          icone="objectifs"
+          libelle="Objectifs"
+          valeur={objectifs.length}
+          detail={
+            objectifs.length > 0
+              ? `${objectifs.filter((o) => o.taches.length > 0 && progressionObjectif(o) === 100).length} atteints`
+              : "Aucun pour l'instant"
+          }
         />
       </div>
 
@@ -111,7 +98,7 @@ export default async function AccueilEspace() {
       {/* Deux colonnes qui s'empilent chacune de leur côté, et non une
           grille de quatre cases. Avec une grille, les rangées s'alignent : la
           carte de l'anneau, courte, laissait un vide sous elle à la hauteur
-          de la carte du pilier, qui est longue. Ici chaque colonne coule. */}
+          de la carte de l'objectif, qui est longue. Ici chaque colonne coule. */}
       <div className="mt-5 grid items-start gap-5 lg:grid-cols-3">
         <div className="flex flex-col gap-5 lg:col-span-2">
           {/* L'ombre la plus haute de l'écran : un membre doit savoir quoi
@@ -124,16 +111,16 @@ export default async function AccueilEspace() {
               <>
                 <div className="flex items-baseline justify-between gap-4">
                   <div>
-                    <MicroLibelle>Ton {reglages.mot_partie.singulier} en cours</MicroLibelle>
+                    <MicroLibelle>Ton objectif en cours</MicroLibelle>
                     <h2 className="mt-2 text-[28px] tracking-[-0.035em] lg:text-[32px]">
-                      {courant.numero}. {courant.nom}
+                      {courant.titre}
                     </h2>
                   </div>
-                  {/* Le chiffre accompagne le titre, il ne se bat plus avec lui :
-                    c'est le nom du pilier qu'on vient lire, pas son taux. */}
+                  {/* Le chiffre accompagne le titre, il ne se bat pas avec lui :
+                    c'est l'objectif qu'on vient lire, pas son taux. */}
                   <span className="shrink-0 text-[15px] text-texte-doux">
                     <span className="font-bold text-texte">
-                      {progressionPilier(taches, courant.id)} %
+                      {progressionObjectif(courant)} %
                     </span>{" "}
                     fait
                   </span>
@@ -142,7 +129,7 @@ export default async function AccueilEspace() {
                 <MicroLibelle className="mt-8">
                   {restantes.length > 0
                     ? "Tes prochaines étapes"
-                    : `Tout est fait sur ce ${reglages.mot_partie.singulier}`}
+                    : "Tout est fait sur cet objectif"}
                 </MicroLibelle>
                 <div className="mt-2 divide-y divide-bordure">
                   {restantes.slice(0, 3).map((tache) => (
@@ -156,9 +143,9 @@ export default async function AccueilEspace() {
                   ))}
                 </div>
 
-                <Link href={`/espace/piliers/${courant.numero}`}>
+                <Link href="/espace/objectifs">
                   <Bouton className="group mt-6 inline-flex items-center gap-2.5 hover:-translate-y-px hover:shadow-[0_8px_20px_-6px_var(--color-accent-fonce)]">
-                    Ouvrir le pilier
+                    Voir tous tes objectifs
                     <span
                       aria-hidden="true"
                       className="transition-transform duration-200 group-hover:translate-x-1"
@@ -182,11 +169,9 @@ export default async function AccueilEspace() {
           <Carte ton="calme" className="flex flex-col items-center text-center shadow-douce">
             <MicroLibelle className="self-start">Ta progression</MicroLibelle>
             <div className="mt-5">
-              <Anneau pourcentage={progression(taches, ouverts)} />
+              <Anneau pourcentage={progression(objectifs)} />
             </div>
-            <p className="mt-4 text-sm text-texte-doux">
-              Sur tes {reglages.mot_partie.pluriel} ouverts
-            </p>
+            <p className="mt-4 text-sm text-texte-doux">Sur tous tes objectifs</p>
           </Carte>
 
           {/* La carte disparaît une fois le profil complet : une carte qui
@@ -200,7 +185,7 @@ export default async function AccueilEspace() {
                 indiscutables.
               </p>
               {/* Secondaire, et pas accent : l'action principale de cet
-                  écran est d'ouvrir son pilier. Deux boutons accent de même
+                  écran est d'ouvrir ses objectifs. Deux boutons accent de même
                   poids diluent la hiérarchie que ce tableau de bord existe
                   pour créer. */}
               <Link href="/espace/profil">
@@ -235,8 +220,8 @@ export default async function AccueilEspace() {
                   </span>
                 </a>
               )}
-              <Link href="/espace/piliers" className={LIGNE_ACCES}>
-                <span className="flex-1">Tes {reglages.mot_partie.pluriel}</span>
+              <Link href="/espace/objectifs" className={LIGNE_ACCES}>
+                <span className="flex-1">Tes objectifs</span>
                 <span aria-hidden="true" className={CHEVRON}>
                   ↗
                 </span>

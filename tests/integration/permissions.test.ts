@@ -152,68 +152,33 @@ describe("permissions par ligne", () => {
     }
   });
 
-  it("un membre lit les cinq piliers, du 0 au 4", async () => {
-    const { data, error } = await membre
-      .from("pilier")
-      .select("numero")
-      .order("ordre");
-    expect(error).toBeNull();
-    // Les numéros plutôt qu'un comptage : c'est le référentiel entier qu'un
-    // membre doit voir, y compris les piliers qui ne lui sont pas encore
-    // ouverts, puisque son écran les affiche cadenassés avec leur date.
-    expect((data ?? []).map((p) => p.numero)).toEqual([0, 1, 2, 3, 4]);
-  });
-
-  it("un membre coche sa tâche mais ne peut pas la réécrire", async () => {
+  it("un membre coche son étape mais ne peut pas la réécrire", async () => {
     const { data: fiche } = await membre.from("personne").select("id").single();
 
-    // Un pilier à soi, distinct de ceux que portail.test.ts ouvre ou ferme
-    // pour ce même compte : deux fichiers de test tournent en parallèle sur
-    // la vraie base, un pilier partagé ferait courir à ce test le risque de
-    // compter la tâche de l'autre fichier.
-    const { data: pilier } = await admin
-      .from("pilier")
-      .select("id")
-      .eq("numero", 2)
-      .single();
-
-    // Depuis la migration 0019, une tâche n'est lisible et cochable que si
-    // son pilier est ouvert pour le membre : sans cette ligne, la mise à
-    // jour ci-dessous ne toucherait aucune ligne et le test ne prouverait
-    // plus rien.
-    await admin
-      .from("acces_pilier")
-      .upsert(
-        {
-          personne_id: fiche!.id,
-          pilier_id: pilier!.id,
-          date_ouverture: "2020-01-01",
-        },
-        { onConflict: "personne_id,pilier_id" },
-      );
-
-    let creeeId: string | undefined;
+    let objectifId: string | undefined;
 
     try {
-      // Le coach pose la tâche, comme dans la vraie vie.
+      // Le coach pose l'objectif et son étape, comme dans la vraie vie.
+      const { data: objectif, error: erreurObjectif } = await admin
+        .from("objectif")
+        .insert({ personne_id: fiche!.id, titre: "Poser ton offre", ordre: 90 })
+        .select("id")
+        .single();
+      expect(erreurObjectif).toBeNull();
+      objectifId = objectif!.id as string;
+
       const { data: creee, error: erreurCreation } = await admin
         .from("tache")
-        .insert({
-          personne_id: fiche!.id,
-          pilier_id: pilier!.id,
-          titre: "Poser ton offre",
-          ordre: 1,
-        })
-        .select()
+        .insert({ objectif_id: objectifId, titre: "Écrire les trois forfaits", ordre: 1 })
+        .select("id")
         .single();
       expect(erreurCreation).toBeNull();
-      creeeId = creee!.id as string;
 
       // Le membre coche : autorisé.
       const coche = await membre
         .from("tache")
         .update({ faite: true, faite_le: new Date().toISOString() })
-        .eq("id", creeeId)
+        .eq("id", creee!.id)
         .select("id");
       expect(coche.error).toBeNull();
       // Le compte des lignes touchées, et pas seulement l'absence d'erreur :
@@ -226,76 +191,81 @@ describe("permissions par ligne", () => {
       const reecriture = await membre
         .from("tache")
         .update({ titre: "Autre chose" })
-        .eq("id", creeeId);
+        .eq("id", creee!.id);
       expect(reecriture.error).not.toBeNull();
     } finally {
-      // Dans un bloc finally : une assertion qui échoue plus haut ne doit ni
-      // laisser traîner la tâche, ni laisser ouvert le calendrier de ce
-      // pilier pour le compte que partagent tous les tests de ce fichier.
-      if (creeeId) await admin.from("tache").delete().eq("id", creeeId);
-      await admin
-        .from("acces_pilier")
-        .delete()
-        .eq("personne_id", fiche!.id)
-        .eq("pilier_id", pilier!.id);
+      // Dans un bloc finally : une assertion qui échoue plus haut ne doit pas
+      // laisser traîner l'objectif dans l'espace du compte que partagent tous
+      // les tests de ce fichier. Ses étapes partent en cascade avec lui.
+      if (objectifId) await admin.from("objectif").delete().eq("id", objectifId);
     }
   });
 
-  it("un membre ne peut pas créer une tâche, même pour lui", async () => {
+  it("un membre ne peut ni créer un objectif, ni créer une étape", async () => {
     // Avec de vraies clés étrangères : sinon l'insertion échouerait sur la
     // contrainte de référence et le test passerait sans rien prouver de la
     // permission.
     const { data: fiche } = await membre.from("personne").select("id").single();
-    const { data: pilier } = await membre
-      .from("pilier")
-      .select("id")
-      .limit(1)
-      .single();
 
-    const { error } = await membre.from("tache").insert({
-      personne_id: fiche!.id,
-      pilier_id: pilier!.id,
-      titre: "Interdit",
-      ordre: 1,
-    });
+    const objectif = await membre
+      .from("objectif")
+      .insert({ personne_id: fiche!.id, titre: "Interdit", ordre: 91 });
+    expect(objectif.error).not.toBeNull();
 
-    expect(error).not.toBeNull();
+    let objectifId: string | undefined;
+    try {
+      const { data: pose } = await admin
+        .from("objectif")
+        .insert({ personne_id: fiche!.id, titre: "Posé par le coach", ordre: 92 })
+        .select("id")
+        .single();
+      objectifId = pose!.id as string;
+
+      const tache = await membre
+        .from("tache")
+        .insert({ objectif_id: objectifId, titre: "Interdit", ordre: 1 });
+      expect(tache.error).not.toBeNull();
+    } finally {
+      if (objectifId) await admin.from("objectif").delete().eq("id", objectifId);
+    }
   });
 
-  it("un anonyme ne voit aucun calendrier de piliers", async () => {
-    await neVoitRien(anonyme.from("acces_pilier").select("date_ouverture"));
+  it("un anonyme ne voit aucun objectif", async () => {
+    await neVoitRien(anonyme.from("objectif").select("titre"));
   });
 
-  it("un membre ne lit que son propre calendrier", async () => {
-    const { data: pilier } = await admin
-      .from("pilier")
-      .select("id")
-      .limit(1)
-      .single();
-
-    // Une fiche qui n'est pas la sienne, avec un calendrier posé dessus.
+  it("un membre ne lit que ses propres objectifs, et les étapes qui vont avec", async () => {
+    // Une fiche qui n'est pas la sienne, avec un objectif et une étape.
     const { data: autre } = await admin
       .from("personne")
-      .insert({ nom: `Calendrier ${Date.now()}` })
+      .insert({ nom: `Objectifs ${Date.now()}` })
       .select("id")
       .single();
 
     try {
-      await admin.from("acces_pilier").insert({
-        personne_id: autre!.id,
-        pilier_id: pilier!.id,
-        date_ouverture: "2020-01-01",
-      });
+      const { data: objectif } = await admin
+        .from("objectif")
+        .insert({ personne_id: autre!.id, titre: "Chez quelqu'un d'autre", ordre: 1 })
+        .select("id")
+        .single();
 
-      const { data: vus } = await membre
-        .from("acces_pilier")
-        .select("personne_id");
+      await admin
+        .from("tache")
+        .insert({ objectif_id: objectif!.id, titre: "Étape d'un autre", ordre: 1 });
 
-      expect(vus?.some((ligne) => ligne.personne_id === autre!.id)).toBe(false);
+      const { data: objectifsVus } = await membre.from("objectif").select("personne_id");
+      expect(objectifsVus?.some((ligne) => ligne.personne_id === autre!.id)).toBe(false);
+
+      // Et les étapes aussi : leur politique passe par une jointure sur
+      // l'objectif, elle pourrait tomber sans que celle des objectifs bouge.
+      const { data: tachesVues } = await membre
+        .from("tache")
+        .select("id, objectif_id")
+        .eq("objectif_id", objectif!.id);
+      expect(tachesVues ?? []).toHaveLength(0);
     } finally {
-      // Dans un bloc finally, comme pour la tâche plus haut : une assertion
-      // qui échoue ne doit pas laisser une fausse fiche cliente dans la
-      // vraie base, à côté des vrais prospects.
+      // Dans un bloc finally : une assertion qui échoue ne doit pas laisser
+      // une fausse fiche cliente dans la base, à côté des vraies.
       await admin.from("personne").delete().eq("id", autre!.id);
     }
   });
