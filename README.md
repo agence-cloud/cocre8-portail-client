@@ -30,15 +30,49 @@ Quatre étapes, une vingtaine de minutes, aucune ligne de commande.
 
    [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fagence-cloud%2Fcocre8-portail-client&env=NEXT_PUBLIC_SUPABASE_URL,NEXT_PUBLIC_SUPABASE_ANON_KEY,SUPABASE_SERVICE_ROLE_KEY&envDescription=Les%20trois%20valeurs%20de%20ton%20projet%20Supabase&project-name=portail-client&repository-name=portail-client)
 
-   Vercel te demandera trois valeurs, toutes dans ton projet Supabase, sous
-   Project Settings puis API : l'URL du projet, la clé `anon`, et la clé
-   `service_role`. **Cette dernière est un secret** : elle sert à créer les
-   comptes de tes clients, et elle ne doit jamais sortir d'ici.
+   Vercel te demandera trois valeurs avant de construire, toutes dans ton
+   projet Supabase :
+
+   - `NEXT_PUBLIC_SUPABASE_URL` : Project Settings puis **Data API**, la
+     ligne « Project URL ». Elle ressemble à
+     `https://abcdefghij.supabase.co`, sans rien après.
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY` : Project Settings puis **API Keys**, la
+     clé `anon`.
+   - `SUPABASE_SERVICE_ROLE_KEY` : au même endroit, la clé `service_role`.
+     **Celle-ci est un secret** : elle sert à créer les comptes de tes
+     clients, et elle ne doit jamais sortir d'ici.
+
+   **Copie chaque clé avec le bouton de copie**, jamais en sélectionnant le
+   texte à l'écran : Supabase les affiche masquées, et une clé masquée a
+   exactement la longueur de la vraie. Rien ne distingue les deux à l'oeil.
+
+   Si tu te trompes, la construction s'arrête et te dit laquelle et pourquoi.
+   Corrige la valeur, puis relance le déploiement : une valeur corrigée ne
+   prend effet qu'au déploiement suivant.
 
 4. **Crée ton compte et regarde-le vivre.** Ouvre l'adresse que Vercel te
    donne : le premier compte créé devient le tien, et la porte se referme
-   derrière toi. Charge ensuite le jeu de démonstration depuis tes réglages,
-   promène-toi dedans, puis vide-le et ajoute ton premier vrai client.
+   derrière toi pour toujours. Personne d'autre ne pourra s'inscrire.
+
+   Charge ensuite le jeu de démonstration depuis tes réglages : une cliente
+   inventée, ses objectifs, ses séances et son compte rendu. Promène-toi
+   dedans, ouvre son espace avec « Voir son espace », puis vide-le et ajoute
+   ton premier vrai client.
+
+## Le faire tourner chez toi
+
+Facultatif : l'app marche sans que tu ouvres jamais un terminal. Si tu veux
+modifier le code, il te faut [Node.js](https://nodejs.org) et trois commandes.
+
+```
+npm install
+cp .env.example .env.local     # puis remplis les trois valeurs
+npm run dev
+```
+
+L'app répond alors sur `http://localhost:3000`, contre la même base que ta
+version en ligne. `npm test` lance les tests, `npm run build` construit comme
+le fait ton hébergeur.
 
 ## Si quelque chose ne répond pas
 
