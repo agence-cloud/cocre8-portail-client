@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { envoyerLesAcces, genererLeLien } from "@/modules/portail/actions";
+import { envoyerLesAcces, genererLeLien, ouvrirLApercu } from "@/modules/portail/actions";
 import { Carte } from "@/lib/design/Carte";
 import { Bouton } from "@/lib/design/Bouton";
 import { CHAMP } from "@/lib/design/champs";
@@ -53,7 +53,26 @@ export function EnvoyerLesAcces({ personneId, email, aUnCompte }: Props) {
 
   return (
     <Carte className="mt-6">
-      <h2 className="text-lg">Ses accès</h2>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h2 className="text-lg">Ses accès</h2>
+        {/* L'aperçu est ici et pas ailleurs : c'est la carte de tout ce qui
+            touche à l'entrée du client dans son espace. Il ouvre son espace
+            réel, pas une imitation, ce qui est la seule façon de vérifier ce
+            qu'il verra vraiment. */}
+        <Bouton
+          variante="secondaire"
+          disabled={enCours}
+          onClick={() =>
+            demarrer(async () => {
+              const obtenu = await ouvrirLApercu(personneId);
+              if (obtenu?.pourquoi) setResultat({ envoye: false, pourquoi: obtenu.pourquoi });
+            })
+          }
+          className="px-4 py-2 text-sm"
+        >
+          Voir son espace
+        </Bouton>
+      </div>
 
       {resultat?.envoye ? (
         <p className="mt-2 text-sm text-texte-doux">

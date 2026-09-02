@@ -86,6 +86,15 @@ réécrits (Authentication, Emails).
 colles où tu parles déjà à tes clients. Il vaut une heure et ouvre son espace,
 donc ne le colle qu'en privé.
 
+## Voir ce que ton client voit
+
+« Voir son espace », sur son écran de suivi, ouvre son espace réel, pas une
+imitation. Un bandeau reste en haut tant que tu y es, et te ramène à ton
+pilotage d'un clic.
+
+Tu y agis sous son identité : une case cochée là est cochée chez lui. C'est le
+prix de voir le vrai écran, et le bandeau est là pour que tu ne l'oublies pas.
+
 ## Ce qu'il ne fait pas
 
 Ce n'est ni un CRM ni un outil de facturation. Il ne suit pas tes prospects,

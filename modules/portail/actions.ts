@@ -16,6 +16,7 @@ import {
   envoyerLesAcces as envoyer,
   genererLeLienDAcces as genererLien,
 } from "@/lib/auth/creation";
+import { entrerDansLEspaceDe, revenirAuPilotage } from "@/lib/auth/apercu";
 import { versInstantUTC } from "@/lib/dates";
 
 export async function cocherTache(id: string, faite: boolean): Promise<void> {
@@ -215,6 +216,37 @@ export async function deposerDocument(
   revalidatePath("/espace", "layout");
   revalidatePath("/pilotage/membres", "layout");
   return { erreur: null };
+}
+
+/**
+ * L'aperçu : le coach ouvre l'espace d'un client tel que ce client le voit.
+ *
+ * **La garde est ici, et elle est la seule.** `lib/auth/apercu.ts` lit la clé
+ * de service, il ne se garde pas lui-même : un appelant sans `exigerAdmin`
+ * n'a rien à faire ici. L'identifiant de la fiche est le seul paramètre,
+ * l'adresse email se lit en base.
+ *
+ * Pas de `revalidatePath` : la redirection change de session, donc tout se
+ * recharge de toute façon, et l'appeler avant le `redirect` rafraîchirait des
+ * pages avec les droits qu'on vient de quitter.
+ */
+export async function ouvrirLApercu(personneId: string): Promise<{ pourquoi?: string }> {
+  await exigerAdmin();
+  const { pourquoi } = await entrerDansLEspaceDe(personneId);
+  if (pourquoi) return { pourquoi };
+  redirect("/espace");
+}
+
+/**
+ * Le retour du coach chez lui.
+ *
+ * **Sans `exigerAdmin`, et c'est voulu** : celui qui l'appelle est justement
+ * connecté comme membre à ce moment-là. C'est la présence du cookie de retour
+ * qui fait foi, et ce cookie ne se pose que dans l'action ci-dessus.
+ */
+export async function quitterLApercu(): Promise<void> {
+  await revenirAuPilotage();
+  redirect("/pilotage");
 }
 
 /**

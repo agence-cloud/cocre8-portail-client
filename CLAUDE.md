@@ -139,6 +139,15 @@ objectifs et étapes, séances et comptes rendus, documents), l'écran de suivi
 d'un client côté coach, la connexion et le chemin de récupération de mot de
 passe.
 
+**Le coach peut ouvrir l'espace d'un client tel que ce client le voit**
+(`lib/auth/apercu.ts`, troisième lecteur de la clé de service). Il n'emprunte
+qu'un compte membre, jamais un admin, et l'adresse email n'est pas un
+paramètre. Le jeton de retour du coach est mis de côté dans un cookie
+`httpOnly` avant la bascule : après, sa session n'existe plus, et il n'y
+aurait plus aucun moyen de le ramener sans lui redemander son mot de passe. Un
+bandeau non refermable rappelle qu'il agit sous l'identité de son client, une
+case cochée là étant cochée pour de bon.
+
 Ce qui a été retiré à la copie : le CRM, les statistiques, les webhooks, tout
 import automatique, et la bascule commerciale qui créait les clients. **Un
 client s'ajoute donc à la main**, et c'est le geste que le plan doit encore

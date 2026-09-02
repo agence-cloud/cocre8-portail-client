@@ -19,14 +19,20 @@ import { lireConfigSupabase } from "@/lib/supabase/config";
  *
  *     grep -rn "supabase/service" lib modules app
  *
- * **Un seul appelant à ce jour, et il porte ses propres gardes, écrites en
- * tête de son fichier :**
+ * **Trois appelants à ce jour, et chacun porte ses propres gardes, écrites
+ * en tête de son fichier :**
  *
- * - `lib/auth/creation.ts` : crée le compte d'un client. Appelé par un coach
- *   connecté, il se méfie de ses paramètres, et l'adresse email n'en est
- *   jamais un.
+ * - `lib/auth/creation.ts` : crée le compte d'un client, en envoie les accès,
+ *   et supprime le seul compte de démonstration. Appelé par un coach connecté,
+ *   il se méfie de ses paramètres, et l'adresse email n'en est jamais un.
+ * - `lib/auth/installation.ts` : crée le tout premier compte, celui du coach.
+ *   Appelé par un inconnu, il se méfie de son appelant : il réserve la ligne
+ *   d'installation avant de créer quoi que ce soit, et la porte se referme.
+ * - `lib/auth/apercu.ts` : ouvre l'espace d'un client pour que son coach le
+ *   voie tel que ce client le voit. Il n'emprunte qu'un compte membre, jamais
+ *   un admin, et l'adresse email n'est pas un paramètre.
  *
- * Le jour où un second appelant apparaît, il s'ajoute à cette liste et il
+ * Le jour où un appelant de plus apparaît, il s'ajoute à cette liste et il
  * arrive avec sa propre garde. Un appelant sans garde n'a rien à faire ici.
  *
  * `server-only` en tête : une importation depuis un composant client casse la

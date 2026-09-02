@@ -5,6 +5,8 @@ import { profilComplet } from "@/lib/profil/completude";
 import { NavigationLaterale } from "@/lib/design/NavigationLaterale";
 import { construireLiensCircle } from "@/modules/portail/circle";
 import { lireReglages } from "@/lib/reglages/requetes";
+import { estUnApercu } from "@/lib/auth/apercu";
+import { BandeauApercu } from "@/modules/portail/BandeauApercu";
 
 const LIENS = [
   {
@@ -43,6 +45,7 @@ export default async function LayoutEspace({
   const personneId = compte.personneId!;
   const repliee = (await cookies()).get("nav_repliee")?.value === "1";
   const reglages = await lireReglages();
+  const apercu = await estUnApercu();
 
   const [questions, reponses] = await Promise.all([
     lireQuestions(),
@@ -54,10 +57,22 @@ export default async function LayoutEspace({
   // n'aurait qu'un lien, celui de la page où l'on se trouve déjà, et cet
   // écran-là se veut « au centre, avec aucune interface nulle part ». La page
   // du profil dessine alors la sienne, plein écran.
-  if (!complet) return <>{children}</>;
+  // Le bandeau passe avant la porte du profil : un coach qui ouvre l'aperçu
+  // d'un client au profil incomplet tombe sur cette porte, et sans bandeau il
+  // n'aurait aucun moyen d'en ressortir.
+  if (!complet) {
+    return (
+      <>
+        {apercu && <BandeauApercu nom={compte.nom} />}
+        {children}
+      </>
+    );
+  }
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen flex-col">
+      {apercu && <BandeauApercu nom={compte.nom} />}
+      <div className="flex min-h-0 flex-1">
       <NavigationLaterale
         liens={LIENS}
         nom={compte.nom}
@@ -76,6 +91,7 @@ export default async function LayoutEspace({
           lieu de rester dans son propre conteneur. */}
       <div className="flex min-w-0 flex-1 flex-col bg-fond-alt">
         <main className="min-w-0 flex-1 p-10">{children}</main>
+      </div>
       </div>
     </div>
   );
