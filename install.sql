@@ -594,6 +594,29 @@ revoke all on coaching_membre from authenticated;
 grant select on coaching_membre to authenticated;
 
 
+-- Les dix tables du portail, révoquées puis rendues au seul rôle connecté.
+--
+-- **Sans ce bloc, ce fichier n'installait rien de complet.** Il comptait sur
+-- les privilèges que Supabase pose tout seul sur `public`, et deux choses en
+-- découlaient. Chez Supabase, `anon` gardait INSERT, UPDATE et DELETE sur ces
+-- dix tables : plus aucune politique ne le laissait passer, mais le jour où
+-- l'une d'elles serait écrite sans `to authenticated`, il entrerait. Ailleurs
+-- que chez Supabase, où ces privilèges par défaut n'existent pas, l'app
+-- installée ne pouvait plus rien lire du tout.
+--
+-- Les droits sont larges parce que la politique `admin_tout` l'est : c'est
+-- elle qui filtre, pas le `grant`. Un `grant` trop étroit ne rendrait pas
+-- l'app plus sûre, il l'empêcherait de fonctionner.
+revoke all on personne, compte, offre, accompagnement, objectif, tache,
+  question_profil, reponse_profil, document, appel
+  from anon, authenticated;
+
+grant select, insert, update, delete on personne, compte, offre,
+  accompagnement, objectif, tache, question_profil, reponse_profil,
+  document, appel
+  to authenticated;
+
+
 -- ---------------------------------------------------------------------
 --  9. Le coffre à documents
 -- ---------------------------------------------------------------------

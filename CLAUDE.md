@@ -101,9 +101,16 @@ surtout rien qu'un numéro qui appartient à quelqu'un d'autre.
 ## Où en est le dépôt
 
 **Le code compile, les tests unitaires passent, et le schéma existe**
-(`install.sql`, à coller dans l'éditeur SQL de Supabase). Il manque la
-première mise en service et l'écran de réglages : ce sont les prochaines
-tâches de `docs/plans/`.
+(`install.sql`, à coller dans l'éditeur SQL de Supabase). La première mise en
+service et l'écran de réglages sont là depuis ; `docs/plans/` est devenu un
+journal, et son en-tête dit ce qui a changé depuis son exécution.
+
+**`npm test` ne lance que les unitaires, et c'est délibéré.** Ils passent sur
+un dépôt qu'on vient de récupérer, sans base ni `.env.local`. Les tests
+d'intégration se connectent pour de vrai et ont leur propre commande,
+`npm run test:integration` : mêlés aux autres, ils faisaient échouer cinq
+fichiers sur une installation neuve, pour la seule raison qu'aucune base
+n'existait encore.
 
 **Avant de publier quoi que ce soit : `npm run verifier`.** Il refuse de
 laisser partir une donnée qui appartient à l'éditeur, et il a trouvé quatre
@@ -121,6 +128,21 @@ prenant l'identité d'un client puis celle d'un anonyme :
 - ni `update` ni `delete` à travers la vue ne touchent la ligne ;
 - un client ne voit que sa propre fiche ;
 - un anonyme ne voit rien nulle part, et la vue lui est refusée à la porte.
+
+**Et une deuxième fois le 2026-09-02, sur une base vierge, ce qui a trouvé un
+trou que la première n'avait pas vu.** `install.sql` ne posait aucun `grant`
+sur les dix tables du portail : il comptait sur les privilèges que Supabase
+accorde tout seul sur `public`. Deux conséquences. Chez Supabase, `anon`
+gardait INSERT, UPDATE et DELETE sur ces dix tables, bloqué par les seules
+politiques : la deuxième ligne de défense, celle que ce fichier prêche
+partout ailleurs, n'existait pas là où il y a le plus à protéger. Et sur
+toute autre base, l'app installée ne lisait plus rien du tout. Le fichier
+révoque et accorde désormais explicitement, comme il le fait déjà pour
+`reglage` et `coaching_membre`.
+
+**La leçon, plus large que ce trou :** comparer la liste des objets créés ne
+prouve rien sur les droits. C'est la première vérification qui l'avait fait,
+et elle avait conclu « identique, objet pour objet ».
 
 **Les tests d'intégration et les parcours, eux, n'ont jamais tourné.** Ce
 n'est pas un oubli : le proxy réseau des sessions d'agent bloque
@@ -210,13 +232,3 @@ ajouter une colonne la rend lisible par le client, sans autre geste.
   table ou vue nouvelle. Un `grant select` seul ajoute un droit sans en retirer
   aucun.
 - **Après toute migration, lancer le conseiller de sécurité de Supabase.**
-
-<!-- BEGIN:nextjs-agent-rules -->
-
-# This is NOT the Next.js you know
-
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
-
-This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
-
-<!-- END:nextjs-agent-rules -->
