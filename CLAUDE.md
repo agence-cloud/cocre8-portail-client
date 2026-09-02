@@ -10,6 +10,18 @@ données.**
 Il a deux côtés : le client, qui vit son accompagnement, et le coach, qui
 suit ses clients.
 
+**Rien de l'éditeur ne doit se voir dedans.** Ni ses couleurs, ni sa police,
+ni son logotype, ni une signature au pied d'un écran. Un coach qui installe
+l'outil est chez lui : c'est le nom de son programme qui s'affiche, et c'est
+tout. L'habillage est donc volontairement sourd, un thème sombre en gris
+froids avec un seul accent bleu, qui ne ressemble ni à l'éditeur ni à
+personne. `npm run verifier` refuse toute réapparition de la marque hors du
+README et de la licence.
+
+Cette règle a été enfreinte une fois, dans le sens qui coûte : l'écran de
+connexion est parti avec la charte de l'éditeur et son « Propulsé par », et
+c'est le premier écran qu'un prospect ouvre. Corrigé le 2026-09-02.
+
 ## D'où il vient, et ce que ça implique
 
 Ce dépôt est une **copie propre, sans historique**, du socle et du module
@@ -72,8 +84,8 @@ avant toute session, et ouvrir la table entière aurait donné le numéro du
 coach avec.
 
 **Ne se règle pas :** la structure (un programme, des parties, des tâches, un
-profil rempli à l'entrée), le profil comme porte d'entrée, le tutoiement, la
-charte graphique. Les valeurs qui sont des `enum` PostgreSQL non plus :
+profil rempli à l'entrée), le profil comme porte d'entrée, le tutoiement,
+l'habillage. Les valeurs qui sont des `enum` PostgreSQL non plus :
 changer un type demande de recréer le type et de convertir les tables qui s'en
 servent, ce n'est pas un écran.
 

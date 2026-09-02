@@ -328,9 +328,12 @@ d'accès, celui que ses clients emprunteront.
       README, avec l'ordre corrigé : la base d'abord, l'app ensuite. Déployer
       avant d'avoir un projet Supabase n'aurait donné aucune valeur à saisir.
 - [x] **La purge vérifiée par script**, `npm run verifier`. Il ne lit que les
-      fichiers suivis par git, et il cherche des personnes et des valeurs, pas
-      la marque : « Cocre8 » a le droit d'apparaître, c'est la signature de
-      l'éditeur.
+      fichiers suivis par git. Il a d'abord cherché des personnes et des
+      valeurs, en laissant passer la marque de l'éditeur, tenue pour une
+      signature légitime. **Cette exception est tombée le 2026-09-02** : elle
+      couvrait la charte et le « Propulsé par » de l'écran de connexion, que
+      la consigne interdisait. La marque est désormais refusée partout sauf
+      dans le README et la licence.
 - [ ] Le README relu par quelqu'un qui n'a jamais vu le projet.
 - [ ] Passer le dépôt en public. Le geste appartient à son propriétaire.
 

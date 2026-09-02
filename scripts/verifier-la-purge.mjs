@@ -11,10 +11,13 @@
  * Il ne lit que les fichiers suivis par git : ce qui n'est pas versionné ne
  * part pas, et `.env.local` n'a donc pas à être inspecté.
  *
- * **Il ne cherche pas la marque, il cherche les personnes et les valeurs.**
- * « Cocre8 » a le droit d'apparaître, c'est la signature de l'éditeur, posée
- * exprès sur l'écran de connexion et dans la licence. Ce qui n'a pas le droit
- * d'apparaître, c'est quelqu'un.
+ * **Il cherche les personnes, les valeurs, et la marque de l'éditeur.**
+ * Cette dernière a longtemps eu le droit d'être là, en signature sur l'écran
+ * de connexion : c'était une erreur, la consigne étant qu'un coach qui
+ * installe l'outil soit chez lui et nulle part ailleurs. Elle est donc
+ * interdite partout où le code s'exécute, et tolérée dans les deux seuls
+ * fichiers qui nomment un éditeur pour de bonnes raisons, le README et la
+ * licence.
  *
  *     npm run verifier
  */
@@ -34,6 +37,7 @@ const INTERDITS = [
   { motif: /\beyJ[A-Za-z0-9_-]{20,}/, quoi: "ce qui ressemble à une clé Supabase" },
   { motif: /sb_secret_[A-Za-z0-9_-]+/, quoi: "une clé de service" },
   { motif: /SUPABASE_SERVICE_ROLE_KEY\s*=\s*\S/, quoi: "une clé de service renseignée" },
+  { motif: /cocre8|co-?cre(a|é)te/i, quoi: "la marque de l'éditeur, hors README et licence" },
 ];
 
 /**
@@ -43,6 +47,13 @@ const INTERDITS = [
  */
 const EXCEPTIONS = new Set([
   "scripts/verifier-la-purge.mjs",
+  // Les deux seuls endroits où un éditeur se nomme légitimement : celui qui
+  // présente le dépôt, et celui qui dit sous quelle licence il est donné.
+  "README.md",
+  "LICENSE",
+  // Le test qui vérifie que la marque n'est nulle part doit pouvoir la
+  // nommer. Il ne part avec aucune installation.
+  "tests/unitaires/navigation.test.tsx",
   "docs/decisions/0001-un-outil-isole-et-reglable.md",
   "docs/plans/2026-09-01-01-de-la-copie-a-l-outil.md",
   "CLAUDE.md",

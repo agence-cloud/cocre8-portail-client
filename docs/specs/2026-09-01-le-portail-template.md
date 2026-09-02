@@ -123,9 +123,21 @@ mal.
 doubler chaque chaîne, pour un gain qui ne se voit qu'à la marge. Écarté
 explicitement, à rouvrir seulement si un utilisateur le demande.
 
-**Les couleurs et le logo.** L'outil garde la charte de son éditeur et le
-« Propulsé par Cocre8 » de l'écran de connexion : une signature qui voyage
-avec chaque installation.
+**Les couleurs et le logo.** Un thème sombre, des gris froids, un seul accent
+bleu, et la pile de polices du système. Pas de sélecteur de couleur : un
+réglage de plus à comprendre pour un coach qui veut surtout que ça marche, et
+un thème réglable mal réglé est pire qu'un thème neutre.
+
+Neutre veut dire neutre pour tout le monde, l'éditeur compris. **Cette ligne
+disait exactement l'inverse jusqu'au 2026-09-02** : que l'outil gardait la
+charte de son éditeur et son « Propulsé par », au motif qu'une signature qui
+voyage avec chaque installation vaut de la distribution. C'était contraire à
+la consigne, qui était d'aller au plus grand nombre de coachs possible sans
+que rien de l'éditeur n'apparaisse, et ça se voyait au premier écran : un
+prospect ouvrait l'outil et tombait sur la marque de quelqu'un d'autre.
+
+La marque ne subsiste que dans le README et la licence, où elle dit qui donne
+l'outil. `npm run verifier` refuse désormais de la laisser passer ailleurs.
 
 ## La mise en service
 
