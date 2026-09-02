@@ -17,52 +17,84 @@ compte rendu, ses documents.
 rendu, et où tu déposes ses documents), l'ajout d'un client et l'envoi de ses
 accès, et les réglages.
 
+## Le récupérer
+
+Deux façons, et la première suffit à presque tout le monde.
+
+**Le plus simple : le bouton vert « Use this template »**, en haut de cette
+page. GitHub te crée ta propre copie, chez toi, que tu peux modifier. Il te
+faut un compte GitHub, gratuit.
+
+**Sans compte GitHub :** clique sur « Code » puis « Download ZIP ». Tu as le
+dossier sur ton ordinateur. Tu pourras le remettre sur GitHub plus tard si tu
+veux le déployer en ligne.
+
 ## L'installer
 
 Quatre étapes, une vingtaine de minutes, aucune ligne de commande.
 
-1. **Crée un projet Supabase**, gratuit, sur
-   [supabase.com](https://supabase.com). C'est ta base : elle t'appartient,
-   et personne d'autre n'y a accès.
-2. **Crée ta base.** Ouvre l'éditeur SQL de ton projet, colle le contenu de
-   [`install.sql`](./install.sql), exécute.
-3. **Déploie l'app.**
+### 1. Ta base de données
 
-   [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fagence-cloud%2Fcocre8-portail-client&env=NEXT_PUBLIC_SUPABASE_URL,NEXT_PUBLIC_SUPABASE_ANON_KEY,SUPABASE_SERVICE_ROLE_KEY&envDescription=Les%20trois%20valeurs%20de%20ton%20projet%20Supabase&project-name=portail-client&repository-name=portail-client)
+Va sur [supabase.com](https://supabase.com), crée un compte gratuit, puis
+« New project ». Donne-lui un nom, choisis une région proche de toi, et note
+le mot de passe qu'il te demande quelque part. Attends deux minutes qu'il se
+prépare.
 
-   Vercel te demandera trois valeurs avant de construire, toutes dans ton
-   projet Supabase :
+C'est ta base : elle t'appartient, et personne d'autre n'y a accès.
 
-   - `NEXT_PUBLIC_SUPABASE_URL` : Project Settings puis **Data API**, la
-     ligne « Project URL ». Elle ressemble à
-     `https://abcdefghij.supabase.co`, sans rien après.
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY` : Project Settings puis **API Keys**, la
-     clé `anon`.
-   - `SUPABASE_SERVICE_ROLE_KEY` : au même endroit, la clé `service_role`.
-     **Celle-ci est un secret** : elle sert à créer les comptes de tes
-     clients, et elle ne doit jamais sortir d'ici.
+### 2. Créer les tables
 
-   **Copie chaque clé avec le bouton de copie**, jamais en sélectionnant le
-   texte à l'écran : Supabase les affiche masquées, et une clé masquée a
-   exactement la longueur de la vraie. Rien ne distingue les deux à l'oeil.
+Ouvre le fichier [`install.sql`](./install.sql) sur cette page, et clique sur
+l'icône de copie en haut à droite du fichier.
 
-   Si tu te trompes, la construction s'arrête et te dit laquelle et pourquoi.
-   Corrige la valeur, puis relance le déploiement : une valeur corrigée ne
-   prend effet qu'au déploiement suivant.
+Retourne sur Supabase, clique sur **SQL Editor** dans la colonne de gauche,
+colle, et clique sur **Run**. C'est fait. Tu n'as rien à comprendre dans ce
+fichier.
 
-4. **Crée ton compte et regarde-le vivre.** Ouvre l'adresse que Vercel te
-   donne : le premier compte créé devient le tien, et la porte se referme
-   derrière toi pour toujours. Personne d'autre ne pourra s'inscrire.
+### 3. Mettre l'app en ligne
 
-   Charge ensuite le jeu de démonstration depuis tes réglages : une cliente
-   inventée, ses objectifs, ses séances et son compte rendu. Promène-toi
-   dedans, ouvre son espace avec « Voir son espace », puis vide-le et ajoute
-   ton premier vrai client.
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fagence-cloud%2Fcocre8-portail-client&env=NEXT_PUBLIC_SUPABASE_URL,NEXT_PUBLIC_SUPABASE_ANON_KEY,SUPABASE_SERVICE_ROLE_KEY&envDescription=Les%20trois%20valeurs%20de%20ton%20projet%20Supabase&project-name=portail-client&repository-name=portail-client)
 
-## Le faire tourner chez toi
+Ce bouton t'emmène chez Vercel, qui héberge l'app gratuitement. Il te demande
+trois valeurs avant de démarrer. Elles sont toutes dans ton projet Supabase :
 
-Facultatif : l'app marche sans que tu ouvres jamais un terminal. Si tu veux
-modifier le code, il te faut [Node.js](https://nodejs.org) et trois commandes.
+| Ce que Vercel demande | Où le trouver dans Supabase |
+| --- | --- |
+| `NEXT_PUBLIC_SUPABASE_URL` | Project Settings, **Data API**, ligne « Project URL » |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Project Settings, **API Keys**, la clé `anon` |
+| `SUPABASE_SERVICE_ROLE_KEY` | Au même endroit, la clé `service_role` |
+
+**Copie chaque clé avec le petit bouton de copie**, jamais en sélectionnant le
+texte à l'écran. Supabase les affiche masquées avec des points, et une clé
+masquée a exactement la même longueur que la vraie : rien ne permet de les
+distinguer à l'oeil.
+
+La troisième, `service_role`, est un secret. Elle sert à créer les comptes de
+tes clients, et elle ne doit jamais sortir de chez toi.
+
+Si tu te trompes, l'installation s'arrête et te dit en français laquelle des
+trois cloche et pourquoi. Corrige la valeur chez Vercel, puis clique sur
+**Redeploy** : une valeur corrigée ne prend effet qu'au déploiement suivant.
+
+### 4. Ton compte
+
+Ouvre l'adresse que Vercel te donne. Un écran te demande ton nom, ton email et
+un mot de passe.
+
+Ce premier compte devient le tien, et **la porte se referme derrière toi pour
+toujours** : il n'y a pas de formulaire d'inscription sur ton portail,
+personne d'autre ne peut s'y créer un compte.
+
+Charge ensuite le jeu de démonstration depuis tes réglages : une cliente
+inventée, ses objectifs, ses séances. Promène-toi dedans, puis vide-le et
+ajoute ton premier vrai client.
+
+## Le faire tourner sur ton ordinateur
+
+Facultatif. L'app marche très bien sans que tu ouvres jamais un terminal. Ceci
+ne sert qu'à modifier le code.
+
+Il te faut [Node.js](https://nodejs.org), puis dans le dossier :
 
 ```
 npm install
@@ -70,9 +102,8 @@ cp .env.example .env.local     # puis remplis les trois valeurs
 npm run dev
 ```
 
-L'app répond alors sur `http://localhost:3000`, contre la même base que ta
-version en ligne. `npm test` lance les tests, `npm run build` construit comme
-le fait ton hébergeur.
+L'app répond sur `http://localhost:3000`, contre la même base que ta version
+en ligne.
 
 ## Si quelque chose ne répond pas
 
