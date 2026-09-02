@@ -7,12 +7,15 @@ import { REGLAGES_PAR_DEFAUT } from "@/lib/reglages/types";
  * Le logotype du programme, affiché sur l'écran de connexion, dans la barre
  * latérale et sur la porte du profil.
  *
- * **Deux mots, et c'est structurel.** L'italique porte les deux, le gras ne
- * porte que le dernier : c'est ce contraste qui fait la signature. Un nom
- * d'un seul mot s'affiche donc en gras entier, sans que la composition casse.
+ * **Le nom, en toutes lettres, et rien de plus.** Il portait auparavant
+ * l'italique sur tout et le gras sur le dernier mot : c'était le mot-symbole
+ * de l'éditeur, une signature reconnaissable, donc exactement ce qui n'a rien
+ * à faire dans un outil que chacun installe pour soi. Un coach qui écrit
+ * « Master Lab » doit lire « Master Lab », pas la mise en forme de quelqu'un
+ * d'autre.
  *
- * Composé en texte et non en tracé : c'est un mot-symbole typographique, il
- * suit la police de l'app et reste net à toutes les tailles.
+ * Composé en texte et non en tracé : il suit la police de l'app et reste net
+ * à toutes les tailles.
  *
  * **Le nom vient d'un contexte et non d'une propriété**, parce que les trois
  * écrans qui l'affichent sont des composants clients, et que deux d'entre eux
@@ -57,20 +60,12 @@ export function LogoProgramme({
 }) {
   const nom = useNomDuProgramme();
 
-  // Le dernier mot porte le gras, tout ce qui précède reste en normal. Un nom
-  // d'un seul mot n'a donc pas de partie normale, et le `join` rend une
-  // chaîne vide plutôt qu'un espace parasite.
-  const mots = nom.trim().split(/\s+/);
-  const dernier = mots[mots.length - 1];
-  const debut = mots.slice(0, -1).join(" ");
-
   return (
     <p
       aria-label={nom}
-      className={`font-sans leading-none tracking-[-0.04em] italic ${TAILLES[taille]} ${className}`}
+      className={`font-sans leading-none font-medium tracking-[-0.03em] ${TAILLES[taille]} ${className}`}
     >
-      {debut && <span className="font-normal">{debut} </span>}
-      <span className="font-bold">{dernier}</span>
+      {nom}
     </p>
   );
 }

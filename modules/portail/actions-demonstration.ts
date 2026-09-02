@@ -7,6 +7,12 @@ import {
   supprimerLeCompteDeDemonstration,
 } from "@/lib/auth/creation";
 import { creerClientServeur } from "@/lib/supabase/serveur";
+import {
+  CLIENTE,
+  REPONSES,
+  REPONSES_PAR_TYPE,
+  SEANCES,
+} from "@/modules/portail/demonstration-donnees";
 
 /**
  * Le jeu de démonstration : un client inventé, pour que l'outil s'ouvre plein.
@@ -28,44 +34,6 @@ import { creerClientServeur } from "@/lib/supabase/serveur";
  * un détour, et c'est voulu : il lui fait traverser le vrai chemin d'accès,
  * celui que ses clients emprunteront.
  */
-
-/** Le client inventé, et ce qu'il a déjà vécu. */
-const CLIENTE = {
-  prenom: "Léa",
-  nom: "Marchand",
-  email: "lea.marchand@exemple.test",
-  entreprise: "Atelier Marchand",
-  /** Assez ancien pour que deux parties soient ouvertes et deux séances passées. */
-  ilYAJours: 45,
-};
-
-const REPONSES: Record<string, string> = {
-  texte_long:
-    "J'ai lancé mon activité il y a deux ans et je plafonne. Je veux doubler mon chiffre sans travailler le soir.",
-  texte_court: "Dans six mois",
-  nombre: "6",
-  choix: "Oui",
-};
-
-const SEANCES = [
-  {
-    ilYAJours: 30,
-    titre: "Première séance",
-    resume:
-      "On a posé ton objectif et ce qui te bloque vraiment. Ta priorité des trois prochaines semaines : arrêter de vendre à l'heure.",
-    transcription:
-      "Bonjour Léa, on commence par où tu en es aujourd'hui. Tu me disais que tes journées partent en poussière...",
-    notes: "Note interne : elle sous-estime son prix. Y revenir à la prochaine.",
-  },
-  {
-    ilYAJours: 12,
-    titre: "Point d'étape",
-    resume:
-      "Ton offre est passée au forfait. On a écrit les trois étapes du plan et daté la première.",
-    transcription: "Alors, tu as testé le forfait sur deux devis. Raconte-moi ce qui s'est passé...",
-    notes: "Note interne : bonne dynamique, ne pas surcharger.",
-  },
-];
 
 function ilYA(jours: number): string {
   const date = new Date();
@@ -176,7 +144,7 @@ export async function chargerLaDemonstration(): Promise<{
   // bord qu'on veut montrer devient inatteignable.
   const { data: questions } = await supabase
     .from("question_profil")
-    .select("id, type")
+    .select("id, type, libelle")
     .eq("active", true);
 
   if (questions && questions.length > 0) {
@@ -184,7 +152,10 @@ export async function chargerLaDemonstration(): Promise<{
       questions.map((question) => ({
         personne_id: personne.id,
         question_id: question.id,
-        reponse: REPONSES[question.type] ?? "Réponse d'exemple",
+        reponse:
+          REPONSES[question.libelle] ??
+          REPONSES_PAR_TYPE[question.type] ??
+          "Réponse d'exemple, à remplacer par celle de ton client.",
       })),
     );
   }
