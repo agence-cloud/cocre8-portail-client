@@ -43,3 +43,8 @@ npm-debug.log*
 # Artefacts de test
 test-results/
 playwright-report/
+
+# Les notes que `next dev` écrit pour les agents. Elles parlent des entrailles
+# de Next, pas de cet outil : dans un modèle destiné à quelqu'un qui ne code
+# pas, c'est du bruit. Elles se recréent toutes seules au prochain `npm run dev`.
+AGENTS.md

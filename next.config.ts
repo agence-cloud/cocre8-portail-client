@@ -66,7 +66,9 @@ function verifierLaConfiguration(): void {
   }
 }
 
-export default (phase: string): NextConfig => {
+const configurer = (phase: string): NextConfig => {
   if (phase === PHASE_PRODUCTION_BUILD) verifierLaConfiguration();
   return {};
 };
+
+export default configurer;

@@ -36,7 +36,17 @@ export async function generateMetadata(): Promise<Metadata> {
  * La lecture passe par une fonction de la base qui ne rend que ce nom : le
  * reste des réglages, dont le numéro du coach, n'est pas lisible sans compte.
  */
-export default async function RootLayout({ children }: LayoutProps<"/">) {
+/**
+ * Les props sont écrites à la main et non prises dans `LayoutProps<"/">`.
+ * Ce type-là, Next le fabrique dans `.next/types` au premier `build` : sur un
+ * dépôt qu'on vient de récupérer, `npx tsc` et l'éditeur ne le trouvent pas et
+ * signalent une erreur avant même qu'on ait touché à quoi que ce soit.
+ */
+export default async function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const nomProgramme = await lireNomDuProgramme();
 
   return (
