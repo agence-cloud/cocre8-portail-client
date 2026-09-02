@@ -42,8 +42,8 @@ méthode dont il est sorti. Quatre parties nommées d'après une méthode
 particulière, dix questions de profil taillées pour une niche : personne
 d'autre ne s'y reconnaît.
 
-Or presque tout ce qui varie était déjà en table (`pilier`, `offre`,
-`question_profil`, `parcours_modele`, `tache_modele`). Il ne manquait qu'un
+Or presque tout ce qui varie était déjà en table (`offre`,
+`question_profil`, et les objectifs de chaque client). Il ne manquait qu'un
 écran. **Aucun coach ne touche au code pour se l'approprier**, et nous ne
 faisons aucun sur-mesure : un seul paquet, pour tout le monde.
 

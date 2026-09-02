@@ -12,9 +12,10 @@ du schéma à ce jour, une surface anonyme laissée ouverte.
 droit à `anon` en direct sur toute fonction nouvelle du schéma public, et un
 `revoke` à `PUBLIC` ne retire pas un `grant` direct.
 
-Trois de ces fonctions ne disent rien d'utile à un anonyme. La quatrième,
-`pilier_ouvert`, répondait sur la personne qu'on lui nommait. Corrigé en
-révoquant aux deux, et vérifié avec `has_function_privilege` avant et après.
+Trois de ces fonctions ne disent rien d'utile à un anonyme. La quatrième
+répondait sur la personne qu'on lui nommait, et elle a disparu depuis avec les
+parties communes. Corrigé en révoquant aux deux, et vérifié avec
+`has_function_privilege` avant et après.
 
 **La leçon, qui vaut pour toute fonction ajoutée ensuite : révoquer à `public`
 ET à `anon`.** Le signalement ne suffit pas à lui seul, il faut le vérifier :

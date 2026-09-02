@@ -1,5 +1,13 @@
 # Plan 01 : de la copie à un outil qui s'installe
 
+> **Ce plan est un journal, pas une description de l'outil d'aujourd'hui.**
+> Il a été exécuté le 2026-09-01 et il garde les noms d'alors. Deux jours
+> plus tard, les « parties » communes à tous les clients ont été retirées au
+> profit d'objectifs propres à chacun : les tables `pilier`, `acces_pilier`,
+> `parcours_modele` et `tache_modele` n'existent plus, et `objectif` a pris
+> leur place. Le fichier `install.sql` et `CLAUDE.md` disent l'état réel du
+> schéma ; ce plan dit comment on y est arrivé, et pourquoi.
+
 **Objectif :** qu'un coach qui n'a jamais ouvert un terminal déploie l'outil,
 entre dedans, voie un jeu de démonstration, le vide, renomme ses quatre
 parties, ajoute son premier client et lui envoie ses accès, en moins de trente

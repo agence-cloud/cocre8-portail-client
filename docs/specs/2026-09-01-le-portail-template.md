@@ -154,6 +154,6 @@ passées avec compte rendu) et **tout vider pour commencer**.
 ## Comment on saura que c'est réussi
 
 Un coach qui n'a jamais ouvert un terminal déploie l'outil, entre dedans, voit
-un jeu de démonstration, le vide, renomme ses quatre parties, ajoute son
-premier client et lui envoie ses accès. **En moins de trente minutes, sans
+un jeu de démonstration, le vide, écrit le premier objectif d'un client et
+lui envoie ses accès. **En moins de trente minutes, sans
 poser de question.**

@@ -19,8 +19,6 @@ accès, et les réglages.
 
 ## Le récupérer
 
-Deux façons, et la première suffit à presque tout le monde.
-
 **Le plus simple : le bouton vert « Use this template »**, en haut de cette
 page. GitHub te crée ta propre copie, chez toi, que tu peux modifier. Il te
 faut un compte GitHub, gratuit.
@@ -53,10 +51,10 @@ fichier.
 
 ### 3. Mettre l'app en ligne
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fagence-cloud%2Fcocre8-portail-client&env=NEXT_PUBLIC_SUPABASE_URL,NEXT_PUBLIC_SUPABASE_ANON_KEY,SUPABASE_SERVICE_ROLE_KEY&envDescription=Les%20trois%20valeurs%20de%20ton%20projet%20Supabase&project-name=portail-client&repository-name=portail-client)
-
-Ce bouton t'emmène chez Vercel, qui héberge l'app gratuitement. Il te demande
-trois valeurs avant de démarrer. Elles sont toutes dans ton projet Supabase :
+Va sur [vercel.com](https://vercel.com), qui héberge l'app gratuitement,
+connecte ton compte GitHub et choisis la copie du dépôt que tu viens de te
+créer. Avant de lancer le déploiement, ouvre **Environment Variables** et pose
+ces trois valeurs. Elles sont toutes dans ton projet Supabase :
 
 | Ce que Vercel demande | Où le trouver dans Supabase |
 | --- | --- |
@@ -72,9 +70,12 @@ distinguer à l'oeil.
 La troisième, `service_role`, est un secret. Elle sert à créer les comptes de
 tes clients, et elle ne doit jamais sortir de chez toi.
 
-Si tu te trompes, l'installation s'arrête et te dit en français laquelle des
-trois cloche et pourquoi. Corrige la valeur chez Vercel, puis clique sur
-**Redeploy** : une valeur corrigée ne prend effet qu'au déploiement suivant.
+Si tu te trompes sur l'une des deux premières, la construction s'arrête et te
+dit en français laquelle cloche et pourquoi. La troisième n'est lue qu'au
+moment de créer ton compte, à l'étape suivante, et l'écran te le dira aussi.
+
+Dans les deux cas : corrige la valeur chez Vercel, puis clique sur
+**Redeploy**. Une valeur corrigée ne prend effet qu'au déploiement suivant.
 
 ### 4. Ton compte
 
