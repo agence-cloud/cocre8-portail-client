@@ -1,19 +1,28 @@
 /**
- * L'erreur dit aussi ce qu'elle voit, et cette liste a déjà servi.
+ * L'erreur dit aussi ce qu'elle voit, et cette liste a déjà servi deux fois.
  *
- * Au premier déploiement, la variable était bien posée dans Vercel, avec sa
- * valeur visible à l'écran, et l'app la réclamait quand même. Le message
- * d'origine envoyait donc chercher là où il n'y avait rien à trouver.
- *
- * **La cause, à connaître : le type d'une variable chez Vercel.** Une
- * variable de type « Secret » n'est pas lisible pendant la construction, or
- * les valeurs `NEXT_PUBLIC_` sont recopiées dans le code à ce moment-là. Elles
- * arrivaient donc vides, et rien à l'écran de Vercel ne le montrait. Il faut
- * le type « Config » pour toute variable lue à la construction.
+ * **Premier piège, le type d'une variable chez Vercel.** Au premier
+ * déploiement, la variable était bien posée, avec sa valeur visible à
+ * l'écran, et l'app la réclamait quand même. Une variable de type « Secret »
+ * n'est pas lisible pendant la construction, or les valeurs `NEXT_PUBLIC_`
+ * sont recopiées dans le code à ce moment-là. Elles arrivaient donc vides, et
+ * rien à l'écran de Vercel ne le montrait. Il faut le type « Config » pour
+ * toute variable lue à la construction.
  *
  * Nommer les variables reçues et la longueur de leur valeur est ce qui a
  * permis de trancher : une valeur de zéro caractère face à un écran qui la
  * montre bien remplie ne laisse plus qu'une explication.
+ *
+ * **Second piège, une valeur présente mais qui n'est pas la bonne.** Une fois
+ * le type corrigé, l'app s'est construite, s'est affichée, et n'a plus rien
+ * dit : elle interrogeait une adresse qui n'était pas celle du projet. Le
+ * nom du programme retombait sur sa valeur par défaut et la connexion
+ * échouait, sans qu'aucune des deux ne s'en plaigne. Une heure perdue à
+ * chercher un mot de passe qui n'avait rien à se reprocher.
+ *
+ * D'où la vérification de forme ci-dessous. Elle ne cherche pas à valider le
+ * projet, elle attrape ce qui se colle par erreur : l'adresse du tableau de
+ * bord Supabase, une clé à la place d'une adresse, un chemin en trop.
  *
  * Les noms et les longueurs, jamais les valeurs. Et Next masque le détail
  * d'une erreur serveur en production : ceci n'apparaît que dans les journaux.
@@ -37,6 +46,31 @@ function manquante(nom: string): Error {
 }
 
 /**
+ * Ce à quoi ressemble l'adresse d'un projet Supabase, et rien d'autre :
+ * `https://<reference>.supabase.co`, sans chemin ni barre finale.
+ *
+ * La référence fait vingt lettres minuscules. On ne vérifie pas ce compte
+ * ici : une future référence plus longue ferait échouer une adresse
+ * parfaitement valable, et cette fonction refuserait alors de démarrer une
+ * app qui marche. Elle attrape la faute grossière, pas la faute fine.
+ */
+const ADRESSE_PROJET = /^https:\/\/[a-z0-9-]+\.supabase\.(co|in)$/;
+
+function malformee(valeur: string): Error {
+  // On dit ce qu'on a reçu jusqu'au premier point : de quoi reconnaître
+  // « supabase.com » ou « localhost » sans recopier la référence du projet
+  // dans un journal.
+  const debut = valeur.slice(0, valeur.indexOf(".") + 1 || 24);
+
+  return new Error(
+    "NEXT_PUBLIC_SUPABASE_URL ne ressemble pas à l'adresse d'un projet Supabase. " +
+      `Attendu : https://<reference>.supabase.co, sans rien après. Reçu, début : ${debut}... ` +
+      "L'adresse se trouve dans ton projet Supabase, sous Project Settings puis Data API. " +
+      "Ce n'est pas celle du tableau de bord, qui commence par https://supabase.com/dashboard.",
+  );
+}
+
+/**
  * Lue par les trois clients (navigateur, serveur, proxy) pour que la
  * même variable manquante produise partout la même erreur nommée.
  *
@@ -52,5 +86,8 @@ export function lireConfigSupabase(): { url: string; cle: string } {
   if (!url) throw manquante("NEXT_PUBLIC_SUPABASE_URL");
   if (!cle) throw manquante("NEXT_PUBLIC_SUPABASE_ANON_KEY");
 
-  return { url, cle };
+  const propre = url.trim().replace(/\/+$/, "");
+  if (!ADRESSE_PROJET.test(propre)) throw malformee(propre);
+
+  return { url: propre, cle };
 }

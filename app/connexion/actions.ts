@@ -24,10 +24,28 @@ export async function seConnecter(
     password: motDePasse,
   });
 
-  // Message volontairement identique pour un email inconnu et un mot de passe
-  // faux : préciser lequel des deux est mauvais permettrait de savoir quels
-  // emails existent dans la base.
-  if (error || !data.user) {
+  // **Une base qu'on ne joint pas n'est pas un mot de passe faux, et les
+  // confondre coûte une soirée.** Ça s'est produit à la première
+  // installation : l'adresse du projet Supabase pointait à côté, l'app
+  // affichait « Email ou mot de passe incorrect. », et la recherche est
+  // partie sur les comptes alors que la base n'avait jamais été jointe.
+  //
+  // Le client Supabase distingue les deux, encore faut-il le lui demander :
+  // un échec réseau porte le nom `AuthRetryableFetchError`, ou un statut
+  // absent, là où un refus d'identifiants arrive en 400. La règle est donc
+  // renversée : on ne dit « incorrect » que pour un refus reconnu comme tel,
+  // et tout le reste s'annonce comme une panne.
+  if (error) {
+    const refus = error.status === 400 || error.status === 422;
+    return refus
+      ? // Message volontairement identique pour un email inconnu et un mot
+        // de passe faux : préciser lequel des deux est mauvais permettrait de
+        // savoir quels emails existent dans la base.
+        { erreur: "Email ou mot de passe incorrect." }
+      : { erreur: "La base de données ne répond pas. Vérifie la configuration de ton installation." };
+  }
+
+  if (!data.user) {
     return { erreur: "Email ou mot de passe incorrect." };
   }
 
