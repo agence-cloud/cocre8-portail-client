@@ -16,7 +16,7 @@ const ouvrirLEspace = vi.fn().mockResolvedValue(undefined);
 
 vi.mock("@/modules/portail/actions", () => ({
   cocherTache: vi.fn(),
-  deposerDocument: vi.fn(),
+  enregistrerLeDocument: vi.fn(),
   enregistrerReponse: (...a: unknown[]) => enregistrerReponse(...a),
   enregistrerDerniereReponse: (...a: unknown[]) => enregistrerDerniereReponse(...a),
   enregistrerReponses: (...a: unknown[]) => enregistrerReponses(...a),

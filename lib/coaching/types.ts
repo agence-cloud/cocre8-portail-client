@@ -1,4 +1,4 @@
-import type { IssueAppel, PorteeReunion } from "@/lib/personne/appels.types";
+import type { PorteeReunion } from "@/lib/personne/appels.types";
 
 /**
  * Un coaching tel que le membre le voit, et rien de plus.
@@ -19,7 +19,6 @@ export type Coaching = {
   prevu_le: string;
   duree_minutes: number | null;
   lien_visio: string | null;
-  issue: IssueAppel;
   lien_enregistrement: string | null;
   transcription: string | null;
   resume: string | null;

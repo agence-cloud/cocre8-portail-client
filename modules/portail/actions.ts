@@ -165,52 +165,64 @@ export async function enregistrerReponses(
 }
 
 /**
- * Dépose un fichier dans le coffre, puis enregistre sa ligne.
+ * L'enregistrement d'un document, une fois le fichier déjà dans le coffre.
  *
- * L'ordre compte : si l'enregistrement échoue après le téléversement, on
- * retire le fichier. Sans ça, le coffre accumulerait des fichiers que plus
- * aucune ligne ne nomme, invisibles et impossibles à nettoyer.
+ * **Le fichier ne passe plus par ici, et c'est la correction du 2026-09-02.**
+ * Il traversait cette action serveur, qui plafonne à 1 Mo chez Next et à
+ * 4,5 Mo chez Vercel. Au-delà, la requête était coupée avant d'arriver, et
+ * l'écran affichait « An unexpected response was received from the server »,
+ * en anglais, sans rapport avec la taille. Le formulaire annonçait 20 Mo.
+ *
+ * Le navigateur envoie donc le fichier directement au coffre, avec la session
+ * du coach ou du client, et n'appelle cette action qu'ensuite, avec les
+ * quelques centaines d'octets qui décrivent le fichier. Les permissions ne
+ * bougent pas : ce sont celles du coffre qui décident où chacun peut écrire,
+ * et elles étaient déjà écrites pour ça.
+ *
+ * **Le chemin est vérifié ici, et il l'est aussi par la base.** La politique
+ * d'écriture de `document` exige déjà qu'un client ne cite qu'un fichier de
+ * son dossier ; on le redit en clair plutôt que de laisser une erreur
+ * PostgreSQL remonter à l'écran.
+ *
+ * **Ce qu'on ne vérifie pas : que le fichier soit bien arrivé.** Relire
+ * l'objet dans le coffre a été écrit puis retiré, parce que la vérification
+ * ne sait pas répondre pour un client : sa politique de lecture du coffre
+ * exige une ligne `document` déjà posée et visible, donc elle ne trouve
+ * jamais un fichier qu'on vient à peine d'envoyer. Elle aurait refusé tous
+ * les dépôts des clients en prétendant que le fichier manquait. Le pire cas
+ * qui reste est une ligne qui pointe sur rien, et elle ne vient que d'un
+ * appel forgé : son propriétaire verrait un document qui ne s'ouvre pas.
  */
-export async function deposerDocument(
-  personneId: string,
-  donnees: FormData,
-): Promise<{ erreur: string | null }> {
+export async function enregistrerLeDocument(champs: {
+  personneId: string;
+  chemin: string;
+  nom: string;
+  taille: number;
+  typeMime: string | null;
+  interne: boolean;
+}): Promise<{ erreur: string | null }> {
   await exigerConnecte();
-
-  const fichier = donnees.get("fichier");
-  if (!(fichier instanceof File) || fichier.size === 0) {
-    return { erreur: "Choisis un fichier." };
-  }
-
-  // 20 Mo : au-delà, c'est une vidéo, et une vidéo se partage par un lien.
-  if (fichier.size > 20 * 1024 * 1024) {
-    return { erreur: "Ce fichier dépasse 20 Mo. Partage plutôt un lien." };
-  }
-
   const supabase = await creerClientServeur();
-  // Le nom d'origine est conservé pour l'affichage, mais le chemin porte un
-  // identifiant : deux fichiers du même nom ne doivent pas s'écraser, et un
-  // nom de fichier peut contenir n'importe quoi.
-  const chemin = `${personneId}/${crypto.randomUUID()}`;
 
-  const { error: erreurCoffre } = await supabase.storage
-    .from("documents")
-    .upload(chemin, fichier, { contentType: fichier.type || undefined });
+  // Le dossier est toujours celui de la fiche : c'est ce que la politique du
+  // coffre impose déjà à l'écriture, on le redit ici pour que la ligne ne
+  // puisse pas désigner le fichier d'un autre.
+  if (!champs.chemin.startsWith(`${champs.personneId}/`)) {
+    return { erreur: "Ce fichier n'appartient pas à cette fiche." };
+  }
 
-  if (erreurCoffre) return { erreur: `Dépôt impossible : ${erreurCoffre.message}` };
-
-  const { error: erreurLigne } = await supabase.from("document").insert({
-    personne_id: personneId,
-    nom: fichier.name,
-    chemin_storage: chemin,
-    taille_octets: fichier.size,
-    type_mime: fichier.type || null,
-    visible_membre: donnees.get("interne") !== "on",
+  const { error } = await supabase.from("document").insert({
+    personne_id: champs.personneId,
+    nom: champs.nom,
+    chemin_storage: champs.chemin,
+    taille_octets: champs.taille,
+    type_mime: champs.typeMime,
+    visible_membre: !champs.interne,
   });
 
-  if (erreurLigne) {
-    await supabase.storage.from("documents").remove([chemin]);
-    return { erreur: `Enregistrement impossible : ${erreurLigne.message}` };
+  if (error) {
+    await supabase.storage.from("documents").remove([champs.chemin]);
+    return { erreur: `Enregistrement impossible : ${error.message}` };
   }
 
   revalidatePath("/espace", "layout");
@@ -404,29 +416,30 @@ export async function poserCoaching(
 }
 
 /**
- * Noter qu'une séance a eu lieu, ou pas. C'est ce geste qui ouvre son compte
- * rendu : tant qu'elle est à venir, il n'y a rien à en dire.
+ * Retire un coaching, et son compte rendu avec lui.
  *
- * Comme la précédente, elle refuse tout ce qui n'est pas un coaching : les
- * appels de prospection se notent depuis leur fiche, dans le CRM, et cet
- * écran-ci n'a pas à les atteindre.
+ * **Elle remplace `noterIssueCoaching`.** Une séance portait une « issue » à
+ * noter, Honoré ou No-show, reste de l'app de prospection dont cet outil est
+ * extrait : là-bas, le taux de présence était une métrique commerciale. Un
+ * coach qui suit ses clients ne compte pas leurs absences, il retire la
+ * séance qui n'a pas eu lieu. C'est ce geste-là qui manquait.
+ *
+ * `nature` reste dans le filtre : cette action ne doit pouvoir toucher qu'un
+ * coaching, jamais une autre réunion qu'un import déposerait un jour.
  */
-export async function noterIssueCoaching(
-  id: string,
-  issue: "honore" | "no_show",
-): Promise<void> {
+export async function retirerCoaching(id: string): Promise<void> {
   await exigerAdmin();
   const supabase = await creerClientServeur();
 
   const { data, error } = await supabase
     .from("appel")
-    .update({ issue })
+    .delete()
     .eq("id", id)
     .eq("nature", "coaching")
     .select("id")
     .maybeSingle();
 
-  if (error) throw new Error(`Issue non enregistrée : ${error.message}`);
+  if (error) throw new Error(`Coaching non retiré : ${error.message}`);
   if (!data) throw new Error("Ce coaching n'existe plus, ou n'en est pas un.");
 
   revalidatePath("/pilotage/membres", "layout");

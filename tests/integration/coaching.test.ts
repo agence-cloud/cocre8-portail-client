@@ -72,7 +72,6 @@ describe("les coachings que le membre peut lire", () => {
       .insert({
         personne_id: personneId,
         prevu_le: new Date("2026-08-01T10:00:00Z").toISOString(),
-        issue: "honore",
         nature,
         ...complement,
       })
@@ -152,7 +151,6 @@ describe("les coachings que le membre peut lire", () => {
     const { error: erreurInsertion } = await membre.from("coaching_membre").insert({
       personne_id: personneDuMembre,
       prevu_le: new Date("2026-08-02T10:00:00Z").toISOString(),
-      issue: "honore",
       titre: "Injecté",
     });
     expect(erreurInsertion).not.toBeNull();

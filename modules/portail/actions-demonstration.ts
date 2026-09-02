@@ -167,7 +167,6 @@ export async function chargerLaDemonstration(): Promise<{
       portee: "individuel",
       prevu_le: ilYAHorodate(seance.ilYAJours),
       duree_minutes: 45,
-      issue: "honore",
       resume: seance.resume,
       transcription: seance.transcription,
       notes: seance.notes,

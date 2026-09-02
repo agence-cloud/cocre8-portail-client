@@ -347,7 +347,6 @@ test("le membre retrouve un coaching passé, sans la note interne du coach", asy
       titre: TITRE,
       portee: "individuel",
       prevu_le: "2026-08-10T14:00:00Z",
-      issue: "honore",
       nature: "coaching",
       lien_enregistrement: "https://exemple.fr/coaching-1",
       transcription: TRANSCRIPTION,

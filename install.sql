@@ -20,7 +20,6 @@ create type statut_accompagnement as enum ('actif', 'termine', 'suspendu');
 -- La portée dit à qui s'adresse la séance, la nature dit ce qu'on y fait.
 create type portee_reunion as enum ('collectif', 'individuel');
 create type nature_appel as enum ('prospection', 'coaching');
-create type issue_appel as enum ('a_venir', 'honore', 'no_show');
 
 
 -- ---------------------------------------------------------------------
@@ -168,7 +167,6 @@ create table appel (
   prevu_le timestamptz not null,
   duree_minutes smallint,
   lien_visio text,
-  issue issue_appel not null default 'a_venir',
   lien_enregistrement text,
   transcription text,
   resume text,
@@ -580,7 +578,7 @@ create policy membre_depose_un_document on document
 create view coaching_membre as
   select
     id, personne_id, titre, portee, prevu_le, duree_minutes, lien_visio,
-    issue, lien_enregistrement, transcription, resume
+    lien_enregistrement, transcription, resume
   from appel
   where nature = 'coaching'
     and personne_id = ma_personne();

@@ -139,6 +139,22 @@ objectifs et étapes, séances et comptes rendus, documents), l'écran de suivi
 d'un client côté coach, la connexion et le chemin de récupération de mot de
 passe.
 
+**Une séance ne porte plus d'issue.** L'app d'origine notait chaque réunion
+Honoré ou No-show, parce que le taux de présence y était une métrique
+commerciale. Un coach qui suit ses clients ne compte pas leurs absences : le
+tag est parti, le compte rendu s'ouvre toujours, et **une séance se retire**,
+ce qui manquait. Le retrait dit ce qui part avec elle, le compte rendu étant
+ce qui a de la valeur.
+
+**Un document part au coffre depuis le navigateur, jamais par une action
+serveur.** Il passait par là, et une action serveur plafonne à 1 Mo chez Next,
+à 4,5 Mo chez Vercel : au-delà, la requête était coupée avant d'arriver et
+l'écran affichait « An unexpected response was received from the server »,
+en anglais et sans rapport avec la taille, pendant que le cadre annonçait
+20 Mo. Les politiques du coffre décident déjà de qui écrit où. L'action
+serveur reste pour la ligne qui décrit le fichier, quelques centaines
+d'octets, et c'est elle qui tient la visibilité.
+
 **Le coach peut ouvrir l'espace d'un client tel que ce client le voit**
 (`lib/auth/apercu.ts`, troisième lecteur de la clé de service). Il n'emprunte
 qu'un compte membre, jamais un admin, et l'adresse email n'est pas un

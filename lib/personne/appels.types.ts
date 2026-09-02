@@ -1,5 +1,3 @@
-export type IssueAppel = "a_venir" | "honore" | "no_show";
-
 /**
  * À qui s'adresse la réunion. Indépendante de sa nature : un coaching peut
  * être collectif ou individuel, un appel de prospection est toujours
@@ -12,7 +10,6 @@ export type Appel = {
   /** Nul pour un appel importé qui n'a pas encore trouvé sa fiche. */
   personne_id: string | null;
   prevu_le: string;
-  issue: IssueAppel;
   /** Déduite à la création, jamais saisie. */
   nature: "prospection" | "coaching";
   /** Nul sur un appel de prospection, qui n'a pas besoin d'être nommé. */
@@ -37,13 +34,3 @@ export type Appel = {
   /** Son numéro d'ordre, calculé à la lecture. */
   rang: number;
 };
-
-export const ISSUES: readonly { valeur: IssueAppel; libelle: string }[] = [
-  { valeur: "a_venir", libelle: "À venir" },
-  { valeur: "honore", libelle: "Honoré" },
-  { valeur: "no_show", libelle: "No-show" },
-];
-
-export function libelleIssue(issue: IssueAppel): string {
-  return ISSUES.find((i) => i.valeur === issue)!.libelle;
-}

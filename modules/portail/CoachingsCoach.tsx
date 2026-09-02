@@ -1,15 +1,17 @@
 "use client";
 
 import { useRef, useState, useTransition } from "react";
-import { poserCoaching, modifierCompteRenduCoaching } from "@/modules/portail/actions";
-import { noterIssueCoaching } from "@/modules/portail/actions";
+import {
+  poserCoaching,
+  modifierCompteRenduCoaching,
+  retirerCoaching,
+} from "@/modules/portail/actions";
 import { Carte } from "@/lib/design/Carte";
 import { Bouton } from "@/lib/design/Bouton";
-import { Badge } from "@/lib/design/Badge";
 import { Icone } from "@/lib/design/Icones";
 import { CompteRendu } from "@/lib/design/CompteRendu";
 import { formaterDateHeure } from "@/lib/dates";
-import { ISSUES, libelleIssue, type Appel, type IssueAppel } from "@/lib/personne/appels.types";
+import type { Appel } from "@/lib/personne/appels.types";
 
 type Props = {
   personneId: string;
@@ -30,8 +32,13 @@ const CHAMP = "rounded-icone border border-bordure px-3 py-2 text-sm";
  * Le panneau lui-même vient du socle : il ne porte pas l'action
  * d'enregistrement, elle arrive en propriété avec la garde du module.
  *
- * Le compte rendu ne s'ouvre qu'une fois l'issue notée : tant que la séance
- * est à venir, il n'y a rien à en dire.
+ * **Le compte rendu s'ouvre toujours.** Une séance portait auparavant une
+ * « issue » à noter, Honoré ou No-show, et son compte rendu restait fermé
+ * tant que le coach ne l'avait pas cliquée. C'était un reste de l'app de
+ * prospection dont cet outil est extrait, où le taux de présence était une
+ * métrique commerciale. Un coach qui suit ses clients ne compte pas leurs
+ * absences : il pose une séance, il écrit ce qui s'y est dit, et il retire
+ * celle qui n'a pas eu lieu.
  */
 export function CoachingsCoach({ personneId, coachings }: Props) {
   const formulaire = useRef<HTMLFormElement>(null);
@@ -79,53 +86,36 @@ export function CoachingsCoach({ personneId, coachings }: Props) {
                   </span>
                 </button>
 
-                <div className="flex items-center gap-2">
-                  {coaching.issue === "a_venir" ? (
-                    ISSUES.filter(
-                      (i): i is { valeur: Exclude<IssueAppel, "a_venir">; libelle: string } =>
-                        i.valeur !== "a_venir",
-                    ).map((issue) => (
-                      <button
-                        key={issue.valeur}
-                        onClick={() =>
-                          demarrer(async () => {
-                            await noterIssueCoaching(coaching.id, issue.valeur);
-                          })
-                        }
-                        className="rounded-pilule bg-fond-alt px-2.5 py-1 text-[11px] transition-colors duration-200 hover:bg-accent hover:text-white"
-                      >
-                        {issue.libelle}
-                      </button>
-                    ))
-                  ) : (
-                    <Badge ton={coaching.issue === "honore" ? "succes" : "attention"}>
-                      {libelleIssue(coaching.issue)}
-                    </Badge>
+                {/* Le retrait demande confirmation sur place, et l'écran
+                    dit ce qui part : le compte rendu s'en va avec la séance,
+                    et c'est lui qui a de la valeur. */}
+                <ConfirmerRetrait
+                  aUnCompteRendu={Boolean(
+                    coaching.resume || coaching.transcription || coaching.notes,
                   )}
-                </div>
+                  enCours={enCours}
+                  onRetirer={() =>
+                    demarrer(async () => {
+                      await retirerCoaching(coaching.id);
+                    })
+                  }
+                />
               </div>
 
               {deplie === coaching.id && (
                 <div className="mt-1 mb-3 rounded-xl border border-bordure bg-fond-alt px-4 py-4">
-                  {coaching.issue === "a_venir" ? (
-                    <p className="text-sm text-texte-doux">
-                      Cette séance n&apos;a pas encore eu lieu. Son compte rendu
-                      s&apos;ouvrira quand tu auras noté son issue.
-                    </p>
-                  ) : (
-                    <CompteRendu
-                      valeurs={{
-                        lien_enregistrement: coaching.lien_enregistrement,
-                        transcription: coaching.transcription,
-                        resume: coaching.resume,
-                        notes: coaching.notes,
-                      }}
-                      source={coaching.source_externe}
-                      onEnregistrer={(champs) =>
-                        modifierCompteRenduCoaching(coaching.id, champs)
-                      }
-                    />
-                  )}
+                  <CompteRendu
+                    valeurs={{
+                      lien_enregistrement: coaching.lien_enregistrement,
+                      transcription: coaching.transcription,
+                      resume: coaching.resume,
+                      notes: coaching.notes,
+                    }}
+                    source={coaching.source_externe}
+                    onEnregistrer={(champs) =>
+                      modifierCompteRenduCoaching(coaching.id, champs)
+                    }
+                  />
                 </div>
               )}
             </div>
@@ -156,5 +146,65 @@ export function CoachingsCoach({ personneId, coachings }: Props) {
 
       {erreur && <p className="mt-3 text-sm text-accent">{erreur}</p>}
     </Carte>
+  );
+}
+
+/**
+ * Le retrait d'une séance, confirmé sur place.
+ *
+ * **Il dit ce qui part.** Une séance sans compte rendu ne coûte rien à
+ * retirer, une séance qui en porte un emporte le résumé, la transcription et
+ * la note interne du coach. Deux phrases différentes, parce que l'hésitation
+ * n'est pas la même.
+ *
+ * L'état vit ici et non chez le parent : une seule séance est en cours de
+ * confirmation à la fois, et un état par ligne dans le parent obligerait à
+ * tenir une carte d'identifiants pour rien.
+ */
+function ConfirmerRetrait({
+  aUnCompteRendu,
+  enCours,
+  onRetirer,
+}: {
+  aUnCompteRendu: boolean;
+  enCours: boolean;
+  onRetirer: () => void;
+}) {
+  const [confirme, setConfirme] = useState(false);
+
+  if (!confirme) {
+    return (
+      <button
+        type="button"
+        onClick={() => setConfirme(true)}
+        aria-label="Retirer ce coaching"
+        className="text-texte-doux transition-colors duration-200 hover:text-accent"
+      >
+        <Icone nom="croix" className="h-4 w-4" />
+      </button>
+    );
+  }
+
+  return (
+    <span className="flex items-center gap-3 text-[13px]">
+      <span className="text-texte-doux">
+        {aUnCompteRendu ? "Son compte rendu part avec." : "Retirer ?"}
+      </span>
+      <button
+        type="button"
+        disabled={enCours}
+        onClick={onRetirer}
+        className="text-accent hover:underline disabled:opacity-60"
+      >
+        Confirmer
+      </button>
+      <button
+        type="button"
+        onClick={() => setConfirme(false)}
+        className="text-texte-doux hover:text-texte"
+      >
+        Annuler
+      </button>
+    </span>
   );
 }

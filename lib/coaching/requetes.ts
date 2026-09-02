@@ -3,7 +3,7 @@ import type { Coaching } from "@/lib/coaching/types";
 import type { Appel } from "@/lib/personne/appels.types";
 
 const CHAMPS =
-  "id, personne_id, titre, portee, prevu_le, duree_minutes, lien_visio, issue, lien_enregistrement, transcription, resume";
+  "id, personne_id, titre, portee, prevu_le, duree_minutes, lien_visio, lien_enregistrement, transcription, resume";
 
 /**
  * Les coachings du membre connecté, passés ou à venir.
@@ -66,7 +66,7 @@ export async function lireCoachingsDuMembre(personneId: string): Promise<Appel[]
   const { data, error } = await supabase
     .from("appel")
     .select(
-      "id, personne_id, prevu_le, issue, nature, titre, portee, duree_minutes, lien_visio, notes, source_externe, reference_externe, lien_enregistrement, transcription, resume",
+      "id, personne_id, prevu_le, nature, titre, portee, duree_minutes, lien_visio, notes, source_externe, reference_externe, lien_enregistrement, transcription, resume",
     )
     .eq("nature", "coaching")
     .eq("personne_id", personneId)

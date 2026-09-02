@@ -13,9 +13,9 @@ cocher, le profil qu'il remplit en arrivant, ses séances passées avec leur
 compte rendu, ses documents.
 
 **Côté coach :** la liste de tes clients, la fiche de suivi de chacun (où tu
-écris ses objectifs et leurs étapes, et où tu retrouves ses séances, les
-comptes rendus et ses documents), l'ajout d'un client et l'envoi de ses accès,
-et les réglages.
+écris ses objectifs et leurs étapes, où tu poses ses séances et leur compte
+rendu, et où tu déposes ses documents), l'ajout d'un client et l'envoi de ses
+accès, et les réglages.
 
 ## L'installer
 

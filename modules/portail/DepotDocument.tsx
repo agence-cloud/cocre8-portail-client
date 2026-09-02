@@ -1,10 +1,14 @@
 "use client";
 
 import { useRef, useState, useTransition, type DragEvent } from "react";
-import { deposerDocument } from "@/modules/portail/actions";
+import { enregistrerLeDocument } from "@/modules/portail/actions";
+import { creerClientNavigateur } from "@/lib/supabase/navigateur";
 import { Bouton } from "@/lib/design/Bouton";
 import { Icone } from "@/lib/design/Icones";
 import { formaterTaille } from "@/lib/document/types";
+
+/** 20 Mo : au-delà, c'est une vidéo, et une vidéo se partage par un lien. */
+const TAILLE_MAX = 20 * 1024 * 1024;
 
 type Props = {
   personneId: string;
@@ -27,14 +31,51 @@ export function DepotDocument({ personneId, avecVisibilite = false }: Props) {
     if (fichier) setChoisi(fichier);
   }
 
+  /**
+   * **Le fichier va au coffre depuis le navigateur, pas par une action
+   * serveur.** Il passait par là, et une action serveur plafonne à 1 Mo chez
+   * Next et à 4,5 Mo chez Vercel : au-delà, la requête était coupée avant
+   * d'arriver et l'écran affichait un message anglais sans rapport avec la
+   * taille, alors que ce cadre annonce 20 Mo. Les permissions du coffre
+   * décident déjà de qui écrit où, elles n'avaient pas besoin du détour.
+   *
+   * L'action serveur reste, pour enregistrer la ligne qui décrit le fichier :
+   * quelques centaines d'octets, et c'est elle qui tient la visibilité.
+   */
   function envoyer() {
     if (!choisi) return;
-    const donnees = new FormData();
-    donnees.set("fichier", choisi);
-    if (interne) donnees.set("interne", "on");
+
+    if (choisi.size > TAILLE_MAX) {
+      setErreur("Ce fichier dépasse 20 Mo. Partage plutôt un lien.");
+      return;
+    }
 
     demarrer(async () => {
-      const resultat = await deposerDocument(personneId, donnees);
+      setErreur(null);
+      const supabase = creerClientNavigateur();
+      // Le nom d'origine est gardé pour l'affichage, mais le chemin porte un
+      // identifiant : deux fichiers du même nom ne doivent pas s'écraser, et
+      // un nom de fichier peut contenir n'importe quoi.
+      const chemin = `${personneId}/${crypto.randomUUID()}`;
+
+      const { error } = await supabase.storage
+        .from("documents")
+        .upload(chemin, choisi, { contentType: choisi.type || undefined });
+
+      if (error) {
+        setErreur(`Dépôt impossible : ${error.message}`);
+        return;
+      }
+
+      const resultat = await enregistrerLeDocument({
+        personneId,
+        chemin,
+        nom: choisi.name,
+        taille: choisi.size,
+        typeMime: choisi.type || null,
+        interne,
+      });
+
       setErreur(resultat.erreur);
       if (!resultat.erreur) {
         setChoisi(null);
