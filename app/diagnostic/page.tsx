@@ -26,6 +26,43 @@ export const dynamic = "force-dynamic";
 
 type Ligne = { quoi: string; valeur: string; bon: boolean };
 
+/**
+ * **La faute qui a coûté la première installation, et qu'aucune vérification
+ * de longueur n'attrape.** La clé collée dans l'hébergeur faisait exactement
+ * les 208 caractères de la vraie, et portait des « • » au milieu : c'était la
+ * version masquée, recopiée depuis un écran qui la cache tout en gardant sa
+ * longueur. Tout paraissait juste, et le seul symptôme était une connexion qui
+ * refusait.
+ *
+ * Une clé Supabase est de l'ASCII imprimable, jeton JWT ou `sb_publishable_`.
+ * Tout ce qui sort de cette plage vient d'un copier-coller sur du texte
+ * affiché plutôt que sur la valeur.
+ */
+function premierCaractereInterdit(valeur: string): string | null {
+  for (const caractere of valeur) {
+    const code = caractere.codePointAt(0) ?? 0;
+    if (code < 33 || code > 126) return caractere;
+  }
+  return null;
+}
+
+function verifierUneCle(quoi: string, valeur: string): Ligne {
+  if (!valeur) return { quoi, valeur: "absente", bon: false };
+
+  const interdit = premierCaractereInterdit(valeur);
+  if (interdit) {
+    return {
+      quoi,
+      valeur: `contient « ${interdit} » : c'est la version masquée, pas la clé`,
+      bon: false,
+    };
+  }
+
+  // Une clé Supabase, ancienne ou nouvelle, dépasse largement cette longueur.
+  // En dessous, c'est une valeur tronquée.
+  return { quoi, valeur: `${valeur.length} caractères`, bon: valeur.length > 30 };
+}
+
 async function essayer(url: string, cle: string): Promise<Ligne> {
   // Un appel réel, pas une vérification de forme : c'est la seule façon de
   // distinguer une adresse bien écrite d'une adresse qui existe. Le
@@ -66,21 +103,17 @@ export default async function PageDiagnostic() {
   }
 
   const service = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
+  const anon = verifierUneCle("Clé anon", config.cle);
   const lignes: Ligne[] = [
     { quoi: "Adresse du projet", valeur: config.url, bon: true },
-    {
-      quoi: "Clé anon",
-      valeur: `${config.cle.length} caractères`,
-      // Une clé Supabase, ancienne ou nouvelle, dépasse largement cette
-      // longueur. En dessous, c'est une valeur tronquée ou un espace.
-      bon: config.cle.length > 30,
-    },
-    {
-      quoi: "Clé de service",
-      valeur: service ? `${service.length} caractères` : "absente",
-      bon: service.length > 30,
-    },
-    await essayer(config.url, config.cle),
+    anon,
+    verifierUneCle("Clé de service", service),
+    // L'appel réel n'a de sens qu'avec une clé qui peut voyager dans un
+    // en-tête. Sinon il échouerait sur le caractère interdit et masquerait la
+    // ligne au-dessus, qui est la vraie réponse.
+    anon.bon
+      ? await essayer(config.url, config.cle)
+      : { quoi: "Réponse du projet", valeur: "pas tentée, la clé est illisible", bon: false },
   ];
 
   const tout = lignes.every((ligne) => ligne.bon);
@@ -114,8 +147,11 @@ export default async function PageDiagnostic() {
         ) : (
           <>
             L&apos;adresse et les clés se trouvent dans ton projet Supabase, sous Project
-            Settings puis Data API. Corrige-les dans les variables de ton hébergeur, puis
-            redéploie : une valeur corrigée ne prend effet qu&apos;au déploiement suivant.
+            Settings puis API Keys. <strong className="text-texte">Copie-les avec le bouton
+            de copie</strong>, jamais en sélectionnant le texte à l&apos;écran : la clé y est
+            affichée masquée, et une clé masquée a la bonne longueur sans être la bonne
+            valeur. Corrige-les dans les variables de ton hébergeur, puis redéploie : une
+            valeur corrigée ne prend effet qu&apos;au déploiement suivant.
           </>
         )}
       </p>

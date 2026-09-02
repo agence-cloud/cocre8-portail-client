@@ -48,7 +48,12 @@ lui répond. C'est la première chose à regarder quand la connexion refuse : un
 adresse ou une clé fausse produit exactement le même écran qu'un mot de passe
 faux.
 
-Deux pièges qui coûtent une soirée chacun :
+Trois pièges qui coûtent une soirée chacun :
+
+- **Copie tes clés avec le bouton de copie**, jamais en sélectionnant le texte
+  affiché. Supabase les montre masquées, et une clé masquée a exactement la
+  longueur de la vraie : rien ne distingue les deux à l'oeil, et l'app se
+  contente de refuser la connexion.
 
 - Sur Vercel, une variable de type **Secret** n'est pas lisible pendant la
   construction. Les deux valeurs `NEXT_PUBLIC_` doivent être de type
