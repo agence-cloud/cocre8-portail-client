@@ -13,7 +13,7 @@ export default async function PageCoachings() {
   return (
     <>
       <h1 className="text-4xl">
-        Tes <span className="text-orange">coachings</span>
+        Tes <span className="text-accent">coachings</span>
       </h1>
       <p className="mt-2 max-w-2xl text-texte-doux">
         Ce qui a déjà eu lieu, avec l'enregistrement et le résumé de chaque

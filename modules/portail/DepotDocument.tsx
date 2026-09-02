@@ -53,12 +53,12 @@ export function DepotDocument({ personneId, avecVisibilite = false }: Props) {
         onDragOver={(e) => { e.preventDefault(); setSurvole(true); }}
         onDragLeave={() => setSurvole(false)}
         onDrop={deposer}
-        className={`flex cursor-pointer flex-col items-center justify-center rounded-carte border-2 border-dashed px-6 py-10 text-center transition-colors duration-200 focus-within:border-orange ${
-          survole ? "border-orange bg-orange-tint" : "border-bordure bg-fond-alt hover:border-texte-doux"
+        className={`flex cursor-pointer flex-col items-center justify-center rounded-carte border-2 border-dashed px-6 py-10 text-center transition-colors duration-200 focus-within:border-accent ${
+          survole ? "border-accent bg-accent-doux" : "border-bordure bg-fond-alt hover:border-texte-doux"
         }`}
       >
-        <span className="flex h-12 w-12 items-center justify-center rounded-icone bg-orange-tint">
-          <Icone nom="depot" className="h-5 w-5 text-orange" />
+        <span className="flex h-12 w-12 items-center justify-center rounded-icone bg-accent-doux">
+          <Icone nom="depot" className="h-5 w-5 text-accent" />
         </span>
         {choisi ? (
           <>
@@ -105,7 +105,7 @@ export function DepotDocument({ personneId, avecVisibilite = false }: Props) {
                 type="checkbox"
                 checked={interne}
                 onChange={(e) => setInterne(e.target.checked)}
-                className="accent-orange"
+                className="accent-accent"
               />
               Garder ce document interne
             </label>
@@ -113,7 +113,7 @@ export function DepotDocument({ personneId, avecVisibilite = false }: Props) {
         </div>
       )}
 
-      {erreur && <p className="mt-3 text-sm text-orange">{erreur}</p>}
+      {erreur && <p className="mt-3 text-sm text-accent">{erreur}</p>}
     </div>
   );
 }

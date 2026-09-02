@@ -27,13 +27,13 @@ function Bandeau({ pilier, ouvert }: { pilier: Pilier; ouvert: boolean }) {
   return (
     <div
       className={`relative h-24 overflow-hidden rounded-t-carte ${
-        ouvert ? "bg-orange-tint" : "bg-fond-alt"
+        ouvert ? "bg-accent-doux" : "bg-fond-alt"
       }`}
     >
       <Icone
         nom={icone}
         className={`pointer-events-none absolute -right-4 -bottom-9 h-[150px] w-[150px] ${
-          ouvert ? "text-orange/15" : "text-texte/10"
+          ouvert ? "text-accent/15" : "text-texte/10"
         }`}
       />
       {/* Le cartouche blanc décolle l'icône du fond teinté : sans lui elle se
@@ -41,7 +41,7 @@ function Bandeau({ pilier, ouvert }: { pilier: Pilier; ouvert: boolean }) {
       <span className="absolute top-6 left-6 flex h-11 w-11 items-center justify-center rounded-icone bg-fond shadow-carte">
         <Icone
           nom={icone}
-          className={`h-6 w-6 ${ouvert ? "text-orange" : "text-texte-doux"}`}
+          className={`h-6 w-6 ${ouvert ? "text-accent" : "text-texte-doux"}`}
         />
       </span>
     </div>
@@ -62,7 +62,7 @@ export function CartePilier({ pilier, etat, progression, mot }: Props) {
         <Bandeau pilier={pilier} ouvert={false} />
         <div className="p-6">
           <h2 className="flex items-center gap-2.5 text-xl text-texte-doux">
-            <Icone nom="cadenas" className="h-[18px] w-[18px] text-orange" />
+            <Icone nom="cadenas" className="h-[18px] w-[18px] text-accent" />
             {pilier.numero}. {pilier.nom}
           </h2>
           <p className="mt-2 text-sm text-texte-doux">
@@ -89,7 +89,7 @@ export function CartePilier({ pilier, etat, progression, mot }: Props) {
           </div>
           <div className="mt-5 h-1.5 w-full rounded-pilule bg-fond-alt">
             <div
-              className="h-1.5 rounded-pilule bg-orange transition-all duration-200"
+              className="h-1.5 rounded-pilule bg-accent transition-all duration-200"
               style={{ width: `${progression}%` }}
             />
           </div>

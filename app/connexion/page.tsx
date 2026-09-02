@@ -31,7 +31,7 @@ export default function PageConnexion() {
     <EcranAuth
       titre={
         <>
-          Accède à ton <span className="block text-orange">espace personnel.</span>
+          Accède à ton <span className="block text-accent">espace personnel.</span>
         </>
       }
       accroche="Tout ton parcours, au même endroit."
@@ -67,7 +67,7 @@ export default function PageConnexion() {
         {etat.erreur && (
           <p
             role="alert"
-            className="mt-5 rounded-xl bg-orange-tint px-4 py-3 text-center text-[13px] text-orange"
+            className="mt-5 rounded-xl bg-accent-doux px-4 py-3 text-center text-[13px] text-accent"
           >
             {etat.erreur}
           </p>

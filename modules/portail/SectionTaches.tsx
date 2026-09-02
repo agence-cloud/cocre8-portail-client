@@ -33,8 +33,8 @@ export function SectionTaches({ nom, faites, total, terminee, children }: Props)
       >
         <span className="flex items-center gap-3">
           {terminee && (
-            <span className="flex h-6 w-6 items-center justify-center rounded-pilule bg-orange-tint">
-              <Icone nom="coche" className="h-3.5 w-3.5 text-orange" />
+            <span className="flex h-6 w-6 items-center justify-center rounded-pilule bg-accent-doux">
+              <Icone nom="coche" className="h-3.5 w-3.5 text-accent" />
             </span>
           )}
           <span className="text-lg">{nom ?? "Tes tâches"}</span>

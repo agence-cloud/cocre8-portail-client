@@ -31,7 +31,7 @@ export function BoutonStylo({
       onClick={onClick}
       aria-label={intitule}
       title={intitule}
-      className={`flex items-center justify-center rounded-pilule border-[1.5px] border-bordure px-4 py-3.5 text-texte-doux transition-colors duration-200 hover:border-orange hover:text-orange ${className}`}
+      className={`flex items-center justify-center rounded-pilule border-[1.5px] border-bordure px-4 py-3.5 text-texte-doux transition-colors duration-200 hover:border-accent hover:text-accent ${className}`}
     >
       <Icone nom="stylo" className="h-4 w-4" />
     </button>

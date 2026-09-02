@@ -27,7 +27,7 @@ export function FormulaireInstallation() {
     <EcranAuth
       titre={
         <>
-          Ton outil est prêt, <span className="block text-orange">crée ton compte.</span>
+          Ton outil est prêt, <span className="block text-accent">crée ton compte.</span>
         </>
       }
       accroche="Ce compte sera le tien, celui du coach. C'est la seule fois où cet écran s'affiche."
@@ -79,7 +79,7 @@ export function FormulaireInstallation() {
         {etat.erreur && (
           <p
             role="alert"
-            className="mt-5 rounded-xl bg-orange-tint px-4 py-3 text-center text-[13px] text-orange"
+            className="mt-5 rounded-xl bg-accent-doux px-4 py-3 text-center text-[13px] text-accent"
           >
             {etat.erreur}
           </p>

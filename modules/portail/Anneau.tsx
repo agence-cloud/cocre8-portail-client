@@ -43,7 +43,7 @@ export function Anneau({
           cy={taille / 2}
           r={rayon}
           fill="none"
-          stroke="var(--color-orange)"
+          stroke="var(--color-accent)"
           strokeWidth={epaisseur}
           strokeLinecap="round"
           strokeDasharray={`${rempli} ${circonference}`}

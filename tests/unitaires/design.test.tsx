@@ -19,16 +19,16 @@ describe("Bouton", () => {
     expect(screen.getByRole("button", { name: "Valider" })).toBeInTheDocument();
   });
 
-  it("est orange en variante primaire", () => {
+  it("porte l'accent en variante primaire", () => {
     render(<Bouton>Valider</Bouton>);
-    expect(screen.getByRole("button")).toHaveClass("bg-orange");
+    expect(screen.getByRole("button")).toHaveClass("bg-accent");
   });
 
-  it("est blanc bordé en variante secondaire", () => {
+  it("reste sur le fond, bordé, en variante secondaire", () => {
     render(<Bouton variante="secondaire">Annuler</Bouton>);
     const bouton = screen.getByRole("button");
     expect(bouton).toHaveClass("bg-fond");
-    expect(bouton).not.toHaveClass("bg-orange");
+    expect(bouton).not.toHaveClass("bg-accent");
   });
 
   it("transmet les props natives", () => {
@@ -57,9 +57,9 @@ describe("Badge", () => {
     expect(screen.getByText("À relier")).toBeInTheDocument();
   });
 
-  it("passe en orange sur le ton attention", () => {
+  it("prend l'accent sur le ton attention", () => {
     render(<Badge ton="attention">À relier</Badge>);
-    expect(screen.getByText("À relier")).toHaveClass("text-orange");
+    expect(screen.getByText("À relier")).toHaveClass("text-accent");
   });
 });
 

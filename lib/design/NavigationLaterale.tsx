@@ -75,7 +75,7 @@ function LienDeBarre({ lien, repliee }: { lien: LienNav; repliee: boolean }) {
           c'est justement l'information qu'on ne veut pas rater. */}
       {lien.pastille !== undefined && lien.pastille > 0 && (
         <span
-          className={`rounded-pilule bg-orange px-1.5 py-0.5 text-[10px] font-medium text-fond ${
+          className={`rounded-pilule bg-accent px-1.5 py-0.5 text-[10px] font-medium text-fond ${
             repliee ? "absolute right-1 top-1" : "ml-auto"
           }`}
         >
@@ -125,7 +125,7 @@ function LienDeBarre({ lien, repliee }: { lien: LienNav; repliee: boolean }) {
           target="_blank"
           rel="noopener noreferrer"
           title={`${lien.libelle} (nouvel onglet)`}
-          className={`${classes} text-texte-doux hover:bg-fond-alt hover:text-texte`}
+          className={`${classes} text-texte-doux hover:bg-surface hover:text-texte`}
         >
           {contenu}
         </a>
@@ -138,7 +138,7 @@ function LienDeBarre({ lien, repliee }: { lien: LienNav; repliee: boolean }) {
       <Link
         href={lien.href}
         title={lien.libelle}
-        className={`${classes} text-texte-doux hover:bg-fond-alt hover:text-texte`}
+        className={`${classes} text-texte-doux hover:bg-surface hover:text-texte`}
       >
         {contenu}
         {/* Dans le `Link` et non à côté : `useLinkStatus` lit l'état du lien
@@ -280,7 +280,7 @@ export function NavigationLaterale({
                 <button
                   type="submit"
                   title={geste.libelle}
-                  className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-texte-doux transition-colors duration-200 hover:bg-fond-alt hover:text-texte ${
+                  className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-texte-doux transition-colors duration-200 hover:bg-surface hover:text-texte ${
                     repliee ? "justify-center" : "max-md:justify-center"
                   }`}
                 >
@@ -304,7 +304,7 @@ export function NavigationLaterale({
           <button
             type="submit"
             title="Se déconnecter"
-            className={`mt-1 w-full rounded-lg px-3 py-2 text-sm text-texte-doux transition-colors duration-200 hover:bg-fond-alt hover:text-texte ${
+            className={`mt-1 w-full rounded-lg px-3 py-2 text-sm text-texte-doux transition-colors duration-200 hover:bg-surface hover:text-texte ${
               repliee ? "text-center" : "text-left max-md:text-center"
             }`}
           >

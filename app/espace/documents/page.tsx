@@ -26,7 +26,7 @@ export default async function PageDocuments() {
   return (
     <>
       <h1 className="text-4xl">
-        Tes <span className="text-orange">documents</span>
+        Tes <span className="text-accent">documents</span>
       </h1>
       <p className="mt-2 text-texte-doux">
         Ce que ton coach dépose pour toi, et ce que tu lui envoies.

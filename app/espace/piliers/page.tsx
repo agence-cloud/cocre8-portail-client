@@ -27,7 +27,7 @@ export default async function PagePiliers() {
   return (
     <>
       <h1 className="text-4xl">
-        Tes <span className="text-orange">{reglages.mot_partie.pluriel}</span>
+        Tes <span className="text-accent">{reglages.mot_partie.pluriel}</span>
       </h1>
       <p className="mt-2 text-texte-doux">
         Ils s'ouvrent au fil de ton accompagnement. Un à la fois, dans l'ordre.

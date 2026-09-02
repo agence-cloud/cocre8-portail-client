@@ -47,7 +47,7 @@ export default async function PageProfil() {
       <div className="flex items-start justify-between gap-6">
         <div>
           <h1 className="text-4xl">
-            Ton <span className="text-orange">point de départ</span>
+            Ton <span className="text-accent">point de départ</span>
           </h1>
           <p className="mt-2 max-w-2xl text-texte-doux">
             C'est la photo d'avant. Dans trois mois, ce sont ces chiffres qui

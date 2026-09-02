@@ -149,7 +149,7 @@ export function AjouterClient({ offres }: { offres: Offre[] }) {
         </label>
 
         {erreur && (
-          <p role="alert" className="mt-5 rounded-xl bg-orange-tint px-4 py-3 text-[13px] text-orange">
+          <p role="alert" className="mt-5 rounded-xl bg-accent-doux px-4 py-3 text-[13px] text-accent">
             {erreur}
           </p>
         )}

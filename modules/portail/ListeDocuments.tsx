@@ -30,7 +30,7 @@ export function ListeDocuments({ documents, liens, montrerVisibilite = false }: 
           href={liens[document.id] ?? "#"}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-3 border-b border-bordure py-3 transition-colors duration-200 last:border-0 hover:text-orange"
+          className="flex items-center gap-3 border-b border-bordure py-3 transition-colors duration-200 last:border-0 hover:text-accent"
         >
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-icone bg-fond-alt">
             <Icone nom={iconeDocument(document.type_mime)} className="h-5 w-5 text-texte-doux" />

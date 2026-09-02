@@ -17,7 +17,7 @@ export default async function AccueilPilotage() {
   return (
     <>
       <h1 className="text-4xl">
-        Tes <span className="text-orange">clients</span>
+        Tes <span className="text-accent">clients</span>
       </h1>
       <p className="mt-2 text-texte-doux">
         {clients.length === 0
@@ -35,14 +35,14 @@ export default async function AccueilPilotage() {
             <Link
               key={client.id}
               href={`/pilotage/membres/${client.id}`}
-              className="group -mx-6 flex items-center gap-3 border-b border-bordure px-6 py-3 transition-colors duration-200 last:border-0 hover:bg-fond-alt"
+              className="group -mx-6 flex items-center gap-3 border-b border-bordure px-6 py-3 transition-colors duration-200 last:border-0 hover:bg-surface"
             >
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-icone bg-orange-tint">
-                <Icone nom="personne" className="h-5 w-5 text-orange" />
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-icone bg-accent-doux">
+                <Icone nom="personne" className="h-5 w-5 text-accent" />
               </span>
               <span className="flex min-w-0 flex-col">
                 <span className="flex items-center gap-2">
-                  <span className="text-sm font-medium transition-colors duration-200 group-hover:text-orange">
+                  <span className="text-sm font-medium transition-colors duration-200 group-hover:text-accent">
                     {nomComplet(client)}
                   </span>
                   {/* Le client du jeu de démonstration reste dans la liste,

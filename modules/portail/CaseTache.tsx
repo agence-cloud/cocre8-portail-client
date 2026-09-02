@@ -48,11 +48,11 @@ export function CaseTache({ id, titre, description, faite }: Props) {
       type="button"
       onClick={basculer}
       aria-pressed={cochee}
-      className="flex w-full items-start gap-3 py-3 text-left transition-colors duration-200 hover:text-orange"
+      className="flex w-full items-start gap-3 py-3 text-left transition-colors duration-200 hover:text-accent"
     >
       <span
         className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition-all duration-200 ${
-          cochee ? "border-orange bg-orange text-white" : "border-bordure bg-fond"
+          cochee ? "border-accent bg-accent text-white" : "border-bordure bg-fond"
         }`}
       >
         {cochee && <Icone nom="coche" className="h-3.5 w-3.5" />}

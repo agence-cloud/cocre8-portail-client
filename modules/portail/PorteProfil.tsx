@@ -23,7 +23,7 @@ type Props = {
 type Temps = "accueil" | "questions" | "chargement";
 
 const CHAMP =
-  "champ-nu w-full border-b-2 border-bordure bg-transparent pb-3 text-2xl outline-none transition-colors duration-200 placeholder:text-texte-doux/40 focus:border-orange";
+  "champ-nu w-full border-b-2 border-bordure bg-transparent pb-3 text-2xl outline-none transition-colors duration-200 placeholder:text-texte-doux/40 focus:border-accent";
 
 /** Ce que l'écran de chargement annonce, dans l'ordre où il l'annonce. */
 const ETAPES_CHARGEMENT = [
@@ -233,7 +233,7 @@ export function PorteProfil({ questions, reponses, prenom }: Props) {
         <ul className="mt-10 space-y-4">
           {ETAPES_CHARGEMENT.slice(0, etapesVues).map((etape) => (
             <li key={etape} className="entree-avant flex items-center gap-3 text-[17px]">
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-pilule bg-orange text-white">
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-pilule bg-accent text-white">
                 <Icone nom="coche" className="h-3.5 w-3.5" />
               </span>
               {etape}
@@ -278,8 +278,8 @@ export function PorteProfil({ questions, reponses, prenom }: Props) {
                   onClick={() => choisir(option)}
                   className={`entree-monte flex items-center gap-4 rounded-icone border-[1.5px] px-5 py-4 text-left text-[17px] transition-colors duration-200 disabled:opacity-60 ${
                     valeur === option
-                      ? "border-orange bg-orange-tint text-orange"
-                      : "border-bordure hover:border-orange hover:text-orange"
+                      ? "border-accent bg-accent-doux text-accent"
+                      : "border-bordure hover:border-accent hover:text-accent"
                   }`}
                   style={{ animationDelay: `${80 + index * 60}ms` }}
                 >
@@ -288,7 +288,7 @@ export function PorteProfil({ questions, reponses, prenom }: Props) {
                       quand la main ne quitte pas les touches. */}
                   <span
                     className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border text-[13px] ${
-                      valeur === option ? "border-orange text-orange" : "border-bordure text-texte-doux"
+                      valeur === option ? "border-accent text-accent" : "border-bordure text-texte-doux"
                     }`}
                   >
                     {index + 1}
@@ -318,7 +318,7 @@ export function PorteProfil({ questions, reponses, prenom }: Props) {
           )}
         </div>
 
-        {erreur && <p className="mt-6 text-sm text-orange">{erreur}</p>}
+        {erreur && <p className="mt-6 text-sm text-accent">{erreur}</p>}
 
         {/* Un choix s'enregistre au clic : lui laisser un « Suivant » qui ne
             sert jamais donnerait un bouton mort à chaque question à options. */}
@@ -391,7 +391,7 @@ function Cadre({
           fait abandonner. */}
       <div className="h-1 w-full bg-fond-alt">
         <div
-          className="h-1 bg-orange transition-all duration-500 ease-out"
+          className="h-1 bg-accent transition-all duration-500 ease-out"
           style={{ width: `${progression}%` }}
         />
       </div>

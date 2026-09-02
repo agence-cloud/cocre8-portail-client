@@ -68,7 +68,7 @@ export function EnvoyerLesAcces({ personneId, email, aUnCompte }: Props) {
           </p>
 
           {resultat?.pourquoi && (
-            <p className="mt-3 text-sm text-orange">{resultat.pourquoi}</p>
+            <p className="mt-3 text-sm text-accent">{resultat.pourquoi}</p>
           )}
 
           {confirme ? (
@@ -120,7 +120,7 @@ export function EnvoyerLesAcces({ personneId, email, aUnCompte }: Props) {
           )}
 
           {!email && (
-            <p className="mt-2 text-sm text-orange">
+            <p className="mt-2 text-sm text-accent">
               Cette fiche n&apos;a pas d&apos;email. Ajoute-le sur sa fiche.
             </p>
           )}
@@ -149,7 +149,7 @@ export function EnvoyerLesAcces({ personneId, email, aUnCompte }: Props) {
                       setCopie(false);
                     }
                   }}
-                  className="text-sm text-orange transition-opacity duration-200 hover:opacity-70"
+                  className="text-sm text-accent transition-opacity duration-200 hover:opacity-70"
                 >
                   Copier
                 </button>

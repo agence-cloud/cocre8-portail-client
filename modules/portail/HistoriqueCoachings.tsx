@@ -99,9 +99,9 @@ export function HistoriqueCoachings({ coachings }: { coachings: Coaching[] }) {
                       href={coaching.lien_enregistrement}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-3 rounded-xl border border-bordure bg-fond-alt px-4 py-3 transition-colors duration-200 hover:border-orange"
+                      className="flex items-center gap-3 rounded-xl border border-bordure bg-fond-alt px-4 py-3 transition-colors duration-200 hover:border-accent"
                     >
-                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-orange">
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent">
                         <Icone nom="demo" className="h-5 w-5 text-fond" />
                       </span>
                       <span className="min-w-0 flex-1 text-sm">

@@ -72,13 +72,13 @@ function Pied({
       <button
         type="button"
         onClick={onAjouter}
-        className="mt-4 text-sm text-orange transition-opacity duration-200 hover:opacity-70"
+        className="mt-4 text-sm text-accent transition-opacity duration-200 hover:opacity-70"
       >
         + {ajout}
       </button>
 
       {etat.erreur && (
-        <p role="alert" className="mt-5 rounded-xl bg-orange-tint px-4 py-3 text-[13px] text-orange">
+        <p role="alert" className="mt-5 rounded-xl bg-accent-doux px-4 py-3 text-[13px] text-accent">
           {etat.erreur}
         </p>
       )}
@@ -106,7 +106,7 @@ function BoutonRetirer({ onClick }: { onClick: () => void }) {
       onClick={onClick}
       aria-label="Retirer cette ligne"
       title="Retirer cette ligne"
-      className="shrink-0 px-2 text-texte-doux transition-colors duration-200 hover:text-orange"
+      className="shrink-0 px-2 text-texte-doux transition-colors duration-200 hover:text-accent"
     >
       ×
     </button>

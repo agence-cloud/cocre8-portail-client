@@ -16,7 +16,7 @@ type Props = {
 };
 
 const CHAMP =
-  "mt-3 w-full rounded-icone border border-bordure bg-fond px-4 py-3 text-[15px] outline-none transition-colors duration-200 focus:border-orange";
+  "mt-3 w-full rounded-icone border border-bordure bg-fond px-4 py-3 text-[15px] outline-none transition-colors duration-200 focus:border-accent";
 
 /**
  * Le profil déjà rempli, qu'on rouvre pour corriger un chiffre.
@@ -94,7 +94,7 @@ export function FormulaireProfil({ questions, reponses, resume }: Props) {
       <div className="mt-8 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-bordure bg-fond px-4 py-3">
         <div>
           <p className="text-sm text-texte-doux">Tu modifies ton profil.</p>
-          {erreur && <p className="mt-1 text-sm text-orange">{erreur}</p>}
+          {erreur && <p className="mt-1 text-sm text-accent">{erreur}</p>}
         </div>
         <div className="flex gap-3">
           <Bouton onClick={enregistrer} disabled={enCours}>

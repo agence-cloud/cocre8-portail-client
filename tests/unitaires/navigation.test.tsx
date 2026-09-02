@@ -69,15 +69,19 @@ describe("NavigationLaterale", () => {
     expect(pied.className).toContain("mt-auto");
   });
 
-  it("signe du logotype du programme, pas de celui de l'éditeur", () => {
-    // Le client vient chez son coach ; l'éditeur de l'outil signe ailleurs,
-    // sur l'écran de connexion. Repliée, la barre n'affiche rien : il reste
-    // 48 pixels une fois les marges retirées, dont 32 pour la bascule.
+  it("signe du logotype du programme, et de rien d'autre", () => {
+    // Le client vient chez son coach : c'est le nom que son coach a réglé
+    // qu'il doit lire, et l'éditeur de l'outil n'apparaît nulle part.
+    // Repliée, la barre n'affiche rien : il reste 48 pixels une fois les
+    // marges retirées, dont 32 pour la bascule.
     const liens = [{ libelle: "Clients", href: "/pilotage", icone: "clients" as const }];
     render(<NavigationLaterale liens={liens} nom="Alice Dupont" zone="Pilotage" repliee={false} />);
 
     expect(screen.getByLabelText(REGLAGES_PAR_DEFAUT.nom_programme)).toBeInTheDocument();
-    expect(screen.queryByText("Cocre8")).not.toBeInTheDocument();
+    // Le nom de l'éditeur a été retiré de l'app entière, et un script le
+    // garde dehors (`npm run verifier`). Cette assertion reste : c'est ici
+    // qu'une signature reviendrait le plus naturellement.
+    expect(screen.queryByText(/cocre8/i)).not.toBeInTheDocument();
 
     // Un remontage, pas un rerender : `repliee` n'est que la valeur initiale
     // d'un état local, changer la propriété ne le déplace plus une fois le

@@ -29,9 +29,9 @@ import { formaterJourMoisCourt } from "@/lib/dates";
    la ligne, `group-hover` sur le chevron, pour que survoler n'importe où sur
    la ligne les allume tous les deux. */
 const LIGNE_ACCES =
-  "group flex items-center gap-3 py-1.5 transition-colors duration-200 hover:text-orange";
+  "group flex items-center gap-3 py-1.5 transition-colors duration-200 hover:text-accent";
 const CHEVRON =
-  "text-xs text-texte-doux/50 transition-colors duration-200 group-hover:text-orange";
+  "text-xs text-texte-doux/50 transition-colors duration-200 group-hover:text-accent";
 
 export default async function AccueilEspace() {
   const compte = await exigerMembre();
@@ -67,12 +67,12 @@ export default async function AccueilEspace() {
 
   return (
     <>
-      {/* Le titre monte à 48 px et passe en bleu nuit. La charte prévoit 56
+      {/* Le titre monte à 48 px et passe en bleu titre. La charte prévoit 56
           pour un titre de page et l'app était à 36 : elle était en dessous de
-          son propre système. Le nuit plutôt que le charcoal vient de la
+          son propre système. Le titre plutôt que le charcoal vient de la
           décision 0020. */}
-      <h1 className="text-[40px] tracking-[-0.035em] text-nuit lg:text-5xl">
-        Bonjour <span className="text-orange">{compte.nom}</span>
+      <h1 className="text-[40px] tracking-[-0.035em] text-titre lg:text-5xl">
+        Bonjour <span className="text-accent">{compte.nom}</span>
       </h1>
       <p className="mt-3 text-[17px] text-texte-doux">
         {courant
@@ -199,8 +199,8 @@ export default async function AccueilEspace() {
                 {bilan.total}. Ce sont ces chiffres qui rendront tes résultats
                 indiscutables.
               </p>
-              {/* Secondaire, et pas orange : l'action principale de cet
-                  écran est d'ouvrir son pilier. Deux boutons orange de même
+              {/* Secondaire, et pas accent : l'action principale de cet
+                  écran est d'ouvrir son pilier. Deux boutons accent de même
                   poids diluent la hiérarchie que ce tableau de bord existe
                   pour créer. */}
               <Link href="/espace/profil">

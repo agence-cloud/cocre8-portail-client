@@ -25,9 +25,10 @@ type Nom =
   | "pilier-4";
 
 /**
- * Icônes dessinées à la main plutôt qu'importées : la charte Cocre8 demande
- * des icônes sur mesure, et une librairie ajouterait une dépendance pour huit
- * glyphes. Toutes en trait, jamais pleines, sur une grille de 24.
+ * Icônes dessinées à la main plutôt qu'importées : une librairie ajouterait
+ * une dépendance pour huit glyphes, et rendrait l'outil reconnaissable au jeu
+ * d'icônes qu'il emprunte. Toutes en trait, jamais pleines, sur une grille de
+ * 24.
  */
 const CHEMINS: Record<Nom, React.ReactNode> = {
   // Trois colonnes : un pipe se lit comme un tableau de colonnes.

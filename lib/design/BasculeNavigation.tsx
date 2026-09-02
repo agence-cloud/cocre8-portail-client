@@ -20,7 +20,7 @@ export function BasculeNavigation({
       onClick={onBasculer}
       aria-label={repliee ? "Déplier la navigation" : "Replier la navigation"}
       title={repliee ? "Déplier" : "Replier"}
-      className="flex h-8 w-8 items-center justify-center rounded-lg text-texte-doux transition-colors duration-200 hover:bg-fond-alt hover:text-texte"
+      className="flex h-8 w-8 items-center justify-center rounded-lg text-texte-doux transition-colors duration-200 hover:bg-surface hover:text-texte"
     >
       <Icone
         nom="replier"

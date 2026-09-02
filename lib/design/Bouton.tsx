@@ -3,8 +3,8 @@ import type { ComponentProps } from "react";
 type Variante = "primaire" | "secondaire" | "conversion";
 
 const STYLES: Record<Variante, string> = {
-  primaire: "bg-orange text-white hover:bg-orange-fonce",
-  secondaire: "bg-fond text-texte border-[1.5px] border-texte hover:bg-fond-alt",
+  primaire: "bg-accent text-white hover:bg-accent-fonce",
+  secondaire: "bg-fond text-texte border-[1.5px] border-texte/40 hover:border-texte hover:bg-surface",
   // Le seul vert de l'app.
   conversion: "bg-vert text-white hover:bg-vert-fonce",
 };

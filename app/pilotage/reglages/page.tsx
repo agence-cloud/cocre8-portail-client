@@ -27,7 +27,7 @@ export default async function PageReglages() {
   return (
     <>
       <h1 className="text-4xl">
-        Tes <span className="text-orange">réglages</span>
+        Tes <span className="text-accent">réglages</span>
       </h1>
       <p className="mt-2 text-texte-doux">
         Ce que tes clients voient, et comment tu appelles les choses.

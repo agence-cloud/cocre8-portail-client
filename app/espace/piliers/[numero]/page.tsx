@@ -50,12 +50,12 @@ export default async function PagePilier({
 
       <div className="mt-4 flex items-start justify-between gap-6">
         <div className="flex items-start gap-4">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-icone bg-orange-tint">
-            <Icone nom={iconePilier(pilier.numero)} className="h-6 w-6 text-orange" />
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-icone bg-accent-doux">
+            <Icone nom={iconePilier(pilier.numero)} className="h-6 w-6 text-accent" />
           </div>
           <div>
             <h1 className="text-4xl">
-              {pilier.numero}. <span className="text-orange">{pilier.nom}</span>
+              {pilier.numero}. <span className="text-accent">{pilier.nom}</span>
             </h1>
             <p className="mt-2 max-w-2xl text-texte-doux">{pilier.description}</p>
           </div>

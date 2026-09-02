@@ -9,7 +9,7 @@ export function Squelette({ className = "" }: { className?: string }) {
   return (
     <div
       aria-hidden="true"
-      className={`animate-pulse rounded-icone bg-fond-alt ${className}`}
+      className={`animate-pulse rounded-icone bg-surface ${className}`}
     />
   );
 }

@@ -1,9 +1,9 @@
 import { Squelette } from "@/lib/design/Squelette";
 
-// Une bordure fine, en plus du gris du squelette : le fond de /pilotage est
-// lui-même gris clair (bg-fond-alt), presque du même ton que le squelette.
-// Sans bordure, le squelette se fond dans la page et redevient invisible,
-// exactement ce qu'il est censé empêcher.
+// Une bordure fine, en plus du ton du squelette : le fond de /pilotage est
+// à un demi-ton du squelette, quelle que soit la palette. Sans bordure, le
+// squelette se fond dans la page et redevient invisible, exactement ce qu'il
+// est censé empêcher.
 const CONTOUR = "border border-bordure";
 
 /**

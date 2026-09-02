@@ -4,7 +4,7 @@ type Ton = "neutre" | "attention" | "succes";
 
 const STYLES: Record<Ton, string> = {
   neutre: "bg-fond-alt text-texte-doux",
-  attention: "bg-orange-tint text-orange",
+  attention: "bg-accent-doux text-accent",
   succes: "bg-surface text-texte",
 };
 

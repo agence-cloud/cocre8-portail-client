@@ -16,7 +16,7 @@ const LEGAL = [
 ].filter((page) => page.href !== "");
 
 type Props = {
-  /** Le grand titre du volet de marque. Un `ReactNode` pour porter l'orange. */
+  /** Le grand titre du volet de marque. Un `ReactNode` pour porter l'accent. */
   titre: ReactNode;
   /** La phrase sous le titre. Masquée sur téléphone, comme la liste. */
   accroche: string;
@@ -51,47 +51,47 @@ type Props = {
  * `lg` : quelqu'un qui arrive ici vient entrer, et chaque ligne de plus
  * repousse le premier champ sous la ligne de flottaison.
  *
- * Le premium vient du mouvement et de la hiérarchie, jamais d'un fond
- * sombre : la charte Cocre8 est une marque à fond blanc, et elle le reste.
+ * Le premium vient du mouvement et de la hiérarchie, pas de la couleur. Le
+ * volet de gauche se distingue du volet de droite d'un demi-ton, et c'est
+ * tout : sur un outil qui part chez des inconnus, un écran d'accueil qui
+ * affirme une identité affirme celle de son éditeur, jamais celle de son
+ * installateur.
  */
 export function EcranAuth({ titre, accroche, points = [], children }: Props) {
   return (
     <main className="flex min-h-screen flex-col lg:flex-row">
       <section className="relative flex flex-col overflow-hidden bg-fond px-8 pt-14 pb-2 lg:min-h-screen lg:flex-[1.05] lg:justify-between lg:border-r lg:border-bordure lg:bg-fond-alt lg:px-16 lg:py-14">
-        {/* Les cercles concentriques du logotype Cocre8, agrandis et coupés
-            par le bord. Une texture, pas un motif : assez présente pour que
-            le volet ne soit pas un aplat, assez discrète pour ne rien
-            disputer au titre. Un seul arc porte l'orange.
+        {/* Une trame de lignes, coupée par le bord : assez présente pour que
+            le volet ne soit pas un aplat, assez muette pour ne rien dire.
+            C'était auparavant le logotype de l'éditeur agrandi, ce qui
+            revenait à poser sa marque sur l'écran d'accueil de tous ceux qui
+            installent l'outil.
 
             `aria-hidden` et `pointer-events-none` : c'est du décor, il n'a
             rien à dire à un lecteur d'écran ni à intercepter un clic. */}
         <svg
           viewBox="0 0 600 600"
           aria-hidden="true"
-          className="pointer-events-none absolute -right-40 -bottom-52 hidden h-[600px] w-[600px] opacity-55 lg:block"
+          className="pointer-events-none absolute -right-32 -bottom-40 hidden h-[600px] w-[600px] lg:block"
         >
-          <g fill="none" stroke="currentColor" strokeWidth="1" className="text-texte/12">
-            <circle cx="300" cy="300" r="100" />
-            <circle cx="300" cy="300" r="170" />
-            <circle cx="300" cy="300" r="298" />
+          <g fill="none" strokeWidth="1" className="stroke-texte/8">
+            {[0, 1, 2, 3, 4, 5, 6, 7].map((rang) => (
+              <line key={rang} x1={rang * 78} y1="0" x2={rang * 78 - 300} y2="600" />
+            ))}
           </g>
-          <circle
-            cx="300"
-            cy="300"
-            r="240"
-            fill="none"
-            strokeWidth="1"
-            className="stroke-orange/45"
-          />
         </svg>
 
-        <div className="cascade relative flex flex-col gap-8 lg:flex-1 lg:justify-between lg:gap-12">
+        <div className="cascade relative flex flex-col gap-8 lg:flex-1 lg:gap-12">
           <LogoProgramme taille="petit" />
 
-          <div>
+          {/* `lg:my-auto` et non un `justify-between` sur la colonne : le
+              logotype reste en haut, le titre se centre sur la hauteur qui
+              reste. Avec `justify-between` et deux enfants seulement, le
+              titre tombait au ras du bas du volet. */}
+          <div className="lg:my-auto">
             {/* La seconde ligne du titre est un bloc chez l'appelant, pas un
                 simple `span` : laissée au fil du texte, elle casse selon la
-                largeur et l'orange se retrouve à cheval sur deux lignes. Le
+                largeur et l'accent se retrouve à cheval sur deux lignes. Le
                 passage à la ligne fait partie de la composition. */}
             <h1 className="text-[32px] leading-[1.03] tracking-[-0.045em] sm:text-[38px] lg:text-[50px]">
               {titre}
@@ -107,7 +107,7 @@ export function EcranAuth({ titre, accroche, points = [], children }: Props) {
                     key={ligne}
                     className="flex items-baseline gap-6 border-b border-texte/8 py-3.5 transition-[padding] duration-300 hover:pl-2.5"
                   >
-                    <span className="shrink-0 text-[12px] font-semibold tracking-wider text-orange">
+                    <span className="shrink-0 text-[12px] font-semibold tracking-wider text-accent">
                       {String(rang + 1).padStart(2, "0")}
                     </span>
                     <span className="text-[15px]">{ligne}</span>
@@ -117,9 +117,6 @@ export function EcranAuth({ titre, accroche, points = [], children }: Props) {
             )}
           </div>
 
-          {/* Au pied du volet sur grand écran, au pied de la page sur
-              téléphone, où il n'y a plus qu'une colonne. */}
-          <p className="hidden text-[13px] text-texte-doux/65 lg:block">Propulsé par Cocre8</p>
         </div>
       </section>
 
@@ -129,10 +126,6 @@ export function EcranAuth({ titre, accroche, points = [], children }: Props) {
             marque : centré, il tomberait au milieu d'un vide et obligerait à
             faire défiler pour trouver le premier champ. */}
         <div className="mt-8 mb-auto w-full max-w-[400px] self-center lg:my-auto">{children}</div>
-
-        <p className="mt-12 text-center text-[13px] text-texte-doux/65 lg:hidden">
-          Propulsé par Cocre8
-        </p>
 
         <p className="mt-6 text-center text-[12px] text-texte-doux/65 lg:mt-10">
           {LEGAL.map((page, rang) => (
@@ -163,14 +156,14 @@ export function TitreAuth({ children }: { children: ReactNode }) {
 
 /** Le gabarit d'un champ, partagé par les deux formulaires. */
 export const CHAMP_AUTH =
-  "w-full rounded-xl border border-bordure bg-fond px-4 py-3 text-[15px] outline-none transition-[border-color,box-shadow] duration-200 placeholder:text-texte/30 hover:border-texte/25 focus:border-orange focus:shadow-[0_0_0_3px_var(--color-orange-tint)]";
+  "w-full rounded-xl border border-bordure bg-fond-alt px-4 py-3 text-[15px] outline-none transition-[border-color,box-shadow] duration-200 placeholder:text-texte/30 hover:border-texte/25 focus:border-accent focus:shadow-[0_0_0_3px_var(--color-accent-doux)]";
 
 /** Le gabarit d'un libellé de champ. */
 export const ETIQUETTE_AUTH =
   "mb-2 block text-[12px] font-semibold tracking-[0.1em] text-texte-doux/65 uppercase";
 
 /**
- * Le bouton se soulève d'un pixel et projette une ombre orange diffuse :
+ * Le bouton se soulève d'un pixel et projette une ombre colorée diffuse :
  * c'est le seul endroit de l'écran où quelque chose bouge sous la souris, et
  * il gagne à être celui-là.
  */

@@ -65,7 +65,7 @@ export function CoachingsCoach({ personneId, coachings }: Props) {
                   type="button"
                   onClick={() => setDeplie(deplie === coaching.id ? null : coaching.id)}
                   aria-expanded={deplie === coaching.id}
-                  className="flex items-center gap-2 text-left transition-colors duration-200 hover:text-orange"
+                  className="flex items-center gap-2 text-left transition-colors duration-200 hover:text-accent"
                 >
                   <Icone
                     nom="replier"
@@ -92,7 +92,7 @@ export function CoachingsCoach({ personneId, coachings }: Props) {
                             await noterIssueCoaching(coaching.id, issue.valeur);
                           })
                         }
-                        className="rounded-pilule bg-fond-alt px-2.5 py-1 text-[11px] transition-colors duration-200 hover:bg-orange hover:text-white"
+                        className="rounded-pilule bg-fond-alt px-2.5 py-1 text-[11px] transition-colors duration-200 hover:bg-accent hover:text-white"
                       >
                         {issue.libelle}
                       </button>
@@ -154,7 +154,7 @@ export function CoachingsCoach({ personneId, coachings }: Props) {
         <Bouton disabled={enCours}>{enCours ? "En cours..." : "Poser le coaching"}</Bouton>
       </form>
 
-      {erreur && <p className="mt-3 text-sm text-orange">{erreur}</p>}
+      {erreur && <p className="mt-3 text-sm text-accent">{erreur}</p>}
     </Carte>
   );
 }

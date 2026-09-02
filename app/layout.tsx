@@ -1,19 +1,14 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans } from "next/font/google";
 import { lireNomDuProgramme } from "@/lib/reglages/requetes";
 import { ProgrammeProvider } from "@/lib/design/LogoProgramme";
 import "./globals.css";
 
 /**
- * La charte demande BDO Grotesk, une police premium qui n'est ni achetée ni
- * hébergée ici. Plus Jakarta Sans en est le repli le plus proche, et se
- * charge depuis Google Fonts. Jamais de serif.
+ * Aucune police n'est chargée ici, et c'est voulu : la pile système, définie
+ * dans `globals.css`. Une police prise chez Google ferait partir un appel
+ * vers un tiers depuis l'espace des clients de chaque coach, pour un gain
+ * typographique que personne ne verrait sur un outil de ce genre.
  */
-const jakarta = Plus_Jakarta_Sans({
-  variable: "--font-jakarta",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-});
 
 /**
  * Le nom du programme est un réglage, donc le titre de l'onglet aussi : un
@@ -45,7 +40,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   const nomProgramme = await lireNomDuProgramme();
 
   return (
-    <html lang="fr" className={`${jakarta.variable} h-full antialiased`}>
+    <html lang="fr" className="h-full antialiased">
       <body className="flex min-h-full flex-col">
         <ProgrammeProvider nom={nomProgramme}>{children}</ProgrammeProvider>
       </body>

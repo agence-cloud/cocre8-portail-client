@@ -12,7 +12,7 @@ export type ChampsCompteRendu = {
 };
 
 const CHAMP =
-  "mt-1.5 w-full rounded-xl border border-bordure bg-fond px-3 py-2 text-sm outline-none focus:border-orange disabled:opacity-60";
+  "mt-1.5 w-full rounded-xl border border-bordure bg-fond-alt px-3 py-2 text-sm outline-none focus:border-accent disabled:opacity-60";
 
 type Props = {
   valeurs: ChampsCompteRendu;
@@ -105,7 +105,7 @@ export function CompteRendu({ valeurs, source, onEnregistrer }: Props) {
           href={valeurs.lien_enregistrement}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-block text-sm text-texte-doux underline decoration-texte-doux/40 underline-offset-2 transition-colors duration-200 hover:text-orange"
+          className="inline-block text-sm text-texte-doux underline decoration-texte-doux/40 underline-offset-2 transition-colors duration-200 hover:text-accent"
         >
           Ouvrir l&apos;enregistrement
         </a>
@@ -162,7 +162,7 @@ export function CompteRendu({ valeurs, source, onEnregistrer }: Props) {
         </p>
       )}
 
-      {erreur && <p className="text-sm text-orange">{erreur}</p>}
+      {erreur && <p className="text-sm text-accent">{erreur}</p>}
 
       <div className="flex items-center gap-3">
         <Bouton onClick={enregistrer} disabled={enCours || inchange}>

@@ -1,51 +1,78 @@
 @import "tailwindcss";
 
 @theme {
-  /* Couleurs, confirmées depuis le Figma Cocre8 */
-  --color-fond: #ffffff;
-  --color-fond-alt: #f7f7f7;
-  --color-texte: #272727;
-  --color-texte-doux: rgba(39, 39, 39, 0.7);
-  --color-bordure: rgba(39, 39, 39, 0.12);
-  --color-orange: #ff6320;
-  --color-orange-fonce: #e0571c;
-  --color-orange-tint: #fff0ea;
-  --color-surface: #e4ebf1;
-  /* Exception documentée dans docs/decisions/0008 : réservé au seul bouton de
-     conversion. Toute autre action reste orange. */
-  --color-vert: #16a34a;
-  --color-vert-fonce: #15803d;
+  /* **Un thème sombre et neutre, et c'est un choix, pas un goût.**
+     Cet outil part chez des coachs qui n'ont rien à voir les uns avec les
+     autres, et il ne doit ressembler à la marque d'aucun d'eux, à commencer
+     par celle de son éditeur. Une palette de gris froids et un seul accent
+     bleu : c'est ce qui se laisse le mieux oublier, et ce qu'un coach peut
+     reprendre à son compte sans avoir l'impression d'habiter chez quelqu'un.
 
-  /* Le bleu nuit, divergence assumée de la charte vitrine
-     (docs/decisions/0020). Il porte les titres de page et les actions
-     principales là où la charte imposerait l'orange. La raison : une vitrine
-     se parcourt en trente secondes et doit imprimer une marque, une app se
-     regarde une heure par jour et doit rendre lisible une hiérarchie.
-     L'orange reste l'accent, il ne devient pas le décor. */
-  --color-nuit: #151c2c;
-  --color-nuit-fonce: #0e1420;
+     Le sombre plutôt que le clair pour la même raison, et pour une autre :
+     un fond blanc avec un accent vif est le terrain de jeu de toutes les
+     chartes, donc celui où l'on ressemble à quelqu'un par accident.
+
+     Les noms disent le rôle et non la couleur (`accent`, et non `bleu`) :
+     c'est ce qui permettra de rendre l'accent réglable sans repasser sur
+     trente-sept fichiers. La leçon vient d'ici même, où un token nommé
+     `orange` a fallu renommer partout le jour où il a cessé de l'être. */
+  /* **Les deux fonds gardent leur rôle et échangent leur clarté.** En clair,
+     `fond` était le blanc des cartes et de la barre, `fond-alt` le gris de la
+     page : la surface haute était la plus claire. En sombre, c'est l'inverse
+     qui donne le même relief, la surface haute étant celle qui capte le plus
+     de lumière. Les rôles ne bougent pas, donc aucune classe de l'app n'a eu
+     à changer. */
+  --color-fond: #171a21;
+  --color-fond-alt: #0f1115;
+  --color-texte: #e8eaee;
+  --color-texte-doux: rgba(232, 234, 238, 0.6);
+  --color-bordure: rgba(232, 234, 238, 0.11);
+  --color-accent: #7089ff;
+  --color-accent-fonce: #5f78f0;
+  /* Un voile translucide et non un aplat : posé sur `fond` comme sur
+     `fond-alt`, il garde le même écart avec son support. Un aplat opaque
+     ferait une tache sur l'un des deux. */
+  --color-accent-doux: rgba(112, 137, 255, 0.14);
+  --color-surface: #232834;
+  /* Exception documentée dans docs/decisions/0008 : réservé au seul bouton de
+     conversion. Toute autre action reste sur l'accent. */
+  --color-vert: #34d399;
+  --color-vert-fonce: #25b98a;
+
+  /* Le blanc franc des titres et des chiffres, un cran au-dessus du texte
+     courant. Sur fond sombre, c'est la clarté qui hiérarchise, là où sur fond
+     clair c'était la profondeur : le rôle est le même, la direction est
+     inversée. */
+  --color-titre: #ffffff;
 
   /* Rayons */
   --radius-carte: 16px;
   --radius-icone: 12px;
   --radius-pilule: 9999px;
 
-  /* Typo : BDO Grotesk est une police premium. Tant qu'elle n'est pas
-     achetée et hébergée, Plus Jakarta Sans est le repli le plus proche.
-     Jamais de serif. */
-  --font-sans: "BDO Grotesk", var(--font-jakarta), system-ui, sans-serif;
+  /* Aucune police achetée ni chargée : la pile système. Elle rend la même
+     chose que les grotesques neutres qu'on irait chercher chez Google, sans
+     l'attente du chargement ni un appel de plus vers un tiers depuis l'app
+     d'un coach. Jamais de serif. */
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
 
-  /* Ombres douces, multi-couches, jamais marquées. Trois niveaux comme la
-     charte les définit, alors que l'app n'en utilisait qu'un : c'est
-     l'élévation qui donne la profondeur, et une seule valeur met tout sur le
-     même plan. */
-  --shadow-douce: 0 1px 2px rgba(39, 39, 39, 0.04),
-    0 0 0 1px rgba(39, 39, 39, 0.04);
-  --shadow-carte: 0 6px 6px -3px rgba(39, 39, 39, 0.04),
-    0 12px 12px -6px rgba(39, 39, 39, 0.05);
-  --shadow-haute: 0 6px 6px -3px rgba(39, 39, 39, 0.04),
-    0 12px 12px -6px rgba(39, 39, 39, 0.05),
-    0 24px 24px -12px rgba(39, 39, 39, 0.06);
+  /* Sur fond sombre, une ombre portée ne se voit pas : c'est le liseré clair
+     qui détache une carte de son fond. Les trois niveaux restent, mais ils
+     jouent sur l'intensité du liseré plutôt que sur la portée de l'ombre. */
+  --shadow-douce: 0 0 0 1px rgba(232, 234, 238, 0.06);
+  --shadow-carte: 0 0 0 1px rgba(232, 234, 238, 0.08),
+    0 8px 20px -12px rgba(0, 0, 0, 0.7);
+  --shadow-haute: 0 0 0 1px rgba(232, 234, 238, 0.1),
+    0 12px 28px -12px rgba(0, 0, 0, 0.8),
+    0 24px 48px -24px rgba(0, 0, 0, 0.6);
+}
+
+/* Dit au navigateur que la page est sombre : sans ça, il dessine les barres
+   de défilement, les menus déroulants et les champs de date en clair au
+   milieu d'une interface sombre. */
+html {
+  color-scheme: dark;
 }
 
 body {

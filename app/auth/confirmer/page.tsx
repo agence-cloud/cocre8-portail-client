@@ -75,11 +75,11 @@ export default function PageConfirmer() {
       titre={
         erreur ? (
           <>
-            Ce lien <span className="block text-orange">ne marche plus.</span>
+            Ce lien <span className="block text-accent">ne marche plus.</span>
           </>
         ) : (
           <>
-            On ouvre <span className="block text-orange">ton espace.</span>
+            On ouvre <span className="block text-accent">ton espace.</span>
           </>
         )
       }

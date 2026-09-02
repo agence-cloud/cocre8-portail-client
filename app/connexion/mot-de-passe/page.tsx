@@ -86,7 +86,7 @@ export default function PageMotDePasse() {
     <EcranAuth
       titre={
         <>
-          Un dernier geste, <span className="block text-orange">et ton espace s&apos;ouvre.</span>
+          Un dernier geste, <span className="block text-accent">et ton espace s&apos;ouvre.</span>
         </>
       }
       accroche="Choisis ton mot de passe, tu ne le poseras qu'une fois."
@@ -125,7 +125,7 @@ export default function PageMotDePasse() {
         {erreur && (
           <p
             role="alert"
-            className="mt-5 rounded-xl bg-orange-tint px-4 py-3 text-center text-[13px] text-orange"
+            className="mt-5 rounded-xl bg-accent-doux px-4 py-3 text-center text-[13px] text-accent"
           >
             {erreur}
           </p>
