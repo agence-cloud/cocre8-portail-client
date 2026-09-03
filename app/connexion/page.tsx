@@ -1,94 +1,22 @@
-"use client";
-
-import { useActionState } from "react";
-import { seConnecter, type EtatConnexion } from "./actions";
-import { Bouton } from "@/lib/design/Bouton";
-import {
-  BOUTON_AUTH,
-  CHAMP_AUTH,
-  EcranAuth,
-  ETIQUETTE_AUTH,
-  TitreAuth,
-} from "@/lib/design/EcranAuth";
-
-const INITIAL: EtatConnexion = { erreur: null };
+import { redirect } from "next/navigation";
+import { installationFaite } from "@/lib/auth/installation";
+import { FormulaireConnexion } from "./FormulaireConnexion";
 
 /**
- * Ce que le membre voit derrière la porte, dans l'ordre où il le vivra.
- * Trois, pas cinq : une liste qu'on lit d'un regard vaut mieux qu'un
- * inventaire qu'on survole.
+ * L'écran de connexion, précédé d'une question : cet outil a-t-il seulement
+ * déjà été mis en service ?
+ *
+ * **Un formulaire de connexion sur une base vierge est un cul-de-sac.**
+ * Personne n'a de compte, il n'y a pas d'inscription, et rien à l'écran ne
+ * dit où aller. La racine pose déjà la question, mais elle ne couvre pas
+ * celui qui arrive ici par un lien, un signet, ou une redirection.
+ *
+ * Le coût est d'une requête sur le seul écran de connexion, et seulement
+ * pour un visiteur sans session. L'écran d'installation, lui, se referme de
+ * son côté dès que l'outil est installé.
  */
-const CE_QUI_ATTEND = [
-  "Ton programme, tes tâches et ta progression",
-  "Tes coachings, leurs enregistrements et leurs résumés",
-  "Tes documents et ceux de ton coach",
-];
+export default async function PageConnexion() {
+  if (!(await installationFaite())) redirect("/installation");
 
-export default function PageConnexion() {
-  const [etat, action, enCours] = useActionState(seConnecter, INITIAL);
-
-  return (
-    <EcranAuth
-      titre={
-        <>
-          Accède à ton <span className="block text-accent">espace personnel.</span>
-        </>
-      }
-      accroche="Tout ton parcours, au même endroit."
-      points={CE_QUI_ATTEND}
-    >
-      <TitreAuth>Connexion</TitreAuth>
-
-      <form action={action} className="cascade">
-        <label className="block">
-          <span className={ETIQUETTE_AUTH}>Ton adresse email</span>
-          <input
-            type="email"
-            name="email"
-            required
-            autoComplete="email"
-            autoFocus
-            placeholder="toi@exemple.fr"
-            className={CHAMP_AUTH}
-          />
-        </label>
-
-        <label className="mt-5 block">
-          <span className={ETIQUETTE_AUTH}>Ton mot de passe</span>
-          <input
-            type="password"
-            name="motDePasse"
-            required
-            autoComplete="current-password"
-            className={CHAMP_AUTH}
-          />
-        </label>
-
-        {etat.erreur && (
-          <p
-            role="alert"
-            className="mt-5 rounded-xl bg-accent-doux px-4 py-3 text-center text-[13px] text-accent"
-          >
-            {etat.erreur}
-          </p>
-        )}
-
-        <Bouton type="submit" disabled={enCours} className={BOUTON_AUTH}>
-          {enCours ? "Connexion..." : "Entrer dans mon espace"}
-          {!enCours && (
-            <span
-              aria-hidden="true"
-              className="transition-transform duration-200 group-hover:translate-x-1"
-            >
-              →
-            </span>
-          )}
-        </Bouton>
-
-        <p className="mt-6 text-center text-[13px] text-texte-doux/65">
-          Un souci pour te connecter ? Écris à ton coach.
-        </p>
-      </form>
-    </EcranAuth>
-  );
+  return <FormulaireConnexion />;
 }

@@ -20,6 +20,15 @@ import { lireConfigSupabase } from "@/lib/supabase/config";
  * dessous deviendrait publique sans que personne le décide.
  */
 export const ROUTES_PUBLIQUES = [
+  // La racine, et c'est le premier pas de toute installation neuve.
+  //
+  // Elle ne montre rien : elle regarde si l'outil a déjà été mis en service,
+  // puis envoie soit vers l'écran d'installation, soit vers la connexion.
+  // Tant qu'elle ne figurait pas ici, ce proxy l'interceptait avant qu'elle
+  // ait pu poser la question, et celui qui venait de déployer l'outil
+  // atterrissait sur un formulaire de connexion sans avoir de compte, sans
+  // aucun moyen d'en créer un. Le cul-de-sac de la première installation.
+  "/",
   "/connexion",
   "/connexion/mot-de-passe",
   "/auth/confirmer",
