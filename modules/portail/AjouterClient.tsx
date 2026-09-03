@@ -48,6 +48,16 @@ export function AjouterClient() {
         return;
       }
 
+      // Le client est créé, et son compte a pu échouer quand même : l'ajout
+      // se fait en trois temps, et seul le dernier peut rater tout seul. La
+      // raison était renvoyée mais jamais lue, et le client atterrissait sur
+      // une fiche sans accès sans que rien ne dise pourquoi. On la garde
+      // pour l'écran de suivi, où le bouton de rattrapage l'attend.
+      if (resultat.pourquoi) {
+        setErreur(resultat.pourquoi);
+        return;
+      }
+
       // Droit sur son écran de suivi : c'est là qu'on lui envoie ses accès,
       // et c'est la suite naturelle du geste qu'on vient de faire.
       router.push(`/pilotage/membres/${resultat.personneId}`);

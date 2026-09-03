@@ -590,6 +590,32 @@ export async function genererLeLien(
  * c'est ce refus qui garantit qu'un contact ajouté pour mémoire ne reçoit pas
  * d'accès à un espace vide.
  */
+/**
+ * Crée le compte d'un client dont la fiche existe déjà.
+ *
+ * **C'est le rattrapage, et il manquait.** L'ajout d'un client crée sa fiche,
+ * son accompagnement, puis son compte. Les deux premiers peuvent réussir et le
+ * troisième échouer, typiquement quand la clé de service n'est pas posée chez
+ * l'hébergeur. Le client existait alors sans compte, sans aucun moyen de lui
+ * en donner un : il fallait le supprimer et le recréer, en espérant mieux.
+ *
+ * Rejouable sans dégât : `creerLeCompteDuMembre` ne fait rien si un compte
+ * existe déjà, et refuse toujours une fiche sans accompagnement.
+ */
+export async function creerLeCompteDuClient(
+  personneId: string,
+): Promise<{ fait: boolean; pourquoi?: string }> {
+  await exigerAdmin();
+
+  const resultat = await creerLeCompte(personneId);
+
+  revalidatePath("/pilotage");
+  revalidatePath("/pilotage/membres", "layout");
+
+  if (resultat.fait === "impossible") return { fait: false, pourquoi: resultat.pourquoi };
+  return { fait: true };
+}
+
 export async function ajouterUnClient(champs: {
   nom: string;
   prenom: string;

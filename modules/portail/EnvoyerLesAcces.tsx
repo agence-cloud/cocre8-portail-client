@@ -1,7 +1,12 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { envoyerLesAcces, genererLeLien, ouvrirLApercu } from "@/modules/portail/actions";
+import {
+  envoyerLesAcces,
+  genererLeLien,
+  ouvrirLApercu,
+  creerLeCompteDuClient,
+} from "@/modules/portail/actions";
 import { Carte } from "@/lib/design/Carte";
 import { Bouton } from "@/lib/design/Bouton";
 import { CHAMP } from "@/lib/design/champs";
@@ -39,14 +44,56 @@ export function EnvoyerLesAcces({ personneId, email, aUnCompte }: Props) {
   const [copie, setCopie] = useState(false);
   const [enCours, demarrer] = useTransition();
 
+  // Sans compte, la carte n'annonce plus une fatalité : elle propose de le
+  // créer. Le compte se crée normalement à l'ajout du client, mais cette
+  // étape-là peut échouer toute seule, et le client restait alors sans accès
+  // possible et sans rien à cliquer.
   if (!aUnCompte) {
     return (
       <Carte className="mt-6">
         <h2 className="text-lg">Ses accès</h2>
-        <p className="mt-2 text-sm text-texte-doux">
-          Ce client n&apos;a pas encore de compte. Il s&apos;en crée un au
-          moment où tu l&apos;ajoutes, et il lui faut une adresse email.
-        </p>
+
+        {email ? (
+          <>
+            <p className="mt-2 text-sm text-texte-doux">
+              Ce client n&apos;a pas encore de compte. Il s&apos;en crée
+              normalement un quand tu l&apos;ajoutes : si tu vois ce message,
+              c&apos;est que cette étape a échoué.
+            </p>
+            <Bouton
+              disabled={enCours}
+              className="mt-4 px-4 py-2 text-sm"
+              onClick={() =>
+                demarrer(async () => {
+                  const obtenu = await creerLeCompteDuClient(personneId);
+                  setResultat(
+                    obtenu.fait
+                      ? null
+                      : { envoye: false, pourquoi: obtenu.pourquoi ?? "Création impossible." },
+                  );
+                })
+              }
+            >
+              {enCours ? "Création..." : "Créer son compte"}
+            </Bouton>
+            {resultat?.pourquoi && (
+              <p className="mt-3 text-sm text-accent">
+                {resultat.pourquoi}
+                <br />
+                Si le message parle d&apos;une variable manquante, ouvre
+                <code className="mx-1 rounded bg-fond-alt px-1.5 py-0.5">/diagnostic</code>
+                sur ton installation : la clé de service n&apos;est
+                probablement pas posée chez ton hébergeur.
+              </p>
+            )}
+          </>
+        ) : (
+          <p className="mt-2 text-sm text-texte-doux">
+            Ce client n&apos;a pas d&apos;adresse email, et c&apos;est avec
+            elle qu&apos;il se connectera. Ajoute-la sur sa fiche, puis reviens
+            créer son compte.
+          </p>
+        )}
       </Carte>
     );
   }
