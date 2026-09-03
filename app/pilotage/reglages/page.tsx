@@ -5,6 +5,7 @@ import { lireClients } from "@/lib/personne/requetes";
 import { Reglages } from "@/modules/portail/Reglages";
 import { Demonstration } from "@/modules/portail/Demonstration";
 import { ReglagesQuestions } from "@/modules/portail/ReglagesReferentiel";
+import { MonMotDePasse } from "@/lib/design/MonMotDePasse";
 
 export default async function PageReglages() {
   // Chaque page se garde elle-même, le layout ne suffit pas.
@@ -28,6 +29,7 @@ export default async function PageReglages() {
       <div className="mt-8 max-w-2xl">
         <Reglages reglages={reglages} />
         <ReglagesQuestions questions={questions} />
+        <MonMotDePasse />
         <Demonstration chargee={clients.some((client) => client.demonstration)} />
       </div>
     </>

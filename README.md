@@ -140,6 +140,11 @@ les écris pour chacun, sur son écran de suivi, avec leurs étapes en dessous.
 Deux de tes clients n'ont pas les mêmes objectifs, et l'outil n'a aucune
 méthode à t'imposer.
 
+**Ton mot de passe se change là aussi**, en bas des réglages. Rien n'est
+envoyé par email : tu poses le nouveau, tu le confirmes, c'est fait. Tes
+clients ont le même bloc, en bas de leur page « Ton point de départ » : c'est
+là qu'ils remplacent le mot de passe que tu leur as transmis.
+
 ## Donner ses accès à un client
 
 Sur son écran de suivi, clique « Ouvrir son accès ». L'app t'affiche trois
@@ -154,7 +159,8 @@ Le mot de passe ne s'affiche qu'une fois : il n'est rangé nulle part en clair,
 donc l'écran ne saurait pas te le remontrer. S'il est perdu, refais-en un, ce
 qui remplace l'ancien.
 
-Ne colle ces lignes qu'en privé : elles ouvrent son espace.
+Ne colle ces lignes qu'en privé : elles ouvrent son espace. Ton client peut
+en poser un autre dès qu'il est entré, depuis sa page « Ton point de départ ».
 
 ## Voir ce que ton client voit
 

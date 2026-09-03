@@ -206,6 +206,13 @@ qu'il faudrait croire.
   elle refuse tout compte qui ne porte pas le rôle `membre` : la clé de
   service pourrait sinon remettre le mot de passe du coach.
 
+  **Chacun change son propre mot de passe** depuis
+  `lib/auth/actions-mot-de-passe.ts`, qui n'est pas dans ce fichier et n'a
+  pas à y être : l'écriture passe par la session de celui qui la demande,
+  donc Supabase ne touche que son compte à lui, et aucun identifiant n'est un
+  paramètre. Le coach l'a en bas de ses réglages, le client en bas de « Ton
+  point de départ ».
+
   **Aucun accès ne part par email, et les deux chemins qui le faisaient ont
   été retirés** (l'envoi d'un lien de réinitialisation et le même lien copié
   à la main), avec les écrans `/auth/confirmer` et `/connexion/mot-de-passe`

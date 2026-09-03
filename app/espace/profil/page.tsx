@@ -5,6 +5,7 @@ import { FormulaireProfil } from "@/modules/portail/FormulaireProfil";
 import { PorteProfil } from "@/modules/portail/PorteProfil";
 import { ResumeProfil } from "@/modules/portail/ResumeProfil";
 import { Anneau } from "@/modules/portail/Anneau";
+import { MonMotDePasse } from "@/lib/design/MonMotDePasse";
 
 export default async function PageProfil() {
   const compte = await exigerMembre();
@@ -63,6 +64,14 @@ export default async function PageProfil() {
         reponses={valeurs}
         resume={<ResumeProfil questions={questions} reponses={valeurs} />}
       />
+
+      {/* Le seul écran de l'espace où le client règle quelque chose qui le
+          concerne lui et non son accompagnement. Il est ici faute d'un écran
+          de réglages, que rien d'autre ne justifierait : son mot de passe lui
+          vient de son coach, qui l'a lu à l'écran en le lui transmettant. */}
+      <div className="mt-10 max-w-2xl">
+        <MonMotDePasse />
+      </div>
     </>
   );
 }
