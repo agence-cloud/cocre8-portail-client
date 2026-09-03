@@ -4,9 +4,8 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { ajouterUnClient } from "@/modules/portail/actions";
 import { Bouton } from "@/lib/design/Bouton";
-import { Carte } from "@/lib/design/Carte";
+import { Modale } from "@/lib/design/Modale";
 import { CHAMP, ETIQUETTE } from "@/lib/design/champs";
-import { MicroLibelle } from "@/lib/design/MicroLibelle";
 
 /**
  * Ajouter un client : le seul chemin par lequel un client naît ici.
@@ -16,9 +15,9 @@ import { MicroLibelle } from "@/lib/design/MicroLibelle";
  * ferait passer l'ajout pour l'action principale de l'écran, alors que
  * l'écran sert d'abord à retrouver quelqu'un.
  *
- * **Rien ne part.** Le compte est créé et l'espace prêt, mais l'invitation
- * attend un second clic sur l'écran de suivi, où le coach choisit entre
- * l'email et le lien à copier.
+ * **Rien ne part.** Le compte est créé et l'espace prêt, mais son mot de
+ * passe attend un second clic sur l'écran de suivi, où le coach le lit pour
+ * le transmettre lui-même.
  */
 export function AjouterClient() {
   const router = useRouter();
@@ -65,10 +64,13 @@ export function AjouterClient() {
   }
 
   return (
-    <Carte className="mt-6">
-      <MicroLibelle>Ajouter un client</MicroLibelle>
-
-      <form action={envoyer} className="mt-5">
+    <Modale
+      titre="Nouveau client"
+      sous_titre="Son espace sera prêt tout de suite. Rien ne lui sera envoyé."
+      onFermer={() => setOuvert(false)}
+    >
+      <form action={envoyer}>
+        <div className="px-6 py-6">
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="block">
             <span className={ETIQUETTE}>Son prénom</span>
@@ -108,26 +110,20 @@ export function AjouterClient() {
             {erreur}
           </p>
         )}
+        </div>
 
-        <div className="mt-6 flex items-center gap-3">
+        {/* Les actions dans leur propre bande : sur une fenêtre qui défile,
+            elles restaient sinon collées au dernier champ et se lisaient
+            comme si elles lui appartenaient. */}
+        <div className="flex items-center gap-3 border-t border-bordure bg-fond-alt px-6 py-5">
           <Bouton type="submit" disabled={enCours}>
             {enCours ? "Création..." : "Créer son espace"}
           </Bouton>
-          <button
-            type="button"
-            onClick={() => setOuvert(false)}
-            className="text-sm text-texte-doux transition-colors duration-200 hover:text-texte"
-          >
+          <Bouton type="button" variante="secondaire" onClick={() => setOuvert(false)}>
             Annuler
-          </button>
+          </Bouton>
         </div>
-
-        <p className="mt-4 text-[13px] text-texte-doux/65">
-          Son espace sera prêt, mais rien ne lui sera envoyé : tu lui donnes
-          ses accès depuis son écran de suivi, par email ou par un lien à
-          copier.
-        </p>
       </form>
-    </Carte>
+    </Modale>
   );
 }

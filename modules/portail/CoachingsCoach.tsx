@@ -7,9 +7,11 @@ import {
   retirerCoaching,
 } from "@/modules/portail/actions";
 import { Carte } from "@/lib/design/Carte";
+import { Modale } from "@/lib/design/Modale";
 import { Bouton } from "@/lib/design/Bouton";
 import { Icone } from "@/lib/design/Icones";
 import { CompteRendu } from "@/lib/design/CompteRendu";
+import { CHAMP, ETIQUETTE } from "@/lib/design/champs";
 import { formaterDateHeure } from "@/lib/dates";
 import type { Appel } from "@/lib/personne/appels.types";
 
@@ -17,8 +19,6 @@ type Props = {
   personneId: string;
   coachings: Appel[];
 };
-
-const CHAMP = "rounded-icone border border-bordure px-3 py-2 text-sm";
 
 /**
  * Les coachings d'un membre, côté coach : ce qui arrive, ce qui a eu lieu, et
@@ -44,19 +44,35 @@ export function CoachingsCoach({ personneId, coachings }: Props) {
   const formulaire = useRef<HTMLFormElement>(null);
   const [erreur, setErreur] = useState<string | null>(null);
   const [deplie, setDeplie] = useState<string | null>(null);
+  const [ouvert, setOuvert] = useState(false);
   const [enCours, demarrer] = useTransition();
 
   function poser(donnees: FormData) {
     demarrer(async () => {
       const resultat = await poserCoaching(donnees);
       setErreur(resultat.erreur);
-      if (!resultat.erreur) formulaire.current?.reset();
+      if (!resultat.erreur) {
+        formulaire.current?.reset();
+        setOuvert(false);
+      }
     });
   }
 
   return (
     <Carte className="mt-6">
-      <h2 className="text-lg">Ses coachings</h2>
+      <div className="flex items-center justify-between gap-4">
+        <h2 className="text-lg">Ses coachings</h2>
+        <Bouton
+          variante="secondaire"
+          onClick={() => {
+            setErreur(null);
+            setOuvert(true);
+          }}
+          className="px-4 py-2 text-sm"
+        >
+          Poser un coaching
+        </Bouton>
+      </div>
 
       {coachings.length === 0 ? (
         <p className="mt-2 text-sm text-texte-doux">Rien de posé pour l&apos;instant.</p>
@@ -123,28 +139,64 @@ export function CoachingsCoach({ personneId, coachings }: Props) {
         </div>
       )}
 
-      <form ref={formulaire} action={poser} className="mt-5 flex flex-wrap items-end gap-3">
-        <input type="hidden" name="personne_id" value={personneId} />
-        <input
-          name="titre"
-          required
-          placeholder="Titre du coaching"
-          className={`min-w-60 flex-1 ${CHAMP}`}
-        />
-        <input type="datetime-local" name="debut" required className={CHAMP} />
-        <input
-          type="number"
-          name="duree_minutes"
-          min="15"
-          step="15"
-          placeholder="min"
-          className={`w-28 ${CHAMP}`}
-        />
-        <input name="lien_visio" placeholder="Lien visio" className={`min-w-60 flex-1 ${CHAMP}`} />
-        <Bouton disabled={enCours}>{enCours ? "En cours..." : "Poser le coaching"}</Bouton>
-      </form>
+      {ouvert && (
+        <Modale
+          titre="Nouveau coaching"
+          sous_titre="Il apparaîtra dans son espace, et pourra recevoir son compte rendu ensuite."
+          onFermer={() => setOuvert(false)}
+        >
+          <form ref={formulaire} action={poser}>
+            <div className="px-6 py-6">
+              <input type="hidden" name="personne_id" value={personneId} />
 
-      {erreur && <p className="mt-3 text-sm text-accent">{erreur}</p>}
+              <label className="block">
+                <span className={ETIQUETTE}>Le coaching</span>
+                <input
+                  name="titre"
+                  required
+                  placeholder="Point mensuel"
+                  className={CHAMP}
+                />
+              </label>
+
+              <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                <label className="block">
+                  <span className={ETIQUETTE}>Quand</span>
+                  <input type="datetime-local" name="debut" required className={CHAMP} />
+                </label>
+                <label className="block">
+                  <span className={ETIQUETTE}>Durée, en minutes</span>
+                  <input
+                    type="number"
+                    name="duree_minutes"
+                    min="15"
+                    step="15"
+                    placeholder="60"
+                    className={CHAMP}
+                  />
+                </label>
+              </div>
+
+              <label className="mt-4 block">
+                <span className={ETIQUETTE}>Lien visio (facultatif)</span>
+                <input name="lien_visio" placeholder="https://..." className={CHAMP} />
+              </label>
+
+              {erreur && <p className="mt-5 text-sm text-accent">{erreur}</p>}
+            </div>
+
+            {/* Les actions dans leur propre bande : sur une fenêtre qui
+                défile, elles restaient sinon collées au dernier champ et se
+                lisaient comme si elles lui appartenaient. */}
+            <div className="flex gap-3 border-t border-bordure bg-fond-alt px-6 py-5">
+              <Bouton disabled={enCours}>{enCours ? "En cours..." : "Poser le coaching"}</Bouton>
+              <Bouton type="button" variante="secondaire" onClick={() => setOuvert(false)}>
+                Annuler
+              </Bouton>
+            </div>
+          </form>
+        </Modale>
+      )}
     </Carte>
   );
 }

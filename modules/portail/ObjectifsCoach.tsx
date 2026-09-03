@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { Carte } from "@/lib/design/Carte";
+import { Modale } from "@/lib/design/Modale";
 import { Bouton } from "@/lib/design/Bouton";
 import { Icone } from "@/lib/design/Icones";
 import { CHAMP, CHAMP_LIGNE, ETIQUETTE } from "@/lib/design/champs";
@@ -65,46 +66,60 @@ export function ObjectifsCoach({
         <h2 className="text-lg">Ses objectifs</h2>
         <Bouton
           variante="secondaire"
-          onClick={() => setOuvert(!ouvert)}
+          onClick={() => setOuvert(true)}
           className="px-4 py-2 text-sm"
         >
-          {ouvert ? "Annuler" : "Ajouter un objectif"}
+          Ajouter un objectif
         </Bouton>
       </div>
 
       {ouvert && (
-        <div className="mt-4 rounded-xl border border-bordure bg-fond-alt p-4">
-          <label className="block">
-            <span className={ETIQUETTE}>L&apos;objectif</span>
-            <input
-              className={CHAMP}
-              value={titre}
-              onChange={(e) => setTitre(e.target.value)}
-              placeholder="Passer son offre au forfait"
-              autoFocus
-            />
-          </label>
-          <label className="mt-3 block">
-            <span className={ETIQUETTE}>Pourquoi, en une phrase (facultatif)</span>
-            <input
-              className={CHAMP}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
-          </label>
-          <label className="mt-3 block">
-            <span className={ETIQUETTE}>Pour quand (facultatif)</span>
-            <input
-              type="date"
-              className={CHAMP}
-              value={echeance}
-              onChange={(e) => setEcheance(e.target.value)}
-            />
-          </label>
-          <Bouton onClick={poser} disabled={enCours || !titre.trim()} className="mt-4">
-            {enCours ? "Enregistrement..." : "Poser cet objectif"}
-          </Bouton>
-        </div>
+        <Modale
+          titre="Nouvel objectif"
+          sous_titre="Ce qu'il vient chercher. Les étapes se posent ensuite, sous l'objectif."
+          onFermer={() => setOuvert(false)}
+        >
+          <div className="px-6 py-6">
+            <label className="block">
+              <span className={ETIQUETTE}>L&apos;objectif</span>
+              <input
+                className={CHAMP}
+                value={titre}
+                onChange={(e) => setTitre(e.target.value)}
+                placeholder="Passer son offre au forfait"
+              />
+            </label>
+            <label className="mt-4 block">
+              <span className={ETIQUETTE}>Pourquoi, en une phrase (facultatif)</span>
+              <input
+                className={CHAMP}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
+            </label>
+            <label className="mt-4 block">
+              <span className={ETIQUETTE}>Pour quand (facultatif)</span>
+              <input
+                type="date"
+                className={CHAMP}
+                value={echeance}
+                onChange={(e) => setEcheance(e.target.value)}
+              />
+            </label>
+          </div>
+
+          {/* Les actions dans leur propre bande : sur une fenêtre qui défile,
+              elles restaient sinon collées au dernier champ et se lisaient
+              comme si elles lui appartenaient. */}
+          <div className="flex gap-3 border-t border-bordure bg-fond-alt px-6 py-5">
+            <Bouton onClick={poser} disabled={enCours || !titre.trim()}>
+              {enCours ? "Enregistrement..." : "Poser cet objectif"}
+            </Bouton>
+            <Bouton type="button" variante="secondaire" onClick={() => setOuvert(false)}>
+              Annuler
+            </Bouton>
+          </div>
+        </Modale>
       )}
 
       {objectifs.length === 0 ? (
