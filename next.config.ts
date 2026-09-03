@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import { PHASE_PRODUCTION_BUILD } from "next/constants";
+import { normaliserAdresseSupabase } from "./lib/supabase/adresse";
 
 /**
  * **La construction refuse de partir sans les valeurs de la base**, et c'est
@@ -21,7 +22,6 @@ import { PHASE_PRODUCTION_BUILD } from "next/constants";
  * fait la même vérification à l'exécution, et `/diagnostic` la montre à
  * l'écran : trois filets sur le même trou, parce qu'il a coûté cher.
  */
-const ADRESSE_PROJET = /^https:\/\/[a-z0-9-]+\.supabase\.(co|in)$/;
 
 function verifierLaConfiguration(): void {
   const url = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").trim();
@@ -43,11 +43,15 @@ function verifierLaConfiguration(): void {
     );
   }
 
-  if (!ADRESSE_PROJET.test(url.replace(/\/+$/, ""))) {
+  if (normaliserAdresseSupabase(url) === null) {
     throw new Error(
       "Construction impossible : NEXT_PUBLIC_SUPABASE_URL ne ressemble pas à l'adresse d'un\n" +
-        "projet Supabase. Attendu : https://<reference>.supabase.co, sans rien après.\n\n" +
-        "Ce n'est pas l'adresse du tableau de bord, qui commence par https://supabase.com/dashboard.",
+        "projet Supabase.\n\n" +
+        "Prends-la dans ton projet Supabase, sous Data API. Elle a la forme\n" +
+        "https://quelquechose.supabase.co. Si tu as copié le champ « API URL », le bout\n" +
+        "/rest/v1/ à la fin ne pose aucun problème, on le retire pour toi. L'adresse du\n" +
+        "tableau de bord, celle qui commence par https://supabase.com/dashboard, marche\n" +
+        "aussi.",
     );
   }
 

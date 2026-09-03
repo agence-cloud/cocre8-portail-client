@@ -1,3 +1,5 @@
+import { normaliserAdresseSupabase } from "@/lib/supabase/adresse";
+
 /**
  * L'erreur dit aussi ce qu'elle voit, et cette liste a déjà servi deux fois.
  *
@@ -45,17 +47,6 @@ function manquante(nom: string): Error {
   );
 }
 
-/**
- * Ce à quoi ressemble l'adresse d'un projet Supabase, et rien d'autre :
- * `https://<reference>.supabase.co`, sans chemin ni barre finale.
- *
- * La référence fait vingt lettres minuscules. On ne vérifie pas ce compte
- * ici : une future référence plus longue ferait échouer une adresse
- * parfaitement valable, et cette fonction refuserait alors de démarrer une
- * app qui marche. Elle attrape la faute grossière, pas la faute fine.
- */
-const ADRESSE_PROJET = /^https:\/\/[a-z0-9-]+\.supabase\.(co|in)$/;
-
 function malformee(valeur: string): Error {
   // On dit ce qu'on a reçu jusqu'au premier point : de quoi reconnaître
   // « supabase.com » ou « localhost » sans recopier la référence du projet
@@ -64,9 +55,10 @@ function malformee(valeur: string): Error {
 
   return new Error(
     "NEXT_PUBLIC_SUPABASE_URL ne ressemble pas à l'adresse d'un projet Supabase. " +
-      `Attendu : https://<reference>.supabase.co, sans rien après. Reçu, début : ${debut}... ` +
-      "L'adresse se trouve dans ton projet Supabase, sous Project Settings puis Data API. " +
-      "Ce n'est pas celle du tableau de bord, qui commence par https://supabase.com/dashboard.",
+      `Reçu, début : ${debut}... ` +
+      "Prends l'adresse dans ton projet Supabase, sous Data API : elle a la forme " +
+      "https://quelquechose.supabase.co. Le bout de chemin à la fin, du genre /rest/v1/, " +
+      "n'est pas un problème, on le retire pour toi.",
   );
 }
 
@@ -86,8 +78,8 @@ export function lireConfigSupabase(): { url: string; cle: string } {
   if (!url) throw manquante("NEXT_PUBLIC_SUPABASE_URL");
   if (!cle) throw manquante("NEXT_PUBLIC_SUPABASE_ANON_KEY");
 
-  const propre = url.trim().replace(/\/+$/, "");
-  if (!ADRESSE_PROJET.test(propre)) throw malformee(propre);
+  const propre = normaliserAdresseSupabase(url);
+  if (propre === null) throw malformee(url.trim());
 
   return { url: propre, cle };
 }
