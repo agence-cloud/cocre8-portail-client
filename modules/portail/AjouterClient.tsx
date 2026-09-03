@@ -7,7 +7,6 @@ import { Bouton } from "@/lib/design/Bouton";
 import { Carte } from "@/lib/design/Carte";
 import { CHAMP, ETIQUETTE } from "@/lib/design/champs";
 import { MicroLibelle } from "@/lib/design/MicroLibelle";
-import type { Offre } from "@/lib/offre/types";
 
 /**
  * Ajouter un client : le seul chemin par lequel un client naît ici.
@@ -21,35 +20,11 @@ import type { Offre } from "@/lib/offre/types";
  * attend un second clic sur l'écran de suivi, où le coach choisit entre
  * l'email et le lien à copier.
  */
-export function AjouterClient({ offres }: { offres: Offre[] }) {
+export function AjouterClient() {
   const router = useRouter();
   const [ouvert, setOuvert] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const [enCours, demarrer] = useTransition();
-
-  const [offreId, setOffreId] = useState(offres[0]?.id ?? "");
-  const [prix, setPrix] = useState(String(offres[0]?.prix_defaut ?? 0));
-
-  // Le prix suit l'offre choisie, et reste modifiable : c'est le prix de
-  // cette personne-là, pas celui du catalogue. Le champ se remplit pour
-  // éviter une saisie, il ne se verrouille pas.
-  function choisirLOffre(id: string) {
-    setOffreId(id);
-    const offre = offres.find((o) => o.id === id);
-    if (offre) setPrix(String(offre.prix_defaut));
-  }
-
-  if (offres.length === 0) {
-    return (
-      <Carte ton="calme" className="mt-6">
-        <MicroLibelle>Ajouter un client</MicroLibelle>
-        <p className="mt-2 text-sm text-texte-doux">
-          Aucune offre active. Un client s&apos;attache à une offre, c&apos;est
-          elle qui fige son prix : commence par en créer une.
-        </p>
-      </Carte>
-    );
-  }
 
   if (!ouvert) {
     return (
@@ -65,8 +40,6 @@ export function AjouterClient({ offres }: { offres: Offre[] }) {
         nom: String(donnees.get("nom") ?? ""),
         prenom: String(donnees.get("prenom") ?? ""),
         email: String(donnees.get("email") ?? ""),
-        offreId,
-        prix: Number(prix) || 0,
         demarrage: String(donnees.get("demarrage") ?? ""),
       });
 
@@ -104,34 +77,6 @@ export function AjouterClient({ offres }: { offres: Offre[] }) {
             C&apos;est avec elle qu&apos;il se connectera.
           </span>
         </label>
-
-        <div className="mt-4 grid gap-4 sm:grid-cols-3">
-          <label className="block sm:col-span-2">
-            <span className={ETIQUETTE}>Son offre</span>
-            <select
-              value={offreId}
-              onChange={(e) => choisirLOffre(e.target.value)}
-              className={CHAMP}
-            >
-              {offres.map((offre) => (
-                <option key={offre.id} value={offre.id}>
-                  {offre.nom}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="block">
-            <span className={ETIQUETTE}>Son prix</span>
-            <input
-              type="number"
-              min="0"
-              step="1"
-              value={prix}
-              onChange={(e) => setPrix(e.target.value)}
-              className={CHAMP}
-            />
-          </label>
-        </div>
 
         <label className="mt-4 block">
           <span className={ETIQUETTE}>Date de démarrage</span>

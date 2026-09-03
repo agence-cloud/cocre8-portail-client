@@ -14,7 +14,6 @@
 -- ---------------------------------------------------------------------
 
 create type role_compte as enum ('admin', 'membre');
-create type type_offre as enum ('ponctuel', 'mensuel');
 create type statut_accompagnement as enum ('actif', 'termine', 'suspendu');
 
 -- La portée dit à qui s'adresse la séance, la nature dit ce qu'on y fait.
@@ -60,25 +59,20 @@ create table compte (
     check (role = 'admin' or personne_id is not null)
 );
 
--- Ce que tu vends. Le prix par défaut vit ici, le prix réellement pratiqué
--- vit sur l'accompagnement : deux clients n'achètent pas toujours au même
--- montant, et celui qui a signé à un prix l'a signé à ce prix pour toujours.
-create table offre (
-  id uuid primary key default gen_random_uuid(),
-  nom text not null,
-  prix_defaut numeric(10, 2) not null,
-  type type_offre not null,
-  duree_mois smallint,
-  active boolean not null default true,
-  cree_le timestamptz not null default now()
-);
-
+-- Ce qui fait d'une fiche un client : une date de démarrage, et ce qui se
+-- passe ensuite.
+--
+-- **Elle ne porte ni offre ni prix, et c'est un choix.** Une version
+-- précédente obligeait à choisir une offre et à saisir un montant avant de
+-- pouvoir créer un client. Or rien dans cet outil ne permet de créer, de
+-- renommer ou de retirer une offre : c'était un champ obligatoire que
+-- personne ne pouvait administrer, et une méthode de vente imposée à tous
+-- ceux qui installent l'outil. Ce que tu factures se suit ailleurs.
+--
 -- Un client peut en cumuler plusieurs (le programme, puis un suivi).
 create table accompagnement (
   id uuid primary key default gen_random_uuid(),
   personne_id uuid not null references personne (id) on delete cascade,
-  offre_id uuid not null references offre (id),
-  prix_negocie numeric(10, 2) not null,
   date_debut date not null,
   date_fin date,
   statut statut_accompagnement not null default 'actif',
@@ -465,7 +459,6 @@ execute function rafraichir_progression_objectif();
 
 alter table personne enable row level security;
 alter table compte enable row level security;
-alter table offre enable row level security;
 alter table accompagnement enable row level security;
 alter table objectif enable row level security;
 alter table question_profil enable row level security;
@@ -477,7 +470,6 @@ alter table tache enable row level security;
 -- Le coach fait tout, partout.
 create policy admin_tout on personne for all to authenticated using (est_admin()) with check (est_admin());
 create policy admin_tout on compte for all to authenticated using (est_admin()) with check (est_admin());
-create policy admin_tout on offre for all to authenticated using (est_admin()) with check (est_admin());
 create policy admin_tout on accompagnement for all to authenticated using (est_admin()) with check (est_admin());
 create policy admin_tout on objectif for all to authenticated using (est_admin()) with check (est_admin());
 create policy admin_tout on question_profil for all to authenticated using (est_admin()) with check (est_admin());
@@ -607,11 +599,11 @@ grant select on coaching_membre to authenticated;
 -- Les droits sont larges parce que la politique `admin_tout` l'est : c'est
 -- elle qui filtre, pas le `grant`. Un `grant` trop étroit ne rendrait pas
 -- l'app plus sûre, il l'empêcherait de fonctionner.
-revoke all on personne, compte, offre, accompagnement, objectif, tache,
+revoke all on personne, compte, accompagnement, objectif, tache,
   question_profil, reponse_profil, document, appel
   from anon, authenticated;
 
-grant select, insert, update, delete on personne, compte, offre,
+grant select, insert, update, delete on personne, compte,
   accompagnement, objectif, tache, question_profil, reponse_profil,
   document, appel
   to authenticated;
@@ -711,11 +703,6 @@ revoke execute on function public.rafraichir_progression_objectif() from public,
 --  Tout ce qui suit se renomme, se réécrit et se supprime depuis l'app.
 --  Ce sont des valeurs de départ, pas une méthode.
 -- ---------------------------------------------------------------------
-
-insert into offre (nom, prix_defaut, type, duree_mois) values
-  ('Accompagnement 3 mois', 0, 'ponctuel', 3),
-  ('Accompagnement 6 mois', 0, 'ponctuel', 6),
-  ('Suivi mensuel', 0, 'mensuel', null);
 
 insert into question_profil (libelle, aide, type, ordre) values
   ('Quel est ton objectif principal ?', 'En une phrase, ce que tu veux avoir obtenu à la fin.', 'texte_long', 1),

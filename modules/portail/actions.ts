@@ -594,8 +594,6 @@ export async function ajouterUnClient(champs: {
   nom: string;
   prenom: string;
   email: string;
-  offreId: string;
-  prix: number;
   demarrage: string;
 }): Promise<{ fait: boolean; personneId?: string; pourquoi?: string }> {
   await exigerAdmin();
@@ -626,8 +624,6 @@ export async function ajouterUnClient(champs: {
 
   const { error: erreurAccompagnement } = await supabase.from("accompagnement").insert({
     personne_id: personne.id,
-    offre_id: champs.offreId,
-    prix_negocie: champs.prix,
     date_debut: champs.demarrage,
   });
 

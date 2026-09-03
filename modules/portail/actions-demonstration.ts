@@ -67,18 +67,6 @@ export async function chargerLaDemonstration(): Promise<{
     return { fait: false, pourquoi: "Le jeu de démonstration est déjà chargé." };
   }
 
-  const { data: offre } = await supabase
-    .from("offre")
-    .select("id, prix_defaut")
-    .eq("active", true)
-    .order("prix_defaut")
-    .limit(1)
-    .maybeSingle();
-
-  if (!offre) {
-    return { fait: false, pourquoi: "Aucune offre active : le client inventé n'aurait rien signé." };
-  }
-
   const demarrage = ilYA(CLIENTE.ilYAJours);
 
   const { data: personne, error: erreurFiche } = await supabase
@@ -97,8 +85,6 @@ export async function chargerLaDemonstration(): Promise<{
 
   const { error: erreurAccompagnement } = await supabase.from("accompagnement").insert({
     personne_id: personne.id,
-    offre_id: offre.id,
-    prix_negocie: offre.prix_defaut,
     date_debut: demarrage,
   });
 

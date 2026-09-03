@@ -64,17 +64,4 @@ describe("le jeu de départ", () => {
     expect(error).toBeNull();
     expect(data ?? []).toEqual([]);
   });
-
-  it("pose au moins une offre active", async () => {
-    // `creerLeCompteDuMembre` refuse une fiche sans accompagnement, et un
-    // accompagnement demande une offre : sans offre, personne ne peut être
-    // ajouté, et l'outil s'ouvre sur une impasse.
-    const { data, error } = await admin
-      .from("offre")
-      .select("nom")
-      .eq("active", true);
-
-    expect(error).toBeNull();
-    expect((data ?? []).length).toBeGreaterThan(0);
-  });
 });

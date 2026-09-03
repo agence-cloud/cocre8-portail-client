@@ -81,7 +81,7 @@ export async function creerLeCompteDuMembre(
   if ((personne.accompagnement ?? []).length === 0) {
     return {
       fait: "impossible",
-      pourquoi: "Cette fiche n'a pas d'accompagnement. Ajoute-lui son offre, puis renvoie ses accès.",
+      pourquoi: "Cette fiche n'est pas encore cliente. Passe-la en client, puis renvoie ses accès.",
     };
   }
 

@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 import { exigerAdmin } from "@/lib/auth/compte";
 import { lirePersonne, aUnCompte } from "@/lib/personne/requetes";
 import { lireObjectifs } from "@/lib/objectif/requetes";
-import { lireAccompagnements } from "@/lib/offre/requetes";
+import { lireAccompagnements } from "@/lib/accompagnement/requetes";
+import { formaterDateComplete } from "@/lib/dates";
 import { lireQuestions, lireReponses } from "@/lib/profil/requetes";
 import { lireDocuments, signerDocument } from "@/lib/document/requetes";
 import { lireCoachingsDuMembre } from "@/lib/coaching/requetes";
@@ -58,6 +59,13 @@ export default async function SuiviMembre({
   const nom = nomComplet(personne);
   const valeurs = new Map(reponses.map((r) => [r.question_id, r.reponse]));
 
+  // La plus ancienne date de démarrage : un client peut cumuler plusieurs
+  // accompagnements, et c'est le premier qui dit depuis quand il est là.
+  const debut = accompagnements
+    .map((a) => a.date_debut)
+    .sort()
+    .at(0);
+
   return (
     <>
       <Link href="/pilotage" className="text-sm text-texte-doux hover:text-texte">
@@ -68,8 +76,8 @@ export default async function SuiviMembre({
         <div>
           <h1 className="text-4xl">{nom}</h1>
           <p className="mt-2 text-texte-doux">
-            {accompagnements.length > 0
-              ? accompagnements.map((a) => a.offre?.nom).filter(Boolean).join(", ")
+            {debut
+              ? `Client depuis le ${formaterDateComplete(debut)}`
               : "Aucun accompagnement enregistré"}
           </p>
         </div>

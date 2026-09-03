@@ -15,6 +15,15 @@ export function formaterJourMois(iso: string): string {
   return `${jour === 1 ? "1er" : jour} ${mois}`;
 }
 
+/**
+ * « 14 mars 2026 ». L'année compte ici : un client peut être là depuis deux
+ * ans, et « depuis le 14 mars » ne dirait pas lequel.
+ */
+export function formaterDateComplete(iso: string): string {
+  const date = new Date(`${iso}T12:00:00Z`);
+  return `${formaterJourMois(iso)} ${date.getUTCFullYear()}`;
+}
+
 /** Une date ISO du jour, sans l'heure, pour comparer des jours entre eux. */
 export function jourISO(date: Date): string {
   return date.toISOString().slice(0, 10);

@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { exigerAdmin } from "@/lib/auth/compte";
 import { lireClients } from "@/lib/personne/requetes";
-import { lireOffres } from "@/lib/offre/requetes";
 import { AjouterClient } from "@/modules/portail/AjouterClient";
 import { Badge } from "@/lib/design/Badge";
 import { Carte } from "@/lib/design/Carte";
@@ -12,7 +11,7 @@ export default async function AccueilPilotage() {
   // Chaque page se garde elle-même, le layout ne suffit pas.
   await exigerAdmin();
 
-  const [clients, offres] = await Promise.all([lireClients(), lireOffres()]);
+  const clients = await lireClients();
 
   return (
     <>
@@ -25,7 +24,7 @@ export default async function AccueilPilotage() {
           : `${clients.length} client${clients.length > 1 ? "s" : ""} accompagné${clients.length > 1 ? "s" : ""}.`}
       </p>
 
-      <AjouterClient offres={offres} />
+      <AjouterClient />
 
       {clients.length > 0 && (
         <Carte className="mt-8">
