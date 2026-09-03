@@ -13,8 +13,7 @@ import { headers } from "next/headers";
 import { exigerConnecte, exigerAdmin } from "@/lib/auth/compte";
 import {
   creerLeCompteDuMembre as creerLeCompte,
-  envoyerLesAcces as envoyer,
-  genererLeLienDAcces as genererLien,
+  poserUnMotDePasse as poserLeMotDePasse,
 } from "@/lib/auth/creation";
 import { entrerDansLEspaceDe, revenirAuPilotage } from "@/lib/auth/apercu";
 import { versInstantUTC } from "@/lib/dates";
@@ -515,56 +514,55 @@ export async function modifierCompteRenduCoaching(
 }
 
 /**
- * Envoie au membre le lien qui lui fera poser son mot de passe.
+ * Ouvre les accès d'un client : son compte s'il manque, puis un mot de passe
+ * neuf, affiché une fois.
  *
- * Séparée de la bascule en client, délibérément : l'espace se prépare tout
- * seul au moment de la signature, l'invitation part quand un humain le
- * décide. Rien ne sort de l'application sans ce clic.
+ * **Un seul geste, parce que le coach n'en veut qu'un.** Il donne l'adresse
+ * de l'outil et le mot de passe, le client se connecte. C'est tout, et c'est
+ * ce qui remplace les deux chemins par email, retirés le même jour : ils
+ * dépendaient du service d'email de Supabase, en anglais et plafonné, et le
+ * lien qu'ils portaient mourait au bout d'une heure.
  *
- * L'adresse de retour se déduit de l'en-tête de la requête plutôt que d'être
- * écrite en dur : en local elle vaut localhost, en ligne le vrai domaine, et
- * personne n'a à s'en souvenir le jour du déploiement.
+ * **Rejouable, et c'est le rattrapage aussi.** Un compte qui existe déjà ne
+ * se recrée pas, il reçoit simplement un nouveau mot de passe. Un compte qui
+ * n'a pas pu naître à l'ajout du client, faute de clé de service chez
+ * l'hébergeur, naît ici : sans cette reprise, le client restait sans accès
+ * possible et il fallait le supprimer pour recommencer.
+ *
+ * **L'adresse de connexion se déduit de l'en-tête de la requête** plutôt que
+ * d'être écrite en dur : en local elle vaut localhost, en ligne le vrai
+ * domaine, et personne n'a à s'en souvenir le jour du déploiement.
  */
-export async function envoyerLesAcces(
-  personneId: string,
-): Promise<{ envoye: boolean; email?: string; pourquoi?: string }> {
-  await exigerAdmin();
-
-  const entetes = await headers();
-  const hote = entetes.get("host");
-  if (!hote) return { envoye: false, pourquoi: "Adresse du site introuvable." };
-
-  // `x-forwarded-proto` derrière un proxy, http en local : deviner le
-  // protocole donnerait un lien en http sur un site en https, que le
-  // navigateur refuserait après redirection.
-  const protocole = entetes.get("x-forwarded-proto") ?? (hote.startsWith("localhost") ? "http" : "https");
-
-  const resultat = await envoyer(personneId, `${protocole}://${hote}`);
-
-  revalidatePath("/pilotage/membres", "layout");
-  return resultat;
-}
-
-/**
- * Le lien d'accès, fabriqué mais pas envoyé.
- *
- * L'autre moitié de l'invitation : le coach le copie et le transmet
- * lui-même, par le canal qu'il utilise déjà avec ses clients. Rien ne sort
- * de l'application ici, ce qui en fait le geste le plus discret des deux.
- */
-export async function genererLeLien(
-  personneId: string,
-): Promise<{ lien?: string; email?: string; pourquoi?: string }> {
+export async function ouvrirLesAcces(personneId: string): Promise<{
+  adresse?: string;
+  email?: string;
+  motDePasse?: string;
+  pourquoi?: string;
+}> {
   await exigerAdmin();
 
   const entetes = await headers();
   const hote = entetes.get("host");
   if (!hote) return { pourquoi: "Adresse du site introuvable." };
 
+  // `x-forwarded-proto` derrière un proxy, http en local : deviner le
+  // protocole donnerait une adresse en http sur un site en https.
   const protocole =
     entetes.get("x-forwarded-proto") ?? (hote.startsWith("localhost") ? "http" : "https");
 
-  return genererLien(personneId, `${protocole}://${hote}`);
+  const creation = await creerLeCompte(personneId);
+  if (creation.fait === "impossible") return { pourquoi: creation.pourquoi };
+
+  const pose = await poserLeMotDePasse(personneId);
+  if (pose.pourquoi) return { pourquoi: pose.pourquoi };
+
+  revalidatePath("/pilotage/membres", "layout");
+
+  return {
+    adresse: `${protocole}://${hote}/connexion`,
+    email: pose.email,
+    motDePasse: pose.motDePasse,
+  };
 }
 
 /**
@@ -580,42 +578,16 @@ export async function genererLeLien(
  * outil est extrait les créait à la bascule commerciale d'un CRM qui n'existe
  * plus : sans ce geste, un coach ne pourrait ajouter personne.
  *
- * **Rien n'est envoyé.** Le compte est créé et l'espace prêt, mais
- * l'invitation reste un clic séparé sur l'écran de suivi. C'est la règle du
- * dépôt : l'espace se prépare tout seul, ce qui sort vers quelqu'un attend
- * qu'un humain le décide.
+ * **Rien n'est transmis.** Le compte est créé et l'espace prêt, mais le mot
+ * de passe du client s'ouvre par un clic séparé sur l'écran de suivi. C'est
+ * la règle du dépôt : l'espace se prépare tout seul, ce qui va vers quelqu'un
+ * attend qu'un humain le décide.
  *
  * **L'ordre compte.** La fiche d'abord, l'accompagnement ensuite, le compte en
  * dernier : `creerLeCompteDuMembre` refuse une fiche sans accompagnement, et
  * c'est ce refus qui garantit qu'un contact ajouté pour mémoire ne reçoit pas
  * d'accès à un espace vide.
  */
-/**
- * Crée le compte d'un client dont la fiche existe déjà.
- *
- * **C'est le rattrapage, et il manquait.** L'ajout d'un client crée sa fiche,
- * son accompagnement, puis son compte. Les deux premiers peuvent réussir et le
- * troisième échouer, typiquement quand la clé de service n'est pas posée chez
- * l'hébergeur. Le client existait alors sans compte, sans aucun moyen de lui
- * en donner un : il fallait le supprimer et le recréer, en espérant mieux.
- *
- * Rejouable sans dégât : `creerLeCompteDuMembre` ne fait rien si un compte
- * existe déjà, et refuse toujours une fiche sans accompagnement.
- */
-export async function creerLeCompteDuClient(
-  personneId: string,
-): Promise<{ fait: boolean; pourquoi?: string }> {
-  await exigerAdmin();
-
-  const resultat = await creerLeCompte(personneId);
-
-  revalidatePath("/pilotage");
-  revalidatePath("/pilotage/membres", "layout");
-
-  if (resultat.fait === "impossible") return { fait: false, pourquoi: resultat.pourquoi };
-  return { fait: true };
-}
-
 export async function ajouterUnClient(champs: {
   nom: string;
   prenom: string;

@@ -12,7 +12,7 @@ import { progression } from "@/modules/portail/progression";
 import { Anneau } from "@/modules/portail/Anneau";
 import { ObjectifsCoach } from "@/modules/portail/ObjectifsCoach";
 import { CoachingsCoach } from "@/modules/portail/CoachingsCoach";
-import { EnvoyerLesAcces } from "@/modules/portail/EnvoyerLesAcces";
+import { AccesDuClient } from "@/modules/portail/AccesDuClient";
 import { ListeDocuments } from "@/modules/portail/ListeDocuments";
 import { DepotDocument } from "@/modules/portail/DepotDocument";
 import { Carte } from "@/lib/design/Carte";
@@ -88,7 +88,7 @@ export default async function SuiviMembre({
 
       <CoachingsCoach personneId={id} coachings={coachings} />
 
-      <EnvoyerLesAcces personneId={id} email={personne.email} aUnCompte={compteExiste} />
+      <AccesDuClient personneId={id} email={personne.email} aUnCompte={compteExiste} />
 
       <Carte className="mt-6">
         <h2 className="text-lg">Ses documents</h2>

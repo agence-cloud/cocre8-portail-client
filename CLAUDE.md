@@ -198,10 +198,23 @@ et deux fichiers l'utilisent. La liste se vérifie par
 `grep -rn "supabase/service" lib modules app`, jamais par une liste écrite
 qu'il faudrait croire.
 
-- `lib/auth/creation.ts` crée le compte d'un client. **L'adresse email n'y est
-  jamais un paramètre**, elle se lit en base à partir d'un identifiant de
-  fiche : sans cette règle, une requête forgée créerait un compte sur
-  n'importe quelle adresse.
+- `lib/auth/creation.ts` crée le compte d'un client, et pose son mot de passe.
+  **L'adresse email n'y est jamais un paramètre**, elle se lit en base à
+  partir d'un identifiant de fiche : sans cette règle, une requête forgée
+  créerait un compte sur n'importe quelle adresse. **`poserUnMotDePasse` est
+  la seule modification d'un compte existant** que ce fichier autorise, et
+  elle refuse tout compte qui ne porte pas le rôle `membre` : la clé de
+  service pourrait sinon remettre le mot de passe du coach.
+
+  **Aucun accès ne part par email, et les deux chemins qui le faisaient ont
+  été retirés** (l'envoi d'un lien de réinitialisation et le même lien copié
+  à la main), avec les écrans `/auth/confirmer` et `/connexion/mot-de-passe`
+  qui les recevaient. Ils dépendaient du service d'email de Supabase : en
+  anglais tant que personne ne l'a réécrit, plafonné à quelques envois par
+  heure sur un projet neuf, et le lien mourait en une heure. Le coach lit
+  l'adresse, l'identifiant et le mot de passe à l'écran, et les transmet
+  lui-même. **Le mot de passe ne s'affiche qu'une fois** : il n'est rangé
+  nulle part en clair, on en refait un.
 - `lib/auth/installation.ts` crée le compte du coach, une seule fois, sur une
   base vierge. **C'est le seul endroit de l'app où une adresse et un mot de
   passe viennent d'un formulaire**, et c'est acceptable là et nulle part

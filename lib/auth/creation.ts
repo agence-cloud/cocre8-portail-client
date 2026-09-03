@@ -1,9 +1,8 @@
 import "server-only";
 
-import { createClient } from "@supabase/supabase-js";
-import { lireConfigSupabase } from "@/lib/supabase/config";
 import { clienteDeService } from "@/lib/supabase/service";
 import { nomComplet } from "@/lib/personne/types";
+import { fabriquerUnMotDePasse } from "@/lib/auth/motdepasse";
 
 /**
  * Le seul endroit du dépôt où la clé de service est lue.
@@ -26,6 +25,10 @@ import { nomComplet } from "@/lib/personne/types";
  *    modification d'un compte existant. Une clé qui peut tout ne doit servir
  *    qu'à peu de choses.
  *
+ *    **Une seule modification existe**, `poserUnMotDePasse`, et elle refuse
+ *    tout compte qui ne porte pas le rôle `membre` : la clé de service
+ *    pourrait sinon remettre le mot de passe du coach.
+ *
  *    **Une seule suppression existe**, et sa garde tient en une ligne : elle
  *    refuse toute fiche qui ne porte pas le drapeau `demonstration`. Elle
  *    sert au bouton « tout vider » du jeu d'essai, et la base la rend
@@ -37,10 +40,10 @@ import { nomComplet } from "@/lib/personne/types";
  *    un espace qui n'a rien à lui montrer. Rejouable sans dégât : relancer
  *    ne crée pas un second compte.
  *
- * **Rien ne part d'ici.** L'utilisateur est créé déjà confirmé, avec un mot
- * de passe aléatoire que personne ne connaîtra jamais, et Supabase n'envoie
- * aucun email. L'invitation est un geste séparé, `envoyerLesAcces`, déclenché
- * par un clic.
+ * **Rien ne part d'ici, et rien ne part de nulle part.** L'utilisateur est
+ * créé déjà confirmé, et Supabase n'envoie aucun email. Le coach transmet
+ * lui-même l'adresse de l'outil et le mot de passe que `poserUnMotDePasse`
+ * lui affiche une fois.
  *
  * `server-only` en tête du fichier : une importation depuis un composant
  * client casse la compilation au lieu de faire fuiter la clé dans le paquet
@@ -81,14 +84,14 @@ export async function creerLeCompteDuMembre(
   if ((personne.accompagnement ?? []).length === 0) {
     return {
       fait: "impossible",
-      pourquoi: "Cette fiche n'est pas encore cliente. Passe-la en client, puis renvoie ses accès.",
+      pourquoi: "Cette fiche n'est pas encore cliente. Passe-la en client, puis reprends ses accès.",
     };
   }
 
   if (!personne.email) {
     return {
       fait: "impossible",
-      pourquoi: "Cette fiche n'a pas d'email. Ajoute-le, puis renvoie ses accès.",
+      pourquoi: "Cette fiche n'a pas d'email. Ajoute-le, puis reprends ses accès.",
     };
   }
 
@@ -106,9 +109,9 @@ export async function creerLeCompteDuMembre(
   // confirmation, ne peut pas se connecter, et Supabase envoie un email
   // qu'on ne contrôle ni dans son texte ni dans son moment.
   //
-  // Le mot de passe est aléatoire et jeté : personne ne le connaîtra jamais,
-  // le membre posera le sien depuis le lien qu'on lui enverra. Un mot de
-  // passe deviné à la création serait un compte ouvert à qui le devine.
+  // Le mot de passe posé ici est aléatoire et jeté : personne ne le connaîtra
+  // jamais. Celui que le client recevra est posé juste après, par
+  // `poserUnMotDePasse`, qui est le seul à le rendre lisible.
   const { data: utilisateur, error: erreurUtilisateur } =
     await service.auth.admin.createUser({
       email: personne.email,
@@ -142,100 +145,70 @@ export async function creerLeCompteDuMembre(
 }
 
 /**
- * Envoie au membre le lien qui lui fera poser son mot de passe.
+ * Pose un mot de passe neuf sur le compte d'un client, et le rend une fois.
  *
- * Le seul geste de ce fichier qui sorte de l'application, et il est séparé de
- * la création pour cette raison : l'espace se prépare tout seul, l'invitation
- * part quand un humain le décide.
+ * **C'est la seule façon de donner un accès, et rien ne sort d'ici.** Deux
+ * chemins par email ont existé avant celui-ci et ont été retirés le même
+ * jour : l'envoi d'un lien de réinitialisation, et le même lien fabriqué
+ * pour être collé à la main. Les deux dépendaient du service d'email de
+ * Supabase, qui plafonne à quelques envois par heure sur une installation
+ * neuve, dont les textes sont en anglais tant que personne ne les a
+ * réécrits, et dont le lien ne vaut qu'une heure. Un coach qui ouvre son
+ * outil un dimanche soir n'a rien à réparer : il lit le mot de passe à
+ * l'écran et l'envoie par où il parle déjà à ses clients.
  *
- * L'adresse vient de la base, comme partout ici. Et l'envoi passe par la clé
- * publique et non par celle de service : réinitialiser un mot de passe est
- * une opération publique, la clé de service n'y ajouterait qu'un pouvoir dont
- * on n'a pas besoin.
+ * **C'est la seule modification d'un compte existant que ce fichier
+ * autorise**, et la règle 2 en tête s'en trouve entamée. Sa garde tient donc
+ * en deux points, et le premier vaut le plus : le compte visé est lu à
+ * partir de l'identifiant de fiche, et **il doit porter le rôle `membre`**.
+ * La clé de service peut tout, y compris changer le mot de passe du coach :
+ * ce refus est ce qui l'en empêche.
+ *
+ * Le mot de passe n'est jamais rangé nulle part : il traverse cette
+ * fonction, s'affiche une fois, et n'existe plus ensuite que chiffré chez
+ * Supabase. Un coach qui l'a perdu en refait un.
  */
-export async function envoyerLesAcces(
+export async function poserUnMotDePasse(
   personneId: string,
-  origine: string,
-): Promise<{ envoye: boolean; email?: string; pourquoi?: string }> {
+): Promise<{ email?: string; motDePasse?: string; pourquoi?: string }> {
   const service = clienteDeService();
 
-  const { data: personne, error } = await service
-    .from("personne")
-    .select("email, accompagnement (id)")
-    .eq("id", personneId)
-    .maybeSingle();
-
-  if (error) return { envoye: false, pourquoi: error.message };
-  if (!personne) return { envoye: false, pourquoi: "Cette fiche n'existe plus." };
-  if ((personne.accompagnement ?? []).length === 0) {
-    return { envoye: false, pourquoi: "Cette fiche n'a pas d'accompagnement." };
-  }
-  if (!personne.email) {
-    return { envoye: false, pourquoi: "Cette fiche n'a pas d'email." };
-  }
-
-  const { url, cle } = lireConfigSupabase();
-  const publique = createClient(url, cle, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
-
-  const { error: erreurEnvoi } = await publique.auth.resetPasswordForEmail(
-    personne.email,
-    { redirectTo: `${origine}/auth/confirmer` },
-  );
-
-  if (erreurEnvoi) return { envoye: false, pourquoi: erreurEnvoi.message };
-
-  return { envoye: true, email: personne.email };
-}
-
-/**
- * Fabrique le lien d'accès sans l'envoyer, pour que le coach le transmette
- * lui-même.
- *
- * **Pourquoi les deux existent.** Une installation neuve utilise le service
- * d'email de Supabase, qui plafonne à quelques envois par heure et dont les
- * textes sont en anglais tant que personne ne les a réécrits. Un coach qui
- * ajoute ses cinq premiers clients le même après-midi se heurterait au
- * plafond, sans comprendre pourquoi. Le lien copié passe par WhatsApp, et
- * l'outil marche le premier jour sans configurer quoi que ce soit.
- *
- * Ce lien vaut une heure et ouvre l'espace de son porteur : il se colle dans
- * une conversation privée, jamais ailleurs. C'est la même prudence que
- * l'envoi par email, avec la responsabilité déplacée sur celui qui colle.
- *
- * Passe par la clé de service, contrairement à l'envoi : fabriquer un lien
- * sans l'envoyer est une opération d'administration, l'API publique ne sait
- * que déclencher un email.
- */
-export async function genererLeLienDAcces(
-  personneId: string,
-  origine: string,
-): Promise<{ lien?: string; email?: string; pourquoi?: string }> {
-  const service = clienteDeService();
-
-  const { data: personne, error } = await service
-    .from("personne")
-    .select("email, accompagnement (id)")
-    .eq("id", personneId)
+  const { data: compte, error } = await service
+    .from("compte")
+    .select("id, role")
+    .eq("personne_id", personneId)
     .maybeSingle();
 
   if (error) return { pourquoi: error.message };
-  if (!personne) return { pourquoi: "Cette fiche n'existe plus." };
-  if ((personne.accompagnement ?? []).length === 0) {
-    return { pourquoi: "Cette fiche n'a pas d'accompagnement." };
-  }
-  if (!personne.email) return { pourquoi: "Cette fiche n'a pas d'email." };
+  if (!compte) return { pourquoi: "Ce client n'a pas encore de compte." };
 
-  const { data, error: erreurLien } = await service.auth.admin.generateLink({
-    type: "recovery",
-    email: personne.email,
-    options: { redirectTo: `${origine}/auth/confirmer` },
+  // La garde qui compte : ce chemin ne touche que des membres. Un défaut
+  // d'appel ne doit pas pouvoir remettre le mot de passe du coach.
+  if (compte.role !== "membre") {
+    return { pourquoi: "Ce compte n'est pas celui d'un client." };
+  }
+
+  // L'adresse se lit en base, comme partout ici : c'est elle que l'écran
+  // affichera comme identifiant, et elle ne doit venir d'aucun appelant.
+  const { data: personne, error: erreurFiche } = await service
+    .from("personne")
+    .select("email")
+    .eq("id", personneId)
+    .maybeSingle();
+
+  if (erreurFiche) return { pourquoi: erreurFiche.message };
+  if (!personne?.email) return { pourquoi: "Cette fiche n'a pas d'email." };
+  const email = personne.email;
+
+  const motDePasse = fabriquerUnMotDePasse();
+
+  const { error: erreurPose } = await service.auth.admin.updateUserById(compte.id, {
+    password: motDePasse,
   });
 
-  if (erreurLien) return { pourquoi: erreurLien.message };
+  if (erreurPose) return { pourquoi: erreurPose.message };
 
-  return { lien: data.properties.action_link, email: personne.email };
+  return { email, motDePasse };
 }
 
 /**

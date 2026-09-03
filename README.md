@@ -142,16 +142,19 @@ méthode à t'imposer.
 
 ## Donner ses accès à un client
 
-Deux façons, au choix, depuis son écran de suivi.
+Sur son écran de suivi, clique « Ouvrir son accès ». L'app t'affiche trois
+lignes : l'adresse de connexion, son identifiant (son email) et un mot de
+passe. « Copier le message » les met en forme, tu les envoies où tu parles
+déjà à tes clients.
 
-**Par email :** l'app lui envoie le lien qui lui fera poser son mot de passe.
-Attention, le service d'email de Supabase plafonne à quelques envois par heure
-sur un projet neuf, et ses textes sont en anglais tant que tu ne les as pas
-réécrits (Authentication, Emails).
+L'app n'envoie rien elle-même, à personne, jamais. Toi seul décides ce qui
+part et par où.
 
-**Par un lien à copier :** l'app fabrique le lien sans rien envoyer, tu le
-colles où tu parles déjà à tes clients. Il vaut une heure et ouvre son espace,
-donc ne le colle qu'en privé.
+Le mot de passe ne s'affiche qu'une fois : il n'est rangé nulle part en clair,
+donc l'écran ne saurait pas te le remontrer. S'il est perdu, refais-en un, ce
+qui remplace l'ancien.
+
+Ne colle ces lignes qu'en privé : elles ouvrent son espace.
 
 ## Voir ce que ton client voit
 

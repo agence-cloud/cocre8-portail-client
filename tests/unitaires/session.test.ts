@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { ROUTES_PUBLIQUES } from "@/lib/supabase/session";
 
 /**
- * Ces six adresses sont les seules que le proxy laisse passer sans session.
+ * Ces quatre adresses sont les seules que le proxy laisse passer sans session.
  *
  * La première est la racine. **Elle n'affiche rien** : elle regarde si un
  * compte existe, puis renvoie vers l'installation ou vers la connexion. Elle
@@ -13,30 +13,30 @@ import { ROUTES_PUBLIQUES } from "@/lib/supabase/session";
  * formulaire de connexion sans compte et sans moyen d'en créer un. Le README
  * lui promettait un écran de mise en service ; il ne pouvait pas l'atteindre.
  *
- * Trois sont les écrans du chemin d'accès d'un client : `/connexion` est
- * traversé par tous, les deux autres demandent un vrai lien reçu par email.
+ * La deuxième est la connexion, traversée par tous. `/auth/confirmer` et
+ * `/connexion/mot-de-passe` l'accompagnaient tant qu'un client entrait par un
+ * lien reçu par email : ce chemin a été retiré, le coach donne son mot de
+ * passe au client et celui-ci se connecte par le formulaire.
  *
- * La cinquième est la première mise en service, traversée une seule fois dans
+ * La troisième est la première mise en service, traversée une seule fois dans
  * la vie de l'outil. Elle est publique par nécessité, et elle se garde
  * elle-même : elle rend un 404 dès que l'installation est faite.
  *
- * La sixième est le diagnostic de l'installation. Publique par nécessité elle
+ * La quatrième est le diagnostic de l'installation. Publique par nécessité elle
  * aussi : elle sert quand personne ne peut se connecter, et la fermer
  * derrière une session la rendrait inutile. Elle n'affiche que l'adresse du
  * projet, déjà recopiée dans le code envoyé au navigateur, et la longueur des
  * clés, jamais leur valeur.
  *
- * Un test qui les nomme toutes est le seul filet qui reste. Sans lui, retirer
- * `/auth/confirmer` de la liste casserait tout le chemin d'accès d'un nouveau
- * client, et rien ne le dirait avant que le premier ne s'en plaigne.
+ * Un test qui les nomme toutes est le seul filet qui reste. Sans lui, ouvrir
+ * une adresse de trop passerait inaperçu, et en fermer une de trop ne se
+ * verrait qu'à l'installation suivante.
  */
 describe("les adresses ouvertes sans session", () => {
-  it("laisse passer la racine, la connexion et le chemin du lien d'accès", () => {
+  it("laisse passer la racine, la connexion, l'installation et le diagnostic", () => {
     expect(ROUTES_PUBLIQUES).toEqual([
       "/",
       "/connexion",
-      "/connexion/mot-de-passe",
-      "/auth/confirmer",
       "/installation",
       "/diagnostic",
     ]);
